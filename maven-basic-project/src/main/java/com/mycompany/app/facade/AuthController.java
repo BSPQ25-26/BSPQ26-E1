@@ -1,6 +1,7 @@
 package com.mycompany.app.facade;
 
 import com.mycompany.app.dto.CredentialsDTO;
+import com.mycompany.app.dto.UserCreationDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -55,5 +56,18 @@ public class AuthController {
         }else{
             return new ResponseEntity<>("Invalid token", HttpStatus.UNAUTHORIZED);
         }
+    }
+
+    @Operation(
+            summary = "Create account",
+            description = "User creation",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK: account creation, returns a token"),
+                    @ApiResponse(responseCode = "401", description = "Invalid credentials")
+            }
+    )
+    @PostMapping("/create")
+    public ResponseEntity<String> createUser(@RequestBody UserCreationDTO userCreationDTO) {
+        return new ResponseEntity<>("token", HttpStatus.OK);
     }
 }

@@ -1,4 +1,5 @@
 com/mycompany/app/model/Category.class
+com/mycompany/app/dto/UserCreationDTO.class
 com/mycompany/app/model/Budget.class
 com/mycompany/app/dto/CredentialsDTO.class
 com/mycompany/app/model/Transaction.class
