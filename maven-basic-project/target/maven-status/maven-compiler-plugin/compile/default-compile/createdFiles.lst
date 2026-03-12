@@ -1,1 +1,5 @@
-com\mycompany\app\App.class
+com/mycompany/app/model/Category.class
+com/mycompany/app/model/Budget.class
+com/mycompany/app/model/Transaction.class
+com/mycompany/app/model/User.class
+com/mycompany/app/facade/AuthController.class
