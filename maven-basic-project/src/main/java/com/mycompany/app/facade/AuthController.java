@@ -1,5 +1,6 @@
 package com.mycompany.app.facade;
 
+import com.mycompany.app.dto.CredentialsDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
@@ -30,11 +31,10 @@ public class AuthController {
             }
     )
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody String credentials) {
-        String token = "bien";
+    public ResponseEntity<String> login(@RequestBody CredentialsDTO credentials) {
 
-        if("hola".equals(credentials)){
-            return new ResponseEntity<>(token, HttpStatus.OK);
+        if("user".equals(credentials.getEmail()) && "password".equals(credentials.getPassword())){
+            return new ResponseEntity<>("muy bien", HttpStatus.OK);
         }else{
             return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
         }
