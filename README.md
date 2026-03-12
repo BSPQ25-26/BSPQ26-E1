@@ -8,7 +8,7 @@ Before you begin, make sure you have the following installed on your machine:
 
 * **[Docker Desktop](https://docs.docker.com/desktop/)**: Required to start the database container.
 * **[Java JDK](https://adoptium.net/)**: Required to compile and run the Spring Boot project (make sure the `JAVA_HOME` environment variable is configured).
-* **[Maven]**: You will need Maven installed and added to your `PATH`, install the -bin.zip file and extract it, after all put until the folder \bin inn the `PATH`.
+* **[Maven](https://maven.apache.org/download.cgi)**: You will need Maven installed and added to your `PATH`, install the -bin.zip file and extract it, after all put until the folder \bin inn the `PATH`.
 
 ---
 
@@ -43,7 +43,7 @@ Once the database is ready, we can start the application.
    ```bash
    cd maven-basic-project
    ```
-3. Run the application using the Maven Wrapper (recommended):
+3. Run the application:
    ```bash
    mvn spring-boot:run
    ```
