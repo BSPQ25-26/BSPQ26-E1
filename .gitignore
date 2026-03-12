@@ -1,16 +1,10 @@
-# Compiled class file
+# Maven build folder
+target/
+
+# Compiled class files
 *.class
 
-# Log file
-*.log
-
-# BlueJ files
-*.ctxt
-
-# Mobile Tools for Java (J2ME)
-.mtj.tmp/
-
-# Package Files #
+# Package Files
 *.jar
 *.war
 *.nar
@@ -19,6 +13,30 @@
 *.tar.gz
 *.rar
 
-# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+# Logs
+*.log
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Maven compiler plugin temporary files
+**/target/maven-status/maven-compiler-plugin/**/*.lst
+
+# Surefire test reports
+**/target/surefire-reports/**
+
+# Virtual machine crash logs
 hs_err_pid*
-replay_pid*
+replay_pid* 
