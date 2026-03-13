@@ -28,15 +28,11 @@ jobs:
           java-version: 17
           cache: maven
 
-      # 4. Wait a few seconds to ensure the DB is ready
-      - name: Wait for database
-        run: sleep 10
-
-      # 5. Build and test the Maven project
+      # 3. Build and test the Maven project
       - name: Build & Test with Maven
         run: mvn -B clean verify
         working-directory: maven-basic-project
 
-      # 6. Optional: list build artifacts
+      # 4. List build artifacts
       - name: Show build artifacts
         run: ls -l maven-basic-project/target/
