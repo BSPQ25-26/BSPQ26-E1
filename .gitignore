@@ -32,7 +32,7 @@ Thumbs.db
 .mtj.tmp/
 
 # Maven compiler plugin temporary files
-**/target/maven-status/maven-compiler-plugin/**/*.lst
+*.lst
 
 # Surefire test reports
 **/target/surefire-reports/**

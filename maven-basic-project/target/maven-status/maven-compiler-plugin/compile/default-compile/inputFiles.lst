@@ -1,5 +1,7 @@
-C:\Users\chivi\Desktop\uni\4\SoftwareProccess&Quality\Project\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\App.java
-C:\Users\chivi\Desktop\uni\4\SoftwareProccess&Quality\Project\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\model\Transaction.java
-C:\Users\chivi\Desktop\uni\4\SoftwareProccess&Quality\Project\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\model\Category.java
-C:\Users\chivi\Desktop\uni\4\SoftwareProccess&Quality\Project\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\model\Budget.java
-C:\Users\chivi\Desktop\uni\4\SoftwareProccess&Quality\Project\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\model\User.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/TransactionCreationDTO.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/repository/UsuarioRepository.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/model/Usuario.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/UserCreationDTO.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/AuthController.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/App.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/CredentialsDTO.java
