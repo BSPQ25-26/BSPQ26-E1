@@ -2,12 +2,13 @@ name: Docker CD
 
 on:
   workflow_run:
-    workflows: ["Java CI"]  
+    workflows: ["Java CI"]
     types:
       - completed
 
 env:
   REGISTRY: ghcr.io
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   docker:
@@ -25,7 +26,7 @@ jobs:
         with:
           name: app-jar
           path: maven-basic-project/target/
-
+          run-id: ${{ github.event.workflow_run.id }}
 
       # 3. Log in to GitHub Container Registry
       - name: Log in to GitHub Container Registry
@@ -38,7 +39,8 @@ jobs:
       # 4. Build Docker image
       - name: Build Docker image
         run: |
-          docker build -t ${{ env.REGISTRY }}/${{ github.repository }}:latest -f maven-basic-project/Dockerfile maven-basic-project
+          docker build -t ${{ env.REGISTRY }}/${{ github.repository }}:latest \
+            -f maven-basic-project/Dockerfile maven-basic-project
 
       # 5. Push Docker image
       - name: Push Docker image
