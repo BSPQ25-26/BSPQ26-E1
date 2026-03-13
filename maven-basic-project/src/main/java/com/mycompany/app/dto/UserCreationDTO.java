@@ -5,6 +5,8 @@ public class UserCreationDTO {
     private String email;
     private String password;
 
+    public UserCreationDTO() {}
+
     public UserCreationDTO(String username, String email, String password){
         this.username = username;
         this.email = email;

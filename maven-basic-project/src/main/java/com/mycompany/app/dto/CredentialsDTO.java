@@ -4,6 +4,8 @@ public class CredentialsDTO {
     private String email;
     private String password;
 
+    public CredentialsDTO() {}
+
     public CredentialsDTO(String email, String password){
         this.email = email;
         this.password = password;
