@@ -18,6 +18,7 @@ public class Usuario {
     private String email;
     private Double balance;
 
+
     // Constructores vacíos obligatorios para Spring
     public Usuario() {}
 
