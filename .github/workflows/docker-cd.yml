@@ -8,6 +8,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
+  IMAGE_NAME: ghcr.io/bspq25-26/bspq26-e1
 
 jobs:
   docker:
@@ -15,23 +16,27 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }} 
 
     steps:
+      # 1. Checkout code
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Log in to GitHub Container Registry
+      # 2. Log in to GitHub Container Registry
+      - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # 3. Build Docker image
       - name: Build Docker image
         run: |
-          docker build -t ${{ env.REGISTRY }}/${{ github.repository }}:latest \
-                       -t ${{ env.REGISTRY }}/${{ github.repository }}:${{ github.sha }} \
-                       -f maven-basic-project/Dockerfile maven-basic-project
-            
+          docker build \
+            -t ${{ env.IMAGE_NAME }}:latest \
+            -f maven-basic-project/Dockerfile \
+            maven-basic-project
 
-      - name: Push Docker image to GitHub Container Registry
+      # 4. Push Docker image to GitHub Container Registry
+      - name: Push Docker image
         run: |
-          docker push ${{ env.REGISTRY }}/${{ github.repository }}:latest
+          docker push ${{ env.IMAGE_NAME }}:latest
