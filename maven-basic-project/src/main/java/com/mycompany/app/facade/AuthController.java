@@ -1,14 +1,18 @@
 package com.mycompany.app.facade;
 
-import com.mycompany.app.dto.CredentialsDTO;
-import com.mycompany.app.dto.UserCreationDTO;
+import java.util.ArrayList;
+
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.mycompany.app.dto.CredentialsDTO;
+import com.mycompany.app.dto.UserCreationDTO;
+import com.mycompany.app.model.Usuario;
+import com.mycompany.app.repository.UsuarioRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -17,10 +21,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 @RequestMapping("/auth")
 public class AuthController {
     //private final AuthService authService;
+    private final UsuarioRepository usuarioRepository;
 
     //public AuthController(AuthService authService) {
-    public AuthController() {
+    public AuthController(UsuarioRepository usuarioRepository) {
         //this.authService = authService;
+        this.usuarioRepository = usuarioRepository;
+        
     }
 
     @Operation(
@@ -51,8 +58,10 @@ public class AuthController {
     )
     @PostMapping("/logout")
     public ResponseEntity<String> logout(@RequestBody String token) {
+        String aa = usuarioRepository.findAll().get(0).getNombre();
+        
         if("adios".equals(token)){
-            return new ResponseEntity<>(token, HttpStatus.OK);
+            return new ResponseEntity<>(aa, HttpStatus.OK);
         }else{
             return new ResponseEntity<>("Invalid token", HttpStatus.UNAUTHORIZED);
         }
