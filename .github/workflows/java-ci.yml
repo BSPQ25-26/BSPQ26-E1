@@ -42,3 +42,4 @@ jobs:
         with:
           name: app-jar
           path: maven-basic-project/target/*.jar
+

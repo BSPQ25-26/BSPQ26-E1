@@ -21,10 +21,11 @@ jobs:
 
       # 2. Download artifact from CI
       - name: Download Spring Boot jar
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: app-jar
           path: maven-basic-project/target/
+
 
       # 3. Log in to GitHub Container Registry
       - name: Log in to GitHub Container Registry
