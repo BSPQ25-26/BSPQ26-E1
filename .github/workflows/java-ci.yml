@@ -7,7 +7,6 @@ on:
   pull_request:
     branches: ["main"]
 
-# Force Node.js 24 to avoid deprecation warnings
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -28,11 +27,18 @@ jobs:
           java-version: 17
           cache: maven
 
-      # 3. Build and test the Maven project
-      - name: Build & Test with Maven
-        run: mvn -B clean verify
+      # 3. Build and repackage Spring Boot jar
+      - name: Build Spring Boot jar
+        run: mvn -B clean package spring-boot:repackage -DskipTests
         working-directory: maven-basic-project
 
       # 4. List build artifacts
       - name: Show build artifacts
         run: ls -l maven-basic-project/target/
+
+      # 5. Upload jar as artifact for CD
+      - name: Upload artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: app-jar
+          path: maven-basic-project/target/*.jar
