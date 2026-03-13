@@ -1,4 +1,4 @@
-name: Java CI with Maven & Docker
+name: Java CI
 
 # Trigger on push or pull request to main
 on:
