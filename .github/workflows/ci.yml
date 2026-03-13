@@ -28,10 +28,6 @@ jobs:
           java-version: 17
           cache: maven
 
-      # 3. Start database with Docker Compose
-      - name: Start database
-        run: docker compose -f database/docker-compose.yml up -d
-
       # 4. Wait a few seconds to ensure the DB is ready
       - name: Wait for database
         run: sleep 10
