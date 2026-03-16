@@ -7,5 +7,5 @@ import com.mycompany.app.model.Usuario;
 
 @Repository
 public interface UsuarioRepository extends JpaRepository<Usuario, Integer> {
-    // ¡No tienes que escribir nada aquí dentro! Spring lo hace por ti.
+    Usuario findByEmail(String email);
 }

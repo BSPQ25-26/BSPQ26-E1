@@ -1,8 +1,0 @@
-com/mycompany/app/model/Usuario.class
-com/mycompany/app/dto/UserCreationDTO.class
-com/mycompany/app/dto/CredentialsDTO.class
-com/mycompany/app/repository/UsuarioRepository.class
-com/mycompany/app/facade/TransactionCreationDTO.class
-com/mycompany/app/facade/TransactionController.class
-com/mycompany/app/dto/TransactionCreationDTO.class
-com/mycompany/app/facade/AuthController.class
