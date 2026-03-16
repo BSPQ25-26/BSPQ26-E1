@@ -1,2 +1,3 @@
 com/mycompany/app/service/UserService.class
+com/mycompany/app/dto/UserInfoDTO.class
 com/mycompany/app/facade/UserController.class

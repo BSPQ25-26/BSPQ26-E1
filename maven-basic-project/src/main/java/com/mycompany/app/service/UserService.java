@@ -3,8 +3,10 @@ package com.mycompany.app.service;
 import org.springframework.stereotype.Service;
 
 import com.mycompany.app.dto.UserCreationDTO;
+import com.mycompany.app.dto.UserInfoDTO;
 import com.mycompany.app.model.Usuario;
 import com.mycompany.app.repository.UsuarioRepository;
+
 
 @Service
 public class UserService {
@@ -29,5 +31,12 @@ public class UserService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public UserInfoDTO getUserInfo(String email){
+        Usuario user = usuarioRepository.findByEmail(email);
+        UserInfoDTO userInfoDTO = new UserInfoDTO(user.getContraseña(), user.getEmail(), user.getBalance());
+
+        return userInfoDTO;
     }
 }
