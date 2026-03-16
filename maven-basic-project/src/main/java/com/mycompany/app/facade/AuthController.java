@@ -44,11 +44,28 @@ public class AuthController {
     }
 
     @Operation(
-        summary = "Logout",
-        description = "Logout",
+        summary = "Logout from the system",
+        description = "Allows an employee to log out by providing a valid authorization token.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Logged out successfully"),
-            @ApiResponse(responseCode = "401", description = "Invalid or missing token")
+            @ApiResponse(responseCode = "200", description = "No Content: Logout successful"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized: Invalid token")
+        }
+    )
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestParam("token") String token) {
+        if (authService.isValidToken(token)) {
+            authService.logout(token);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Operation(
+        summary = "Check",
+        description = "Check",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Checked out successfully"),
+            @ApiResponse(responseCode = "401", description = "Invalid")
         }
     )
     @GetMapping("/check")
