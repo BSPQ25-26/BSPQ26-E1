@@ -16,20 +16,28 @@ public class Usuario {
 
     private String nombre;
     private String email;
+    private String contraseña;
     private Double balance;
 
-    // Constructores vacíos obligatorios para Spring
-    public Usuario() {}
+    public Usuario() {
+    }
 
-    // Getters
+    public Usuario(String nombre, String email, String contraseña, Double balance) {
+        this.nombre = nombre;
+        this.email = email;
+        this.contraseña = contraseña;
+        this.balance = balance;
+    }
+
     public Integer getId() { return id; }
     public String getNombre() { return nombre; }
     public String getEmail() { return email; }
+    public String getContraseña() { return contraseña; }
     public Double getBalance() { return balance; }
 
-    // Setters
     public void setId(Integer id) { this.id = id; }
     public void setNombre(String nombre) { this.nombre = nombre; }
     public void setEmail(String email) { this.email = email; }
+    public void setContraseña(String contraseña) { this.contraseña = contraseña; }
     public void setBalance(Double balance) { this.balance = balance; }
 }

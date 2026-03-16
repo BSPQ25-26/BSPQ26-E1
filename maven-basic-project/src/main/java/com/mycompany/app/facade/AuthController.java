@@ -1,14 +1,19 @@
 package com.mycompany.app.facade;
 
-import com.mycompany.app.dto.AuthResponseDTO;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.mycompany.app.dto.CredentialsDTO;
-import com.mycompany.app.dto.UserCreationDTO;
 import com.mycompany.app.service.AuthService;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.security.SecurityRequirement;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
@@ -22,45 +27,54 @@ public class AuthController {
 
     @Operation(
         summary = "Login",
-        description = "Authenticates via Supabase and returns a JWT plus local user info.",
+        description = "Login",
         responses = {
             @ApiResponse(responseCode = "200", description = "Login successful"),
-            @ApiResponse(responseCode = "401", description = "Invalid credentials"),
-            @ApiResponse(responseCode = "404", description = "User not found in system")
+            @ApiResponse(responseCode = "401", description = "Invalid credentials")
         }
     )
     @PostMapping("/login")
-    public ResponseEntity<AuthResponseDTO> login(@RequestBody CredentialsDTO credentials) {
-        return ResponseEntity.ok(authService.login(credentials));
-    }
-
-    @Operation(
-        summary = "Create account",
-        description = "Registers via Supabase and creates a local usuario row.",
-        responses = {
-            @ApiResponse(responseCode = "200", description = "Account created, token returned"),
-            @ApiResponse(responseCode = "409", description = "Email already registered"),
-            @ApiResponse(responseCode = "400", description = "Bad request")
+    public ResponseEntity<String> login(@RequestBody CredentialsDTO credentials) {
+        String token = authService.login(credentials);
+        
+        if (token == null) {
+            return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
         }
-    )
-    @PostMapping("/create")
-    public ResponseEntity<AuthResponseDTO> createUser(@RequestBody UserCreationDTO userCreationDTO) {
-        return ResponseEntity.ok(authService.create(userCreationDTO));
+        return new ResponseEntity<>(token, HttpStatus.OK);
     }
 
     @Operation(
-        summary = "Logout",
-        description = "Invalidates the JWT on Supabase. Requires Bearer token in Authorization header.",
-        security = @SecurityRequirement(name = "bearerAuth"),
+        summary = "Logout from the system",
+        description = "Allows an employee to log out by providing a valid authorization token.",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Logged out successfully"),
-            @ApiResponse(responseCode = "401", description = "Invalid or missing token")
+            @ApiResponse(responseCode = "200", description = "No Content: Logout successful"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized: Invalid token")
         }
     )
     @PostMapping("/logout")
-    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authHeader) {
-        String token = authHeader.startsWith("Bearer ") ? authHeader.substring(7) : authHeader;
-        authService.logout(token);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Void> logout(@RequestParam("token") String token) {
+        if (authService.isValidToken(token)) {
+            authService.logout(token);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    }
+
+    @Operation(
+        summary = "Check",
+        description = "Check",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Checked out successfully"),
+            @ApiResponse(responseCode = "401", description = "Invalid")
+        }
+    )
+    @GetMapping("/check")
+    public ResponseEntity<String> check(
+        @RequestParam("token") String token
+    ) {
+        if (authService.isValidToken(token)) {
+            return new ResponseEntity<>("Valid token", HttpStatus.OK);
+        }
+        return new ResponseEntity<>("Invalid token", HttpStatus.UNAUTHORIZED);
     }
 }

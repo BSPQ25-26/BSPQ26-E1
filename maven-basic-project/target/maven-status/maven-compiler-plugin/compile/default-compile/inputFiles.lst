@@ -1,0 +1,16 @@
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/config/AppConfig.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/TransactionCreationDTO.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/service/AuthService.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/repository/UsuarioRepository.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/service/UserService.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/model/Usuario.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/UserCreationDTO.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/exception/GlobalExceptionHandler.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/AuthController.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/exception/AuthException.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/UserController.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/AuthResponseDTO.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/config/SecurityConfig.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/App.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/TransactionController.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/CredentialsDTO.java
