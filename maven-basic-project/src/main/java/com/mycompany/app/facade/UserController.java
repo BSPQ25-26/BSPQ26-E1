@@ -68,6 +68,7 @@ public class UserController {
         if (!authService.isValidToken(token)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+        
 
         try {
             UserInfoDTO usuario = userService.getUserInfo(email); 
