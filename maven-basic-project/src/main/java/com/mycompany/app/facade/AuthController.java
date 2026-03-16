@@ -55,7 +55,7 @@ public class AuthController {
     public ResponseEntity<Void> logout(@RequestParam("token") String token) {
         if (authService.isValidToken(token)) {
             authService.logout(token);
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
