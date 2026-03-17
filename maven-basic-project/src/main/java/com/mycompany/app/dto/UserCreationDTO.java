@@ -1,7 +1,6 @@
 package com.mycompany.app.dto;
 
 public class UserCreationDTO {
-    private String token;
     private String username;
     private String email;
     private String password;
@@ -10,20 +9,11 @@ public class UserCreationDTO {
 
     public UserCreationDTO() {}
 
-    public UserCreationDTO(String token, String username, String email, String password, Double balance){
-        this.token = token;
+    public UserCreationDTO(String username, String email, String password, Double balance){
         this.username = username;
         this.email = email;
         this.password = password;
         this.balance = balance;
-    }
-
-    public String getToken(){
-        return token;
-    }
-
-    public void setToken(String token){
-        this.token = token;
     }
 
     public String getUsername() {
