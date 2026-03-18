@@ -18,11 +18,14 @@ public class UserService {
 
     public boolean createUser(UserCreationDTO userCreationDTO){
         try {
+            if (this.usuarioRepository.findByEmail(userCreationDTO.getEmail()) != null){
+                return false;
+            }
             Usuario usuario =  new Usuario(
-                userCreationDTO.getUsername(), 
-                userCreationDTO.getEmail(), 
-                userCreationDTO.getPassword(), 
-                userCreationDTO.getBalance());
+                    userCreationDTO.getUsername(),
+                    userCreationDTO.getEmail(),
+                    userCreationDTO.getPassword(),
+                    userCreationDTO.getBalance());
 
             usuarioRepository.save(usuario);
 
