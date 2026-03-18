@@ -34,14 +34,16 @@ public class UserController {
         summary = "Create user",
         description = "Create a new user",
         responses = {
-            @ApiResponse(responseCode = "200", description = "Creation OK"),
+            @ApiResponse(responseCode = "200", description = "Creation OK, now you are required to login"),
             @ApiResponse(responseCode = "401", description = "Invalid")
         }
     )
     @PostMapping("/")
     public ResponseEntity<Void> createUser(@RequestBody UserCreationDTO userCreationDTO) {
         try {
-            userService.createUser(userCreationDTO);
+            if (!userService.createUser(userCreationDTO)){
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
             return new ResponseEntity<>(HttpStatus.CREATED);
         } catch (Exception e) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);

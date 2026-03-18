@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Info de Usuario</title>
+</head>
+<body>
+<h1>Info de Usuario</h1>
+
+<p id="error" style="color:red; display:none"></p>
+
+<div id="info" style="display:none">
+    <p><strong>Username:</strong> <span id="username"></span></p>
+    <p><strong>Email:</strong> <span id="email"></span></p>
+    <p><strong>Balance:</strong> <span id="balance"></span> €</p>
+    <br/>
+    <button onclick="logout()">Cerrar sesión</button>
+</div>
+
+<script>
+    const token = sessionStorage.getItem('token');
+    const email = sessionStorage.getItem('email');
+
+    if (!token || !email) {
+        window.location.href = '/web/auth/login';
+    } else {
+        fetch(`/user/${email}?token=${token}`)
+            .then(res => {
+                if (res.status === 401) {
+                    sessionStorage.clear();
+                    window.location.href = '/web/auth/login';
+                } else if (res.status === 404) {
+                    document.getElementById('error').style.display = 'block';
+                    document.getElementById('error').textContent = 'Usuario no encontrado';
+                } else {
+                    return res.json();
+                }
+            })
+            .then(user => {
+                if (user) {
+                    document.getElementById('username').textContent = user.username;
+                    document.getElementById('email').textContent = user.email;
+                    document.getElementById('balance').textContent = user.balance;
+                    document.getElementById('info').style.display = 'block';
+                }
+            });
+    }
+
+    async function logout() {
+        await fetch(`/auth/logout?token=${token}`, { method: 'POST' });
+        sessionStorage.clear();
+        window.location.href = '/web/auth/login';
+    }
+</script>
+</body>
+</html>
