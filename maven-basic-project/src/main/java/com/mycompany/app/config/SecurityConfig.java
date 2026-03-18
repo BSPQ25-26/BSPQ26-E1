@@ -28,7 +28,8 @@ public class SecurityConfig {
                 "/user/",
                 "/transaction",
                 "/transaction/create",
-                "/transaction/delete"
+                "/transaction/delete",
+                "/transaction/edit/{transactionId}"
             ).permitAll()
                 .requestMatchers(
                     "/v3/api-docs/**",

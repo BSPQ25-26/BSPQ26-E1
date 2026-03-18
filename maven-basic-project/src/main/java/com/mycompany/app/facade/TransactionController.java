@@ -2,6 +2,7 @@ package com.mycompany.app.facade;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.mycompany.app.dto.TransactionCreationDTO;
 import com.mycompany.app.dto.TransactionDeletionDTO;
+import com.mycompany.app.dto.TransactionEditionDTO;
 import com.mycompany.app.service.AuthService;
 import com.mycompany.app.service.TransactionService;
 
@@ -63,6 +65,26 @@ public class TransactionController {
         Boolean result = transactionService.deleteTransaction(request);
         if(result){ return new ResponseEntity<>(HttpStatus.OK); }
         else{ return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
-        
+    }
+
+    @Operation(
+            summary = "Edit transaction",
+            description = "Editing a new transation",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK: transaction edition completed"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
+            }
+    )
+    @PostMapping("/edit/{transactionId}")
+    public ResponseEntity<String> editTransaction(@RequestBody TransactionEditionDTO request,
+            @PathVariable("transactionId") Integer transactionId
+        ){
+        if (!authService.isValidToken(request.getAccessToken())) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Boolean result = transactionService.editTransaction(request, transactionId);
+        if(result){ return new ResponseEntity<>(HttpStatus.OK); }
+        else{ return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
     }
 }

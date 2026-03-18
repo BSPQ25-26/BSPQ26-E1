@@ -5,3 +5,4 @@ com/mycompany/app/repository/TransactionRepository.class
 com/mycompany/app/service/UserService.class
 com/mycompany/app/model/Transaction.class
 com/mycompany/app/facade/UserController.class
+com/mycompany/app/dto/TransactionEditionDTO.class

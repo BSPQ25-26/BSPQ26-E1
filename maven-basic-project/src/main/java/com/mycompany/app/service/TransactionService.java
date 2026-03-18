@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.mycompany.app.dto.TransactionCreationDTO;
 import com.mycompany.app.dto.TransactionDeletionDTO;
+import com.mycompany.app.dto.TransactionEditionDTO;
 import com.mycompany.app.model.Transaction;
 import com.mycompany.app.repository.TransactionRepository;
 
@@ -44,6 +45,29 @@ public class TransactionService {
                 return false;
             }
         }catch(Exception e){
+            return false;
+        }
+    }
+
+    public boolean editTransaction(TransactionEditionDTO request, Integer transactionId) {
+        try {
+            Transaction transaction = transactionRepository.findById(transactionId).orElse(null);
+
+            if (transaction != null) {
+                transaction.setConcepto(request.getConcepto());
+                transaction.setImporteTotal(request.getImporteTotal());
+                transaction.setTipoTransaccion(request.getTipoTransaccion());
+                transaction.setCategoriaId(request.getCategoriaId());
+                transaction.setGrupoId(request.getGrupoId());
+                transaction.setCreadorId(request.getCreadorId());
+
+                transactionRepository.saveAndFlush(transaction);
+                
+                return true;
+            } else {
+                return false; 
+            }
+        } catch (Exception e) {
             return false;
         }
     }
