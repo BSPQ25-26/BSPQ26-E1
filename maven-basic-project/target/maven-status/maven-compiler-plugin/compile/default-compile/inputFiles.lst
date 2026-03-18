@@ -8,6 +8,8 @@
 /home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/exception/GlobalExceptionHandler.java
 /home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/AuthController.java
 /home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/exception/AuthException.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/ErrorResponseDTO.java
+/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/UserInfoDTO.java
 /home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/UserController.java
 /home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/AuthResponseDTO.java
 /home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/config/SecurityConfig.java

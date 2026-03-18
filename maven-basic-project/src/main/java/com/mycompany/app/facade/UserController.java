@@ -40,9 +40,6 @@ public class UserController {
     )
     @PostMapping("/")
     public ResponseEntity<Void> createUser(@RequestBody UserCreationDTO userCreationDTO) {
-        if (!authService.isValidToken(userCreationDTO.getToken())) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
         try {
             userService.createUser(userCreationDTO);
             return new ResponseEntity<>(HttpStatus.CREATED);
