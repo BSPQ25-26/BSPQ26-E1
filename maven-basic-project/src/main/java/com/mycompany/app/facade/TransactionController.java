@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mycompany.app.dto.TransactionCreationDTO;
+import com.mycompany.app.service.AuthService;
+import com.mycompany.app.service.TransactionService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -15,11 +17,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 @RestController
 @RequestMapping("/transaction")
 public class TransactionController {
-    //private final TransactionService transactionService;
+    private final TransactionService transactionService;
+    private final AuthService authService;
 
-    //public TransactionController(TransactionService transactionService) {
-    public TransactionController() {
-        //this.transactionService = transactionService;
+    public TransactionController(TransactionService transactionService, AuthService authService) {
+        this.transactionService = transactionService;
+        this.authService = authService;
     }
 
     @Operation(
@@ -31,8 +34,14 @@ public class TransactionController {
             }
     )
     @PostMapping("/create")
-    public ResponseEntity<String> createTransaction(@RequestBody TransactionCreationDTO transactionCreationDTO) {
-        return new ResponseEntity<>("token", HttpStatus.OK);
-  
+    public ResponseEntity<String> createTransaction(@RequestBody TransactionCreationDTO request){
+        if (!authService.isValidToken(request.getToken())) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Boolean result = transactionService.createTransaction(request);
+        if(result){ return new ResponseEntity<>(HttpStatus.OK); }
+        else{ return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
+        
     }
 }
