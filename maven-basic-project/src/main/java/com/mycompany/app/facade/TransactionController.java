@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mycompany.app.dto.TransactionCreationDTO;
+import com.mycompany.app.dto.TransactionDeletionDTO;
 import com.mycompany.app.service.AuthService;
 import com.mycompany.app.service.TransactionService;
 
@@ -40,6 +41,26 @@ public class TransactionController {
         }
 
         Boolean result = transactionService.createTransaction(request);
+        if(result){ return new ResponseEntity<>(HttpStatus.OK); }
+        else{ return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
+        
+    }
+
+    @Operation(
+            summary = "Delete transaction",
+            description = "Deleting a new transation",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "OK: transaction deletion completed"),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
+            }
+    )
+    @PostMapping("/delete")
+    public ResponseEntity<String> deleteTransaction(@RequestBody TransactionDeletionDTO request){
+        if (!authService.isValidToken(request.getAccessToken())) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Boolean result = transactionService.deleteTransaction(request);
         if(result){ return new ResponseEntity<>(HttpStatus.OK); }
         else{ return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
         

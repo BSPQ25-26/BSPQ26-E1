@@ -27,7 +27,8 @@ public class SecurityConfig {
                 "/auth/check",
                 "/user/",
                 "/transaction",
-                "/transaction/create"
+                "/transaction/create",
+                "/transaction/delete"
             ).permitAll()
                 .requestMatchers(
                     "/v3/api-docs/**",

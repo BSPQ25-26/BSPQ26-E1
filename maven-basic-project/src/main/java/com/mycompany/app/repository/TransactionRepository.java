@@ -7,4 +7,5 @@ import com.mycompany.app.model.Transaction;
 
 @Repository
 public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
+
 }

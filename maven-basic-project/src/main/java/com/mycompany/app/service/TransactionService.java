@@ -3,6 +3,7 @@ package com.mycompany.app.service;
 import org.springframework.stereotype.Service;
 
 import com.mycompany.app.dto.TransactionCreationDTO;
+import com.mycompany.app.dto.TransactionDeletionDTO;
 import com.mycompany.app.model.Transaction;
 import com.mycompany.app.repository.TransactionRepository;
 
@@ -30,6 +31,19 @@ public class TransactionService {
             return true;
 
         } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean deleteTransaction(TransactionDeletionDTO request){
+        try{
+            if(transactionRepository.findById(request.getTransactionId()) != null){
+                transactionRepository.deleteById(request.getTransactionId());
+                return true;
+            }else{
+                return false;
+            }
+        }catch(Exception e){
             return false;
         }
     }
