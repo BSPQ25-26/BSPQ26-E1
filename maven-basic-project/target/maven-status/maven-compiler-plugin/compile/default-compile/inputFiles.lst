@@ -1,23 +1,29 @@
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/repository/TransactionRepository.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/config/AppConfig.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/TransactionCreationDTO.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/service/AuthService.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/service/TransactionService.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/repository/UsuarioRepository.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/service/UserService.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/model/Usuario.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/TransactionDeletionDTO.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/UserCreationDTO.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/exception/GlobalExceptionHandler.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/AuthController.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/model/Transaction.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/exception/AuthException.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/ErrorResponseDTO.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/UserInfoDTO.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/UserController.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/AuthResponseDTO.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/config/SecurityConfig.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/App.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/TransactionController.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/TransactionEditionDTO.java
-/home/pablo/Projects/clase/swQuality/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/CredentialsDTO.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\exception\AuthException.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\UserCreationDTO.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\facade\CategoryController.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\exception\GlobalExceptionHandler.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\facade\UserController.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\service\CategoryService.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\ErrorResponseDTO.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\TransactionDeletionDTO.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\config\AppConfig.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\facade\AuthController.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\config\SecurityConfig.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\TransactionEditionDTO.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\facade\TransactionController.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\service\TransactionService.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\CredentialsDTO.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\TransactionCreationDTO.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\UserInfoDTO.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\facade\UserViewController.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\model\Category.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\repository\TransactionRepository.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\repository\CategoryRepository.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\service\UserService.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\facade\AuthViewController.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\AuthResponseDTO.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\repository\UsuarioRepository.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\model\Usuario.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\service\AuthService.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\model\Transaction.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\App.java
