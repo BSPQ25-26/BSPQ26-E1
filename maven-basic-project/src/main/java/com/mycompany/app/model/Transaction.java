@@ -7,6 +7,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -34,8 +36,9 @@ public class Transaction {
     @Column(name = "categoria_id", nullable = false)
     private Integer categoriaId;
 
-    @Column(name = "grupo_id")
-    private Integer grupoId;
+    @ManyToOne
+    @JoinColumn(name = "grupo_id")
+    private Group group;
 
     @Column(name = "creador_id", nullable = false)
     private Integer creadorId;
@@ -43,13 +46,13 @@ public class Transaction {
     public Transaction() {
     }
 
-    public Transaction(String concepto, Double importeTotal, String tipoTransaccion, 
-                       Integer categoriaId, Integer grupoId, Integer creadorId) {
+    public Transaction(String concepto, Double importeTotal, String tipoTransaccion,
+                       Integer categoriaId, Group group, Integer creadorId) {
         this.concepto = concepto;
         this.importeTotal = importeTotal;
         this.tipoTransaccion = tipoTransaccion;
         this.categoriaId = categoriaId;
-        this.grupoId = grupoId;
+        this.group = group;
         this.creadorId = creadorId;
         this.fecha = LocalDateTime.now();
     }
@@ -60,7 +63,7 @@ public class Transaction {
     public String getTipoTransaccion() { return tipoTransaccion; }
     public LocalDateTime getFecha() { return fecha; }
     public Integer getCategoriaId() { return categoriaId; }
-    public Integer getGrupoId() { return grupoId; }
+    public Group getGroup() { return group; }
     public Integer getCreadorId() { return creadorId; }
 
     public void setId(Integer id) { this.id = id; }
@@ -69,6 +72,6 @@ public class Transaction {
     public void setTipoTransaccion(String tipoTransaccion) { this.tipoTransaccion = tipoTransaccion; }
     public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
     public void setCategoriaId(Integer categoriaId) { this.categoriaId = categoriaId; }
-    public void setGrupoId(Integer grupoId) { this.grupoId = grupoId; }
+    public void setGroup(Group group) { this.group = group; }
     public void setCreadorId(Integer creadorId) { this.creadorId = creadorId; }
 }

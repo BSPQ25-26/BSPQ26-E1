@@ -1,8 +1,8 @@
 com/mycompany/app/dto/TransactionDeletionDTO.class
 com/mycompany/app/dto/UserInfoDTO.class
 com/mycompany/app/service/TransactionService.class
-com/mycompany/app/facade/UserViewController.class
 com/mycompany/app/repository/TransactionRepository.class
+com/mycompany/app/facade/UserViewController.class
 com/mycompany/app/facade/AuthViewController.class
 com/mycompany/app/service/UserService.class
 com/mycompany/app/model/Transaction.class

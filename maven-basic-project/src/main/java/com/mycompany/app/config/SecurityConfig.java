@@ -35,16 +35,11 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/auth/login",
-                "/auth/create",
-                "/user/{email}",
-                "/auth/logout",
-                "/auth/check",
+            .requestMatchers("/auth/**",
                 "/user/",
-                "/transaction",
-                "/transaction/create",
-                "/transaction/delete",
-                "/transaction/edit/{transactionId}"
+                "/user/{email}",
+                "/transaction/**",
+                "/group/**"
             ).permitAll()
                 .requestMatchers(
                     "/v3/api-docs/**",
