@@ -8,9 +8,11 @@ import com.mycompany.app.dto.TransactionCreationDTO;
 import com.mycompany.app.dto.TransactionDeletionDTO;
 import com.mycompany.app.dto.TransactionEditionDTO;
 import com.mycompany.app.model.Category;
+import com.mycompany.app.model.Grupo;
 import com.mycompany.app.model.Transaction;
 import com.mycompany.app.model.Usuario;
 import com.mycompany.app.repository.CategoryRepository;
+import com.mycompany.app.repository.GrupoRepository;
 import com.mycompany.app.repository.TransactionRepository;
 import com.mycompany.app.repository.UsuarioRepository;
 
@@ -19,13 +21,16 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final CategoryRepository categoryRepository;
     private final UsuarioRepository usuarioRepository;
+    private final GrupoRepository grupoRepository;
 
     public TransactionService(TransactionRepository transactionRepository, 
                               CategoryRepository categoryRepository, 
-                              UsuarioRepository usuarioRepository) {
+                              UsuarioRepository usuarioRepository,
+                              GrupoRepository grupoRepository) {
         this.transactionRepository = transactionRepository;
         this.categoryRepository = categoryRepository;
         this.usuarioRepository = usuarioRepository;
+        this.grupoRepository = grupoRepository;
     }
 
     public boolean createTransaction(TransactionCreationDTO transactionCreationDTO){
@@ -40,12 +45,17 @@ public class TransactionService {
                 categoria = categoryRepository.findById(transactionCreationDTO.getCategoriaId()).orElse(null);
             }
 
+            Grupo grupo = null;
+            if (transactionCreationDTO.getGrupoId() != null) {
+                grupo = grupoRepository.findById(transactionCreationDTO.getGrupoId()).orElse(null);
+            }
+
             Transaction transaction = new Transaction(
                 transactionCreationDTO.getConcepto(),
                 transactionCreationDTO.getImporteTotal(),
                 transactionCreationDTO.getTipoTransaccion(),
                 categoria,
-                transactionCreationDTO.getGrupoId(),
+                grupo,
                 creadorOpt.get()
             );
 
@@ -78,7 +88,13 @@ public class TransactionService {
                 transaction.setConcepto(request.getConcepto());
                 transaction.setImporteTotal(request.getImporteTotal());
                 transaction.setTipoTransaccion(request.getTipoTransaccion());
-                transaction.setGrupoId(request.getGrupoId());
+
+                if (request.getGrupoId() != null) {
+                    Grupo grupo = grupoRepository.findById(request.getGrupoId()).orElse(null);
+                    transaction.setGrupo(grupo);
+                } else {
+                    transaction.setGrupo(null);
+                }
 
                 if (request.getCategoriaId() != null) {
                     Category categoria = categoryRepository.findById(request.getCategoriaId()).orElse(null);

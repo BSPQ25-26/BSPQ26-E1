@@ -35,8 +35,9 @@ public class Transaction {
     @JoinColumn(name = "categoria_id")
     private Category categoria;
 
-    @Column(name = "grupo_id")
-    private Integer grupoId;
+    @ManyToOne
+    @JoinColumn(name = "grupo_id")
+    private Grupo grupo;
 
     @ManyToOne
     @JoinColumn(name = "creador_id", nullable = false)
@@ -46,12 +47,12 @@ public class Transaction {
     }
 
     public Transaction(String concepto, Double importeTotal, String tipoTransaccion, 
-                       Category categoria, Integer grupoId, Usuario creador) {
+                       Category categoria, Grupo grupo, Usuario creador) {
         this.concepto = concepto;
         this.importeTotal = importeTotal;
         this.tipoTransaccion = tipoTransaccion;
         this.categoria = categoria;
-        this.grupoId = grupoId;
+        this.grupo = grupo;
         this.creador = creador;
         this.fecha = LocalDateTime.now();
     }
@@ -62,7 +63,7 @@ public class Transaction {
     public String getTipoTransaccion() { return tipoTransaccion; }
     public LocalDateTime getFecha() { return fecha; }
     public Category getCategoria() { return categoria; }
-    public Integer getGrupoId() { return grupoId; }
+    public Grupo getGrupo() { return grupo; }
     public Usuario getCreador() { return creador; }
 
     public void setId(Integer id) { this.id = id; }
@@ -71,6 +72,6 @@ public class Transaction {
     public void setTipoTransaccion(String tipoTransaccion) { this.tipoTransaccion = tipoTransaccion; }
     public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
     public void setCategoria(Category categoria) { this.categoria = categoria; }
-    public void setGrupoId(Integer grupoId) { this.grupoId = grupoId; }
+    public void setGrupo(Grupo grupo) { this.grupo = grupo; }
     public void setCreador(Usuario creador) { this.creador = creador; }
 }

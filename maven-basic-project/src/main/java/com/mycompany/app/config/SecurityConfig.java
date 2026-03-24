@@ -48,7 +48,11 @@ public class SecurityConfig {
                 "/categories/create",          
                 "/categories/user/{usuarioId}",
                 "/categories/{id}",
-                "/categories/**"             
+                "/categories/**",
+                "/grupo/create",
+                "/grupo/addMember",
+                "/grupo/removeMember",
+                "/grupo/**"
             ).permitAll()
                 .requestMatchers(
                     "/v3/api-docs/**",
