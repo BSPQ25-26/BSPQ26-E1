@@ -1,11 +1,11 @@
 <!DOCTYPE html>
-<html lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <title>Info de Usuario</title>
+    <title>User Info</title>
 </head>
 <body>
-<h1>Info de Usuario</h1>
+<h1>User Info</h1>
 
 <p id="error" style="color:red; display:none"></p>
 
@@ -14,7 +14,9 @@
     <p><strong>Email:</strong> <span id="email"></span></p>
     <p><strong>Balance:</strong> <span id="balance"></span> €</p>
     <br/>
-    <button onclick="logout()">Cerrar sesión</button>
+    <!-- Method that makes a button redirect as if it was a href -->
+    <button th:onclick="'window.location.href=\'' + @{/web/transaction} + '\';'">To transactions</button>
+    <button onclick="logout()">Log out</button>
 </div>
 
 <script>
@@ -31,7 +33,7 @@
                     window.location.href = '/web/auth/login';
                 } else if (res.status === 404) {
                     document.getElementById('error').style.display = 'block';
-                    document.getElementById('error').textContent = 'Usuario no encontrado';
+                    document.getElementById('error').textContent = 'User not found';
                 } else {
                     return res.json();
                 }

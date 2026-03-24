@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8"/>
     <title>Login</title>
@@ -10,10 +10,10 @@
 <p id="error" style="color:red; display:none"></p>
 
 <label>Email: <input type="email" id="email"/></label><br/><br/>
-<label>Contraseña: <input type="password" id="password"/></label><br/><br/>
-<button onclick="login()">Entrar</button>
+<label>Password: <input type="password" id="password"/></label><br/><br/>
+<button onclick="login()">Log in</button> <button onclick="logout()">Logout (for debuggin)</button>
 <br/><br/>
-<a href="/web/user/create">¿No tienes cuenta? Crear usuario</a>
+<a href="/web/user/create">Sign in</a>
 
 <script>
     // Si ya tiene token, redirige directamente
@@ -39,8 +39,15 @@
         } else {
             const error = document.getElementById('error');
             error.style.display = 'block';
-            error.textContent = 'Credenciales incorrectas';
+            error.textContent = 'Invalid credentials';
         }
+    }
+
+    async function logout() {
+        const token = sessionStorage.getItem('token');
+        await fetch(`/auth/logout?token=${token}`, { method: 'POST' });
+        sessionStorage.clear();
+        window.location.href = '/web/auth/login';
     }
 </script>
 </body>

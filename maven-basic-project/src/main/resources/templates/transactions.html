@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>Transactions</title>
+</head>
+<body>
+
+<h1>Transaction UI</h1>
+
+<h2>Create Transaction</h2>
+<input id="conceptC" placeholder="Concept"><br>
+<input id="createAmountC" placeholder="Amount"><br>
+<input id="typeC" placeholder="Transaction Type"><br>
+<input id="catIdC" placeholder="Category Id"><br>
+<input id="groupIdC" placeholder="Group Id"><br>
+<input id="creatorC" placeholder="Creator Id"><br>
+<button onclick="createTransaction()">Create</button>
+
+<hr>
+
+<h2>Delete Transaction</h2>
+<input id="deleteId" placeholder="Transaction ID"><br>
+<button onclick="deleteTransaction()">Delete</button>
+
+<hr>
+
+<h2>Edit Transaction</h2>
+<input id="conceptE" placeholder="Concept"><br>
+<input id="createAmountE" placeholder="Amount"><br>
+<input id="typeE" placeholder="Transaction Type"><br>
+<input id="catIdE" placeholder="Category Id"><br>
+<input id="groupIdE" placeholder="Group Id"><br>
+<input id="creatorE" placeholder="Creator Id"><br>
+<button onclick="editTransaction()">Edit</button>
+
+<hr>
+
+<p id="result"></p>
+
+<script th:inline="javascript">
+    const BASE_URL = "/transaction";
+
+    function getToken() {
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+            showError("No token found in sessionStorage");
+            throw new Error("Missing token");
+        }
+        return token;
+    }
+
+    function createTransaction() {
+        const token = getToken();
+
+        fetch(BASE_URL + "/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                token: token,
+                concepto: document.getElementById("conceptC").value,
+                importeTotal: document.getElementById("createAmountC").value,
+                tipoTransaccion: document.getElementById("typeC").value,
+                categoriaId: document.getElementById("catIdC").value,
+                groupId: document.getElementById("groupIdC").value,
+                creadorId: document.getElementById("creatorC").value
+            })
+        })
+            .then(res => showResult(res))
+            .catch(err => showError(err));
+    }
+
+    function deleteTransaction() {
+        const token = getToken();
+
+        fetch(BASE_URL + "/delete", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                accessToken: token,
+                transactionId: document.getElementById("deleteId").value
+            })
+        })
+            .then(res => showResult(res))
+            .catch(err => showError(err));
+    }
+
+    function editTransaction() {
+        const token = getToken();
+        const id = document.getElementById("editId").value;
+
+        fetch(BASE_URL + "/edit/" + id, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                accessToken: token,
+                concepto: document.getElementById("conceptE").value,
+                importeTotal: document.getElementById("createAmountE").value,
+                tipoTransaccion: document.getElementById("typeE").value,
+                categoriaId: document.getElementById("catIdE").value,
+                groupId: document.getElementById("groupIdE").value,
+                creadorId: document.getElementById("creatorE").value
+            })
+        })
+            .then(res => showResult(res))
+            .catch(err => showError(err));
+    }
+
+    function showResult(res) {
+        document.getElementById("result").innerText =
+            "Status: " + res.status;
+    }
+
+    function showError(err) {
+        document.getElementById("result").innerText =
+            "Error: " + err;
+    }
+</script>
+
+</body>
+</html>
