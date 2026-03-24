@@ -1,9 +1,11 @@
 package com.mycompany.app.facade;
 
 import com.mycompany.app.dto.AddUserToGroupDTO;
+import com.mycompany.app.dto.DeleteGroupDTO;
 import com.mycompany.app.dto.GroupCreationDTO;
 import com.mycompany.app.dto.GroupInfoDTO;
 import com.mycompany.app.dto.RemoveUserFromGroupDTO;
+import com.mycompany.app.dto.UpdateGroupDTO;
 import com.mycompany.app.exception.AuthException;
 import com.mycompany.app.service.GroupService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -112,6 +114,47 @@ public class GroupController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error removing user from group: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Update group information
+     * PUT /group/{id}
+     */
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateGroup(@PathVariable Integer id, @RequestBody UpdateGroupDTO updateGroupDTO) {
+        try {
+            updateGroupDTO.setGroupId(id);
+            GroupInfoDTO updatedGroup = grupoService.updateGroup(updateGroupDTO);
+            return ResponseEntity.ok(updatedGroup);
+        } catch (AuthException e) {
+            return ResponseEntity.status(e.getStatus()).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error updating group: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Delete a group
+     * DELETE /group/{id}
+     */
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteGroup(@PathVariable Integer id, @RequestBody DeleteGroupDTO deleteGroupDTO) {
+        try {
+            deleteGroupDTO.setGroupId(id);
+            boolean deleted = grupoService.deleteGroup(deleteGroupDTO);
+            if (deleted) {
+                return ResponseEntity.ok("Group deleted successfully");
+            } else {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("Error deleting group");
+            }
+        } catch (AuthException e) {
+            return ResponseEntity.status(e.getStatus()).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error deleting group: " + e.getMessage());
         }
     }
 }

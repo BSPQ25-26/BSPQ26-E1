@@ -20,6 +20,6 @@ public interface GroupRepository extends JpaRepository<Group, Integer> {
     @Query("SELECT g FROM Group g JOIN FETCH g.miembros WHERE g.id = :id")
     Optional<Group> findByIdWithMiembros(@Param("id") Integer id);
 
-    @Query("SELECT g FROM Group g JOIN FETCH g.transacciones WHERE g.id = :id")
+    @Query("SELECT g FROM Group g LEFT JOIN FETCH g.transacciones WHERE g.id = :id")
     Optional<Group> findByIdWithTransacciones(@Param("id") Integer id);
 }

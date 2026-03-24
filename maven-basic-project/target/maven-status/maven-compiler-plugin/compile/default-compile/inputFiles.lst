@@ -14,6 +14,7 @@
 /Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/model/Usuario.java
 /Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/ErrorResponseDTO.java
 /Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/service/AuthService.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/DeleteGroupDTO.java
 /Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/UserCreationDTO.java
 /Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/model/Group.java
 /Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/GroupController.java
@@ -27,6 +28,7 @@
 /Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/RemoveUserFromGroupDTO.java
 /Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/AuthResponseDTO.java
 /Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/AddUserToGroupDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/UpdateGroupDTO.java
 /Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/App.java
 /Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/repository/TransactionRepository.java
 /Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/UserViewController.java

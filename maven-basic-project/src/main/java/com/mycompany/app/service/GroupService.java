@@ -1,9 +1,11 @@
 package com.mycompany.app.service;
 
 import com.mycompany.app.dto.AddUserToGroupDTO;
+import com.mycompany.app.dto.DeleteGroupDTO;
 import com.mycompany.app.dto.GroupCreationDTO;
 import com.mycompany.app.dto.GroupInfoDTO;
 import com.mycompany.app.dto.RemoveUserFromGroupDTO;
+import com.mycompany.app.dto.UpdateGroupDTO;
 import com.mycompany.app.exception.AuthException;
 import com.mycompany.app.model.Group;
 import com.mycompany.app.model.Transaction;
@@ -201,6 +203,80 @@ public class GroupService {
         // Remove user from group
         group.removeMiembro(userToRemove);
         groupRepository.save(group);
+
+        return true;
+    }
+
+    /**
+     * Updates a group's information
+     */
+    @Transactional
+    public GroupInfoDTO updateGroup(UpdateGroupDTO dto) {
+        // Validate token
+        String requestorEmail = authService.getEmailFromToken(dto.getAccessToken());
+        if (requestorEmail == null) {
+            throw new AuthException("Invalid token", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Find group
+        Optional<Group> groupOpt = groupRepository.findByIdWithMiembros(dto.getGroupId());
+        if (groupOpt.isEmpty()) {
+            throw new AuthException("Group not found", HttpStatus.NOT_FOUND);
+        }
+
+        Group group = groupOpt.get();
+
+        // Check if requestor is a member of the group
+        boolean isRequestorMember = group.getMiembros().stream()
+                .anyMatch(u -> u.getEmail().equals(requestorEmail));
+
+        if (!isRequestorMember) {
+            throw new AuthException("Only group members can update the group", HttpStatus.FORBIDDEN);
+        }
+
+        // Update group fields
+        if (dto.getNombre() != null && !dto.getNombre().trim().isEmpty()) {
+            group.setNombre(dto.getNombre());
+        }
+        if (dto.getDescripcion() != null) {
+            group.setDescripcion(dto.getDescripcion());
+        }
+
+        // Save updated group
+        Group updatedGroup = groupRepository.save(group);
+
+        return convertToInfoDTO(updatedGroup);
+    }
+
+    /**
+     * Deletes a group
+     */
+    @Transactional
+    public boolean deleteGroup(DeleteGroupDTO dto) {
+        // Validate token
+        String requestorEmail = authService.getEmailFromToken(dto.getAccessToken());
+        if (requestorEmail == null) {
+            throw new AuthException("Invalid token", HttpStatus.UNAUTHORIZED);
+        }
+
+        // Find group
+        Optional<Group> groupOpt = groupRepository.findByIdWithMiembros(dto.getGroupId());
+        if (groupOpt.isEmpty()) {
+            throw new AuthException("Group not found", HttpStatus.NOT_FOUND);
+        }
+
+        Group group = groupOpt.get();
+
+        // Check if requestor is a member of the group
+        boolean isRequestorMember = group.getMiembros().stream()
+                .anyMatch(u -> u.getEmail().equals(requestorEmail));
+
+        if (!isRequestorMember) {
+            throw new AuthException("Only group members can delete the group", HttpStatus.FORBIDDEN);
+        }
+
+        // Delete the group
+        groupRepository.delete(group);
 
         return true;
     }
