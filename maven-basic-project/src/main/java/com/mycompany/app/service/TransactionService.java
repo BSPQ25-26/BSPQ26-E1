@@ -1,34 +1,55 @@
 package com.mycompany.app.service;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.mycompany.app.dto.TransactionCreationDTO;
 import com.mycompany.app.dto.TransactionDeletionDTO;
 import com.mycompany.app.dto.TransactionEditionDTO;
+import com.mycompany.app.model.Category;
 import com.mycompany.app.model.Transaction;
+import com.mycompany.app.model.Usuario;
+import com.mycompany.app.repository.CategoryRepository;
 import com.mycompany.app.repository.TransactionRepository;
+import com.mycompany.app.repository.UsuarioRepository;
 
 @Service
 public class TransactionService {
     private final TransactionRepository transactionRepository;
+    private final CategoryRepository categoryRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public TransactionService(TransactionRepository transactionRepository) {
+    public TransactionService(TransactionRepository transactionRepository, 
+                              CategoryRepository categoryRepository, 
+                              UsuarioRepository usuarioRepository) {
         this.transactionRepository = transactionRepository;
+        this.categoryRepository = categoryRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     public boolean createTransaction(TransactionCreationDTO transactionCreationDTO){
         try {
+            Optional<Usuario> creadorOpt = usuarioRepository.findById(transactionCreationDTO.getCreadorId());
+            if (creadorOpt.isEmpty()) {
+                return false;
+            }
+
+            Category categoria = null;
+            if (transactionCreationDTO.getCategoriaId() != null) {
+                categoria = categoryRepository.findById(transactionCreationDTO.getCategoriaId()).orElse(null);
+            }
+
             Transaction transaction = new Transaction(
                 transactionCreationDTO.getConcepto(),
                 transactionCreationDTO.getImporteTotal(),
                 transactionCreationDTO.getTipoTransaccion(),
-                transactionCreationDTO.getCategoriaId(),
+                categoria,
                 transactionCreationDTO.getGrupoId(),
-                transactionCreationDTO.getCreadorId()
-                );
+                creadorOpt.get()
+            );
 
             transactionRepository.saveAndFlush(transaction);
-
             return true;
 
         } catch (Exception e) {
@@ -37,14 +58,14 @@ public class TransactionService {
     }
 
     public boolean deleteTransaction(TransactionDeletionDTO request){
-        try{
-            if(transactionRepository.findById(request.getTransactionId()) != null){
+        try {
+            if(transactionRepository.existsById(request.getTransactionId())){
                 transactionRepository.deleteById(request.getTransactionId());
                 return true;
-            }else{
+            } else {
                 return false;
             }
-        }catch(Exception e){
+        } catch(Exception e) {
             return false;
         }
     }
@@ -57,12 +78,23 @@ public class TransactionService {
                 transaction.setConcepto(request.getConcepto());
                 transaction.setImporteTotal(request.getImporteTotal());
                 transaction.setTipoTransaccion(request.getTipoTransaccion());
-                transaction.setCategoriaId(request.getCategoriaId());
                 transaction.setGrupoId(request.getGrupoId());
-                transaction.setCreadorId(request.getCreadorId());
+
+                if (request.getCategoriaId() != null) {
+                    Category categoria = categoryRepository.findById(request.getCategoriaId()).orElse(null);
+                    transaction.setCategoria(categoria);
+                } else {
+                    transaction.setCategoria(null);
+                }
+
+                if (request.getCreadorId() != null) {
+                    Usuario creador = usuarioRepository.findById(request.getCreadorId()).orElse(null);
+                    if (creador != null) {
+                        transaction.setCreador(creador);
+                    }
+                }
 
                 transactionRepository.saveAndFlush(transaction);
-                
                 return true;
             } else {
                 return false; 

@@ -7,14 +7,14 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "transacciones")
 public class Transaction {
 
-
-    //Una vez estén los models de categoría y más cosas, hay que sustituir los Ids de FK
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -31,26 +31,28 @@ public class Transaction {
     @Column(name = "fecha")
     private LocalDateTime fecha;
 
-    @Column(name = "categoria_id", nullable = false)
-    private Integer categoriaId;
+    @ManyToOne
+    @JoinColumn(name = "categoria_id")
+    private Category categoria;
 
     @Column(name = "grupo_id")
     private Integer grupoId;
 
-    @Column(name = "creador_id", nullable = false)
-    private Integer creadorId;
+    @ManyToOne
+    @JoinColumn(name = "creador_id", nullable = false)
+    private Usuario creador;
 
     public Transaction() {
     }
 
     public Transaction(String concepto, Double importeTotal, String tipoTransaccion, 
-                       Integer categoriaId, Integer grupoId, Integer creadorId) {
+                       Category categoria, Integer grupoId, Usuario creador) {
         this.concepto = concepto;
         this.importeTotal = importeTotal;
         this.tipoTransaccion = tipoTransaccion;
-        this.categoriaId = categoriaId;
+        this.categoria = categoria;
         this.grupoId = grupoId;
-        this.creadorId = creadorId;
+        this.creador = creador;
         this.fecha = LocalDateTime.now();
     }
 
@@ -59,16 +61,16 @@ public class Transaction {
     public Double getImporteTotal() { return importeTotal; }
     public String getTipoTransaccion() { return tipoTransaccion; }
     public LocalDateTime getFecha() { return fecha; }
-    public Integer getCategoriaId() { return categoriaId; }
+    public Category getCategoria() { return categoria; }
     public Integer getGrupoId() { return grupoId; }
-    public Integer getCreadorId() { return creadorId; }
+    public Usuario getCreador() { return creador; }
 
     public void setId(Integer id) { this.id = id; }
     public void setConcepto(String concepto) { this.concepto = concepto; }
     public void setImporteTotal(Double importeTotal) { this.importeTotal = importeTotal; }
     public void setTipoTransaccion(String tipoTransaccion) { this.tipoTransaccion = tipoTransaccion; }
     public void setFecha(LocalDateTime fecha) { this.fecha = fecha; }
-    public void setCategoriaId(Integer categoriaId) { this.categoriaId = categoriaId; }
+    public void setCategoria(Category categoria) { this.categoria = categoria; }
     public void setGrupoId(Integer grupoId) { this.grupoId = grupoId; }
-    public void setCreadorId(Integer creadorId) { this.creadorId = creadorId; }
+    public void setCreador(Usuario creador) { this.creador = creador; }
 }
