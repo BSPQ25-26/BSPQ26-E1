@@ -41,4 +41,8 @@ public class AuthService {
     public boolean isValidToken(String token){
         return activeTokens.containsKey(token);
     }
+
+    public String getEmailFromToken(String token) {
+        return activeTokens.get(token);
+    }
 }

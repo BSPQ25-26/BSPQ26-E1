@@ -14,6 +14,8 @@ import com.mycompany.app.repository.CategoryRepository;
 import com.mycompany.app.repository.TransactionRepository;
 import com.mycompany.app.repository.UsuarioRepository;
 
+import java.util.Optional;
+
 @Service
 public class TransactionService {
     private final TransactionRepository transactionRepository;
@@ -97,7 +99,7 @@ public class TransactionService {
                 transactionRepository.saveAndFlush(transaction);
                 return true;
             } else {
-                return false; 
+                return false;
             }
         } catch (Exception e) {
             return false;

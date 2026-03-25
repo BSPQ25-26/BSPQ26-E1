@@ -35,8 +35,9 @@ public class Transaction {
     @JoinColumn(name = "categoria_id")
     private Category categoria;
 
-    @Column(name = "grupo_id")
-    private Integer grupoId;
+    @ManyToOne
+    @JoinColumn(name = "grupo_id")
+    private Group group;
 
     @ManyToOne
     @JoinColumn(name = "creador_id", nullable = false)
