@@ -16,13 +16,14 @@ public class SecurityConfig {
 
     @Bean
     @Order(1)
-    public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception{
+    public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/web/**")
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll()
-                );
+            .securityMatcher("/web/**", "/css/**")
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/css/**").permitAll() 
+                .anyRequest().permitAll()
+            );
         return http.build();
     }
 
@@ -42,6 +43,7 @@ public class SecurityConfig {
                 "/transaction/**",
                 "/group/**",
                 "/transaction",
+                "/transaction/all",
                 "/transaction/create",
                 "/transaction/delete",
                 "/transaction/edit/*",
@@ -55,7 +57,7 @@ public class SecurityConfig {
                     "/swagger-ui/**",
                     "/swagger-ui.html"
                 ).permitAll()
-                .requestMatchers("/", "/index.html", "/styles/**", "/*.js", "/favicon.ico").permitAll()
+                .requestMatchers("/", "/index.html", "/css/**", "/*.js", "/favicon.ico").permitAll()
                 .anyRequest().authenticated()
             )
             .oauth2ResourceServer(oauth2 ->

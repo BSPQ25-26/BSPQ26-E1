@@ -1,24 +1,42 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
 <head>
     <meta charset="UTF-8"/>
-    <title>User Info</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenSense - Mi Perfil</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
-<h1>User Info</h1>
 
-<p id="error" style="color:red; display:none"></p>
+    <div class="login-box profile-container">
+        <h1 class="logo">Expen<span>Sense</span></h1>
+        
+        <p id="error" class="error-msg" style="display:none"></p>
 
-<div id="info" style="display:none">
-    <p><strong>Username:</strong> <span id="username"></span></p>
-    <p><strong>Email:</strong> <span id="email"></span></p>
-    <p><strong>Balance:</strong> <span id="balance"></span> €</p>
-    <br/>
-    <!-- Method that makes a button redirect as if it was a href -->
-    <button th:onclick="'window.location.href=\'' + @{/web/transaction} + '\';'">To transactions</button>
-    <button th:onclick="'window.location.href=\'' + @{/web/categories} + '\';'">To categories</button>
-    <button onclick="logout()">Log out</button>
-</div>
+        <div id="info" class="profile-content" style="display:none">
+            <div class="avatar" id="initial">U</div>
+            <h2 class="user-name" id="username">Cargando...</h2>
+            <p class="user-email" id="email">email@ejemplo.com</p>
+
+            <div class="balance-card">
+                <span class="balance-label">Tu Balance Actual</span>
+                <span class="balance-amount"><span id="balance">0.00</span> €</span>
+            </div>
+
+            <div class="actions">
+                <button class="btn-login" th:onclick="'window.location.href=\'' + @{/web/transaction} + '\';'">
+                    Ver Transacciones
+                </button>
+                
+                <button class="btn-secondary" th:onclick="'window.location.href=\'' + @{/web/categories} + '\';'">
+                    Gestionar Categorías
+                </button>
+                
+                <button class="btn-logout" onclick="logout()">Cerrar Sesión</button>
+            </div>
+        </div>
+    </div>
 
 <script>
     const token = sessionStorage.getItem('token');
@@ -34,7 +52,7 @@
                     window.location.href = '/web/auth/login';
                 } else if (res.status === 404) {
                     document.getElementById('error').style.display = 'block';
-                    document.getElementById('error').textContent = 'User not found';
+                    document.getElementById('error').textContent = 'Usuario no encontrado';
                 } else {
                     return res.json();
                 }
@@ -43,8 +61,9 @@
                 if (user) {
                     document.getElementById('username').textContent = user.username;
                     document.getElementById('email').textContent = user.email;
-                    document.getElementById('balance').textContent = user.balance;
+                    document.getElementById('balance').textContent = user.balance.toLocaleString('es-ES', {minimumFractionDigits: 2});
                     document.getElementById('info').style.display = 'block';
+                    document.getElementById('initial').textContent = user.username.charAt(0).toUpperCase();
                 }
             });
     }
