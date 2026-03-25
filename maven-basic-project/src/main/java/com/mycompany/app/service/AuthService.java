@@ -36,4 +36,9 @@ public class AuthService {
         System.out.println("DEBUG: Validando token [" + token + "] -> Resultado: " + valido);
         return valido;
     }
+
+    
+    public String getEmailFromToken(String token) {
+        return activeTokens.get(token);
+    }
 }
