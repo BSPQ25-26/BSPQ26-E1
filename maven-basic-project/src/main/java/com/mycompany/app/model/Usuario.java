@@ -4,7 +4,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "usuario")
@@ -18,6 +21,9 @@ public class Usuario {
     private String email;
     private String contraseña;
     private Double balance;
+
+    @ManyToMany(mappedBy = "miembros")
+    private Set<Group> groups = new HashSet<>();
 
     public Usuario() {
     }
@@ -34,10 +40,12 @@ public class Usuario {
     public String getEmail() { return email; }
     public String getContraseña() { return contraseña; }
     public Double getBalance() { return balance; }
+    public Set<Group> getGroups() { return groups; }
 
     public void setId(Integer id) { this.id = id; }
     public void setNombre(String nombre) { this.nombre = nombre; }
     public void setEmail(String email) { this.email = email; }
     public void setContraseña(String contraseña) { this.contraseña = contraseña; }
     public void setBalance(Double balance) { this.balance = balance; }
+    public void setGroups(Set<Group> groups) { this.groups = groups; }
 }

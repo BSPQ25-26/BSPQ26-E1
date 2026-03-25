@@ -36,17 +36,17 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
             .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/auth/login",
-                "/auth/create",
-                "/user/{email}",
-                "/auth/logout",
-                "/auth/check",
+            .requestMatchers("/auth/**",
                 "/user/",
+                "/feature/group-management",
+                "/user/{email}",
+                "/transaction/**",
+                "/group/**",
                 "/transaction",
                 "/transaction/all",
                 "/transaction/create",
                 "/transaction/delete",
-                "/transaction/edit/{transactionId}",
+                "/transaction/edit/*",
                 "/categories/create",          
                 "/categories/user/{usuarioId}",
                 "/categories/{id}",
