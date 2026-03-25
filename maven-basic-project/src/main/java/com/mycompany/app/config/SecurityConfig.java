@@ -43,6 +43,7 @@ public class SecurityConfig {
                 "/auth/check",
                 "/user/",
                 "/transaction",
+                "/transaction/all",
                 "/transaction/create",
                 "/transaction/delete",
                 "/transaction/edit/{transactionId}",

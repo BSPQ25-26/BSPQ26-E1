@@ -103,4 +103,7 @@ public class TransactionService {
             return false;
         }
     }
+    public java.util.List<Transaction> findAll() {
+        return transactionRepository.findAll();
+    }
 }

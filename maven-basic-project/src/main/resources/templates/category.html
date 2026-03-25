@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenSense - Categorías</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body class="transaction-body">
+
+    <div class="nav-header">
+        <a th:href="@{/web/user/info}" class="logo">Expen<span>Sense</span></a>
+        <a th:href="@{/web/user/info}" class="back-link">← Volver al Perfil</a>
+    </div>
+
+    <div class="container-grid">
+        <div class="glass-card card-lista">
+            <div class="header-inline">
+                <h2 class="card-title">Categorías</h2>
+                <div class="button-group-top">
+                    <button class="btn-add" onclick="prepareNewCategory()">＋</button>
+                    <button class="btn-refresh" onclick="loadMyCategories()">↻</button>
+                </div>
+            </div>
+
+            <div class="search-bar-container">
+                <input type="number" id="searchUsrId" placeholder="Buscar por ID de Usuario...">
+                <button class="btn-search" onclick="searchByUser()">🔍</button>
+            </div>
+
+            <div id="categoriesGrid" class="categories-grid">
+                </div>
+            
+            <div id="categoriesGrid" class="categories-grid">
+                </div>
+        </div>
+
+        <div class="glass-card card-principal" id="panelCategory" style="display:none">
+            <h2 class="card-title" id="formTitle">Nueva Categoría</h2>
+            
+            <div class="input-group">
+                <label>Nombre de Categoría</label>
+                <input id="catName" placeholder="Ej: Ocio, Salud...">
+            </div>
+            
+            <div class="input-group">
+                <label>Tu ID de Usuario</label>
+                <input id="usrId" type="number" placeholder="ID">
+            </div>
+
+            <div class="button-group">
+                <button class="btn-login" onclick="createCategory()">Crear Categoría</button>
+                <button class="btn-logout" onclick="closeForm()" style="border:none">Cancelar</button>
+            </div>
+            
+            <div id="result" style="margin-top: 20px; padding: 10px; border-radius: 10px; text-align: center; font-size: 0.8rem; display: none;"></div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const BASE_URL = "/categories";
+
+        window.onload = function() {
+            loadMyCategories();
+        };
+
+        function getToken() {
+            const token = sessionStorage.getItem("token");
+            if (!token) { window.location.href = '/web/auth/login'; return null; }
+            return token;
+        }
+
+        function searchByUser() {
+            const token = getToken();
+            const usrId = document.getElementById("searchUsrId").value; 
+
+            if (!usrId) {
+                return;
+            }
+
+            console.log("Buscando categorías para el usuario:", usrId);
+
+            fetch(`${BASE_URL}/user/${usrId}?token=${token}`)
+                .then(res => {
+                    if (!res.ok) throw new Error("Error " + res.status);
+                    return res.json();
+                })
+                .then(data => {
+                    console.log("Datos recibidos:", data);
+                    renderCategories(data); 
+                })
+                .catch(err => {
+                    console.error("Error en la búsqueda:", err);
+                    renderCategories([]); 
+                });
+        }
+
+        function loadMyCategories() {
+            const lastId = document.getElementById("searchUsrId").value || sessionStorage.getItem("lastSearchedId") || 1;
+            document.getElementById("searchUsrId").value = lastId; 
+            searchByUser();
+        }
+
+        const ICONOS_FIJOS = {
+            "Salary": "💰",
+            "Food": "🍽️",
+            "Entertainment": "🎬",
+            "Transport": "🚌",
+            "Health": "🏥",    
+            "School": "🎓",     
+            "Sport": "⚽",      
+            "Housing": "🏠",    
+            "Fitness": "🏋️",
+            "Groceries": "🛒"
+        };
+
+        function renderCategories(data) {
+            const grid = document.getElementById("categoriesGrid");
+            grid.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                grid.innerHTML = `<p style="grid-column: 1/-1; text-align:center; color:#999; padding:20px;">No hay categorías para este usuario.</p>`;
+                return;
+            }
+
+            data.forEach(cat => {
+
+                const iconoHTML = ICONOS_FIJOS[cat.name] || '📁';
+                
+                grid.innerHTML += `
+                    <div class="category-card">
+                        <button class="btn-mini-delete" onclick="deleteCategory(${cat.id})" title="Borrar">🗑</button>
+                        <div class="category-icon">${iconoHTML}</div> <h3>${cat.name}</h3>
+                        <small>ID: ${cat.id}</small>
+                    </div>
+                `;
+            });
+        }
+
+        function prepareNewCategory() {
+            const panel = document.getElementById("panelCategory");
+            panel.style.display = "block";
+            document.getElementById("catName").value = "";
+            document.getElementById("usrId").value = sessionStorage.getItem("userId") || "";
+        }
+
+        function closeForm() {
+            document.getElementById("panelCategory").style.display = "none";
+        }
+
+        function createCategory() {
+            const token = getToken();
+            const name = document.getElementById("catName").value;
+            const userId = document.getElementById("usrId").value;
+
+            fetch(BASE_URL + "/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    name: name,
+                    userId: userId,
+                    token: token
+                })
+            })
+            .then(res => {
+                if(res.ok) {
+                    showResult(res, "Categoría '" + name + "' creada correctamente ✨");
+                    
+                    document.getElementById("searchUsrId").value = userId;
+                    searchByUser(); 
+                    
+                    closeForm(); 
+                } else {
+                    showResult(res, "Error al crear");
+                }
+            });
+        }
+
+        function deleteCategory(id) {
+            if(!confirm("¿Borrar categoría?")) return;
+            const token = getToken();
+            fetch(BASE_URL + "/delete", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ categoryId: id, token: token })
+            })
+            .then(res => {
+                if(res.ok) loadMyCategories();
+                showResult(res);
+            });
+        }
+
+        function showResult(res, message) {
+            const resDiv = document.getElementById("result");
+            resDiv.style.display = "block"; 
+            resDiv.style.background = res.ok ? "#dcfce7" : "#fee2e2";
+            resDiv.style.color = res.ok ? "#166534" : "#dc2626";
+            resDiv.innerText = message || (res.ok ? "¡Acción realizada! ✨" : "Error: " + res.status);
+            
+            setTimeout(() => {
+                resDiv.style.display = "none";
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
