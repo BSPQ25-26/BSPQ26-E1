@@ -1,29 +1,39 @@
 package com.mycompany.app.facade;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.mycompany.app.dto.*;
-import com.mycompany.app.exception.AuthException;
-import com.mycompany.app.service.GroupService;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.mycompany.app.dto.AddUserToGroupDTO;
+import com.mycompany.app.dto.DeleteGroupDTO;
+import com.mycompany.app.dto.GroupCreationDTO;
+import com.mycompany.app.dto.GroupInfoDTO;
+import com.mycompany.app.dto.RemoveUserFromGroupDTO;
+import com.mycompany.app.dto.UpdateGroupDTO;
+import com.mycompany.app.exception.AuthException;
+import com.mycompany.app.service.GroupService;
 
 @WebMvcTest(GroupController.class)
 @WithMockUser
@@ -240,6 +250,8 @@ class GroupControllerTest {
 
     // ==================== GET USER GROUPS TESTS ====================
 
+  // ==================== GET USER GROUPS TESTS ====================
+
     @Test
     void getUserGroups_WithValidToken_ShouldReturnGroups() throws Exception {
         List<GroupInfoDTO> groups = Arrays.asList(
@@ -247,9 +259,11 @@ class GroupControllerTest {
             new GroupInfoDTO(2, "Group 2", "Desc 2", LocalDateTime.now(), Arrays.asList("test@example.com"), 1)
         );
 
-        when(grupoService.getUserGroups(anyString())).thenReturn(groups);
+        // CAMBIO 1: Ahora acepta un Integer (userId) y un String (token)
+        when(grupoService.getUserGroups(anyInt(), anyString())).thenReturn(groups);
 
-        mockMvc.perform(get("/group/user/groups")
+        // CAMBIO 2: Actualizamos la URL para incluir el userId (ej: 1)
+        mockMvc.perform(get("/group/user/1/groups")
                 .param("token", "valid-token"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$").isArray())
