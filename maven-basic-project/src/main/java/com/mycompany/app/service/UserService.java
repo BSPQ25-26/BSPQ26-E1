@@ -38,7 +38,7 @@ public class UserService {
 
     public UserInfoDTO getUserInfo(String email){
         Usuario user = usuarioRepository.findByEmail(email);
-        UserInfoDTO userInfoDTO = new UserInfoDTO(user.getContraseña(), user.getEmail(), user.getBalance());
+        UserInfoDTO userInfoDTO = new UserInfoDTO(user.getNombre(), user.getEmail(), user.getBalance());
 
         return userInfoDTO;
     }

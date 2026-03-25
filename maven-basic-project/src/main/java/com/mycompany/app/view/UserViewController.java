@@ -29,13 +29,13 @@ public class UserViewController {
     public String createUser(UserCreationDTO userCreationDTO, Model model) {
         try {
             if (!userService.createUser(userCreationDTO)) {
-                model.addAttribute("error", "No se pudo crear el usuario");
+                model.addAttribute("error", "User not found");
                 return "user-create";
             }
-            model.addAttribute("mensaje", "Usuario creado correctamente");
+            model.addAttribute("message", "User found correctly");
             return "user-create";
         } catch (Exception e) {
-            model.addAttribute("error", "Error interno del servidor");
+            model.addAttribute("error", "Internal server error");
             return "user-create";
         }
     }

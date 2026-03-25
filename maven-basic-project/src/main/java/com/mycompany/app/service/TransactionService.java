@@ -1,47 +1,57 @@
 package com.mycompany.app.service;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.mycompany.app.dto.TransactionCreationDTO;
 import com.mycompany.app.dto.TransactionDeletionDTO;
 import com.mycompany.app.dto.TransactionEditionDTO;
-import com.mycompany.app.model.Group;
+import com.mycompany.app.model.Category;
 import com.mycompany.app.model.Transaction;
-import com.mycompany.app.repository.GroupRepository;
+import com.mycompany.app.model.Usuario;
+import com.mycompany.app.repository.CategoryRepository;
 import com.mycompany.app.repository.TransactionRepository;
+import com.mycompany.app.repository.UsuarioRepository;
 
 import java.util.Optional;
 
 @Service
 public class TransactionService {
     private final TransactionRepository transactionRepository;
-    private final GroupRepository groupRepository;
+    private final CategoryRepository categoryRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public TransactionService(TransactionRepository transactionRepository, GroupRepository groupRepository) {
+    public TransactionService(TransactionRepository transactionRepository, 
+                              CategoryRepository categoryRepository, 
+                              UsuarioRepository usuarioRepository) {
         this.transactionRepository = transactionRepository;
-        this.groupRepository = groupRepository;
+        this.categoryRepository = categoryRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     public boolean createTransaction(TransactionCreationDTO transactionCreationDTO){
         try {
-            // Convert groupId to Group entity if provided
-            Group group = null;
-            if (transactionCreationDTO.getGrupoId() != null) {
-                Optional<Group> groupOpt = groupRepository.findById(transactionCreationDTO.getGrupoId());
-                group = groupOpt.orElse(null);
+            Optional<Usuario> creadorOpt = usuarioRepository.findById(transactionCreationDTO.getCreadorId());
+            if (creadorOpt.isEmpty()) {
+                return false;
+            }
+
+            Category categoria = null;
+            if (transactionCreationDTO.getCategoriaId() != null) {
+                categoria = categoryRepository.findById(transactionCreationDTO.getCategoriaId()).orElse(null);
             }
 
             Transaction transaction = new Transaction(
                 transactionCreationDTO.getConcepto(),
                 transactionCreationDTO.getImporteTotal(),
                 transactionCreationDTO.getTipoTransaccion(),
-                transactionCreationDTO.getCategoriaId(),
-                group,
-                transactionCreationDTO.getCreadorId()
-                );
+                categoria,
+                transactionCreationDTO.getGrupoId(),
+                creadorOpt.get()
+            );
 
             transactionRepository.saveAndFlush(transaction);
-
             return true;
 
         } catch (Exception e) {
@@ -50,14 +60,14 @@ public class TransactionService {
     }
 
     public boolean deleteTransaction(TransactionDeletionDTO request){
-        try{
-            if(transactionRepository.findById(request.getTransactionId()) != null){
+        try {
+            if(transactionRepository.existsById(request.getTransactionId())){
                 transactionRepository.deleteById(request.getTransactionId());
                 return true;
-            }else{
+            } else {
                 return false;
             }
-        }catch(Exception e){
+        } catch(Exception e) {
             return false;
         }
     }
@@ -70,20 +80,23 @@ public class TransactionService {
                 transaction.setConcepto(request.getConcepto());
                 transaction.setImporteTotal(request.getImporteTotal());
                 transaction.setTipoTransaccion(request.getTipoTransaccion());
-                transaction.setCategoriaId(request.getCategoriaId());
+                transaction.setGrupoId(request.getGrupoId());
 
-                // Convert groupId to Group entity if provided
-                if (request.getGrupoId() != null) {
-                    Optional<Group> groupOpt = groupRepository.findById(request.getGrupoId());
-                    transaction.setGroup(groupOpt.orElse(null));
+                if (request.getCategoriaId() != null) {
+                    Category categoria = categoryRepository.findById(request.getCategoriaId()).orElse(null);
+                    transaction.setCategoria(categoria);
                 } else {
-                    transaction.setGroup(null);
+                    transaction.setCategoria(null);
                 }
 
-                transaction.setCreadorId(request.getCreadorId());
+                if (request.getCreadorId() != null) {
+                    Usuario creador = usuarioRepository.findById(request.getCreadorId()).orElse(null);
+                    if (creador != null) {
+                        transaction.setCreador(creador);
+                    }
+                }
 
                 transactionRepository.saveAndFlush(transaction);
-
                 return true;
             } else {
                 return false;

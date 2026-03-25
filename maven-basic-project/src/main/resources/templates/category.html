@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Login</title>
+</head>
+<body>
+<h1>Category UI</h1>
+
+<h2>Create category</h2>
+<input id="catName" placeholder="Category name"><br>
+<input id="usrId" placeholder="Creator Id"><br>
+<button onclick="createCategory()">Create</button>
+<hr>
+
+<h2>Delete category</h2>
+<input id="catId" placeholder="Category ID"><br>
+<button onclick="deleteCategory()">Delete</button>
+<hr>
+
+<h2>Search by user</h2>
+<input id="searchUsrId" placeholder="User ID"><br>
+<button onclick="searchByUser()">Search</button>
+<hr>
+
+<p id="result"></p>
+<p id="resSearch"></p>
+
+<script th:inline="javascript">
+    const BASE_URL = "/categories";
+
+    function cleanResSearch(){
+        document.getElementById("resSearch").innerText = "";
+    }
+
+    function getToken() {
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+            showError("No token found in sessionStorage");
+            throw new Error("Missing token");
+        }
+        return token;
+    }
+
+    function createCategory() {
+        const token = getToken();
+
+        fetch(BASE_URL + "/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: document.getElementById("catName").value,
+                userId: document.getElementById("usrId").value,
+                token: token
+            })
+        })
+            .then(res => showResult(res))
+            .catch(err => showError(err));
+    }
+
+    function deleteCategory() {
+        const token = getToken();
+
+        fetch(BASE_URL + "/delete", {
+            method: "POST",
+            headers: { "Content-type": `application/json` },
+            body: JSON.stringify({
+                categoryId: document.getElementById("catId").value,
+                token: token
+            })
+        })
+            .then(res => showResult(res))
+            .catch(err => showError(err));
+    }
+
+    function searchByUser() {
+        const token = getToken();
+        const usrId = document.getElementById("searchUsrId").value;
+
+        fetch(BASE_URL + "/user/" + usrId + "?token=" + token, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json"
+            }
+        })
+            .then(async res => {
+                if (res.status === 200) {
+                    const data = await res.json();
+                    document.getElementById("result").innerText = "Categories for user " + usrId + ":" + "\n";
+                    document.getElementById("resSearch").innerText = data.map(elem => "- " + elem.name + "\n").join("\n");
+                } else {
+                    showResult(res);
+                }
+            })
+            .catch(err => showError(err));
+    }
+
+    function showResult(res) {
+        cleanResSearch();
+        document.getElementById("result").innerText =
+            "Status: " + res.status;
+    }
+
+    function showError(err) {
+        document.getElementById("result").innerText =
+            "Error: " + err;
+    }
+
+</script>
+</body>
+</html>

@@ -37,9 +37,18 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
             .requestMatchers("/auth/**",
                 "/user/",
+                "feature/group-management",
                 "/user/{email}",
                 "/transaction/**",
                 "/group/**"
+                "/transaction",
+                "/transaction/create",
+                "/transaction/delete",
+                "/transaction/edit/{transactionId}",
+                "/categories/create",          
+                "/categories/user/{usuarioId}",
+                "/categories/{id}",
+                "/categories/**"             
             ).permitAll()
                 .requestMatchers(
                     "/v3/api-docs/**",
