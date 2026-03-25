@@ -30,7 +30,7 @@ public class Group {
     )
     private Set<Usuario> miembros = new HashSet<>();
 
-    @OneToMany(mappedBy = "group", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "grupo", cascade = CascadeType.ALL)
     private Set<Transaction> transacciones = new HashSet<>();
 
     public Group() {
@@ -43,74 +43,35 @@ public class Group {
         this.fechaCreacion = LocalDateTime.now();
     }
 
-    // Getters
-    public Integer getId() {
-        return id;
-    }
+    public Integer getId() { return id; }
+    public String getNombre() { return nombre; }
+    public String getDescripcion() { return descripcion; }
+    public LocalDateTime getFechaCreacion() { return fechaCreacion; }
+    public Set<Usuario> getMiembros() { return miembros; }
+    public Set<Transaction> getTransacciones() { return transacciones; }
 
-    public String getNombre() {
-        return nombre;
-    }
+    public void setId(Integer id) { this.id = id; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
+    public void setFechaCreacion(LocalDateTime fechaCreacion) { this.fechaCreacion = fechaCreacion; }
+    public void setMiembros(Set<Usuario> miembros) { this.miembros = miembros; }
+    public void setTransacciones(Set<Transaction> transacciones) { this.transacciones = transacciones; }
 
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public Set<Usuario> getMiembros() {
-        return miembros;
-    }
-
-    public Set<Transaction> getTransacciones() {
-        return transacciones;
-    }
-
-    // Setters
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
-
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-
-    public void setMiembros(Set<Usuario> miembros) {
-        this.miembros = miembros;
-    }
-
-    public void setTransacciones(Set<Transaction> transacciones) {
-        this.transacciones = transacciones;
-    }
-
-    // Helper methods for managing relationships
     public void addMiembro(Usuario usuario) {
         this.miembros.add(usuario);
-        usuario.getGroups().add(this);
     }
 
     public void removeMiembro(Usuario usuario) {
         this.miembros.remove(usuario);
-        usuario.getGroups().remove(this);
     }
 
     public void addTransaccion(Transaction transaction) {
         this.transacciones.add(transaction);
-        transaction.setGroup(this);
+        transaction.setGrupo(this);
     }
 
     public void removeTransaccion(Transaction transaction) {
         this.transacciones.remove(transaction);
-        transaction.setGroup(null);
+        transaction.setGrupo(null);
     }
 }

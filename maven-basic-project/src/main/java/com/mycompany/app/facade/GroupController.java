@@ -1,5 +1,18 @@
 package com.mycompany.app.facade;
 
+import java.util.List;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.mycompany.app.dto.AddUserToGroupDTO;
 import com.mycompany.app.dto.DeleteGroupDTO;
 import com.mycompany.app.dto.GroupCreationDTO;
@@ -8,29 +21,22 @@ import com.mycompany.app.dto.RemoveUserFromGroupDTO;
 import com.mycompany.app.dto.UpdateGroupDTO;
 import com.mycompany.app.exception.AuthException;
 import com.mycompany.app.service.GroupService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/group")
 public class GroupController {
 
-    @Autowired
-    private GroupService grupoService;
+    private final GroupService groupService;
 
-    /**
-     * Create a new group
-     * POST /grupo/
-     */
+    public GroupController(GroupService groupService) {
+        this.groupService = groupService;
+    }
+
     @PostMapping("/")
-    public ResponseEntity<?> createGrupo(@RequestBody GroupCreationDTO grupoCreationDTO) {
+    public ResponseEntity<?> createGroup(@RequestBody GroupCreationDTO groupCreationDTO) {
         try {
-            GroupInfoDTO grupoInfo = grupoService.createGroup(grupoCreationDTO);
-            return ResponseEntity.status(HttpStatus.CREATED).body(grupoInfo);
+            GroupInfoDTO groupInfo = groupService.createGroup(groupCreationDTO);
+            return ResponseEntity.status(HttpStatus.CREATED).body(groupInfo);
         } catch (AuthException e) {
             return ResponseEntity.status(e.getStatus()).body(e.getMessage());
         } catch (Exception e) {
@@ -39,15 +45,11 @@ public class GroupController {
         }
     }
 
-    /**
-     * Get group information by ID
-     * GET /grupo/{id}
-     */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getGrupo(@PathVariable Integer id, @RequestParam String token) {
+    public ResponseEntity<?> getGroup(@PathVariable Integer id, @RequestParam String token) {
         try {
-            GroupInfoDTO grupoInfo = grupoService.getGroupInfo(id, token);
-            return ResponseEntity.ok(grupoInfo);
+            GroupInfoDTO groupInfo = groupService.getGroupInfo(id, token);
+            return ResponseEntity.ok(groupInfo);
         } catch (AuthException e) {
             return ResponseEntity.status(e.getStatus()).body(e.getMessage());
         } catch (Exception e) {
@@ -56,15 +58,11 @@ public class GroupController {
         }
     }
 
-    /**
-     * Get all groups for the authenticated user
-     * GET /grupo/user/groups
-     */
-    @GetMapping("/user/groups")
-    public ResponseEntity<?> getUserGroups(@RequestParam String token) {
+    @GetMapping("/user/{userId}/groups")
+    public ResponseEntity<?> getUserGroups(@PathVariable Integer userId, @RequestParam String token) {
         try {
-            List<GroupInfoDTO> grupos = grupoService.getUserGroups(token);
-            return ResponseEntity.ok(grupos);
+            List<GroupInfoDTO> groups = groupService.getUserGroups(userId, token);
+            return ResponseEntity.ok(groups);
         } catch (AuthException e) {
             return ResponseEntity.status(e.getStatus()).body(e.getMessage());
         } catch (Exception e) {
@@ -73,14 +71,10 @@ public class GroupController {
         }
     }
 
-    /**
-     * Add a user to a group
-     * POST /grupo/addUser
-     */
     @PostMapping("/addUser")
     public ResponseEntity<?> addUserToGroup(@RequestBody AddUserToGroupDTO addUserDTO) {
         try {
-            boolean added = grupoService.addUserToGroup(addUserDTO);
+            boolean added = groupService.addUserToGroup(addUserDTO);
             if (added) {
                 return ResponseEntity.ok("User added to group successfully");
             } else {
@@ -95,14 +89,10 @@ public class GroupController {
         }
     }
 
-    /**
-     * Remove a user from a group
-     * POST /grupo/removeUser
-     */
     @PostMapping("/removeUser")
     public ResponseEntity<?> removeUserFromGroup(@RequestBody RemoveUserFromGroupDTO removeUserDTO) {
         try {
-            boolean removed = grupoService.removeUserFromGroup(removeUserDTO);
+            boolean removed = groupService.removeUserFromGroup(removeUserDTO);
             if (removed) {
                 return ResponseEntity.ok("User removed from group successfully");
             } else {
@@ -117,15 +107,11 @@ public class GroupController {
         }
     }
 
-    /**
-     * Update group information
-     * PUT /group/{id}
-     */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateGroup(@PathVariable Integer id, @RequestBody UpdateGroupDTO updateGroupDTO) {
         try {
             updateGroupDTO.setGroupId(id);
-            GroupInfoDTO updatedGroup = grupoService.updateGroup(updateGroupDTO);
+            GroupInfoDTO updatedGroup = groupService.updateGroup(updateGroupDTO);
             return ResponseEntity.ok(updatedGroup);
         } catch (AuthException e) {
             return ResponseEntity.status(e.getStatus()).body(e.getMessage());
@@ -135,15 +121,10 @@ public class GroupController {
         }
     }
 
-    /**
-     * Delete a group
-     * DELETE /group/{id}
-     */
-    @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteGroup(@PathVariable Integer id, @RequestBody DeleteGroupDTO deleteGroupDTO) {
+    @PostMapping("/delete")
+    public ResponseEntity<?> deleteGroup(@RequestBody DeleteGroupDTO deleteGroupDTO) {
         try {
-            deleteGroupDTO.setGroupId(id);
-            boolean deleted = grupoService.deleteGroup(deleteGroupDTO);
+            boolean deleted = groupService.deleteGroup(deleteGroupDTO);
             if (deleted) {
                 return ResponseEntity.ok("Group deleted successfully");
             } else {

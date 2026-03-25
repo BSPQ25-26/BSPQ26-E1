@@ -37,14 +37,14 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
             .requestMatchers("/auth/**",
                 "/user/",
-                "feature/group-management",
+                "/feature/group-management",
                 "/user/{email}",
                 "/transaction/**",
-                "/group/**"
+                "/group/**",
                 "/transaction",
                 "/transaction/create",
                 "/transaction/delete",
-                "/transaction/edit/{transactionId}",
+                "/transaction/edit/*",
                 "/categories/create",          
                 "/categories/user/{usuarioId}",
                 "/categories/{id}",
