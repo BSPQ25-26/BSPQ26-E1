@@ -1,256 +1,126 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExpenSense - Movimientos</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>Transactions</title>
 </head>
-<body class="transaction-body">
+<body>
 
-    <div class="nav-header">
-        <a th:href="@{/web/user/info}" class="logo">Expen<span>Sense</span></a>
-        <a th:href="@{/web/user/info}" class="back-link">← Volver al Perfil</a>
-    </div>
-    <div class="container-grid">
-        <div class="glass-card card-lista">
-            <div class="header-inline">
-                <h2 class="card-title">Mis Movimientos</h2>
-                <div class="button-group-top">
-                    <button class="btn-add" onclick="prepareNewTransaction()" title="Añadir nuevo">＋</button>
-                    <button class="btn-refresh" onclick="loadTransactions()" title="Refrescar">↻</button>
-                </div>
-            </div>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Concepto</th>
-                            <th>Importe</th>
-                            <th>Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactionsTableBody">
-                        </tbody>
-                </table>
-            </div>
-        </div>
+<h1>Transaction UI</h1>
 
-        <div class="glass-card card-principal">
-            <h2 class="card-title" id="formTitle">Registrar Movimiento</h2>
-            
-            <input type="hidden" id="editId"> <div class="input-group">
-                <label>Concepto</label>
-                <input id="conceptC" placeholder="Ej: Cena amigos">
-            </div>
-            
-            <div class="form-row">
-                <div class="input-group">
-                    <label>Importe (€)</label>
-                    <input id="createAmountC" type="number" step="0.01" placeholder="0.00">
-                </div>
-                <div class="input-group">
-                    <label>Tipo</label>
-                    <input id="typeC" placeholder="GASTO / INGRESO">
-                </div>
-            </div>
+<h2>Create Transaction</h2>
+<input id="conceptC" placeholder="Concept"><br>
+<input id="createAmountC" placeholder="Amount"><br>
+<input id="typeC" placeholder="Transaction Type"><br>
+<input id="catIdC" placeholder="Category Id"><br>
+<input id="groupIdC" placeholder="Group Id"><br>
+<input id="creatorC" placeholder="Creator Id"><br>
+<button onclick="createTransaction()">Create</button>
 
-            <div class="form-row">
-                <div class="input-group">
-                    <label>Category ID</label>
-                    <input id="catIdC" type="number" placeholder="ID">
-                </div>
-                <div class="input-group">
-                    <label>Group ID</label>
-                    <input id="groupIdC" type="number" placeholder="ID">
-                </div>
-            </div>
+<hr>
 
-            <div class="input-group">
-                <label>Creator ID</label>
-                <input id="creatorC" type="number" placeholder="Tu ID de usuario">
-            </div>
+<h2>Delete Transaction</h2>
+<input id="deleteId" placeholder="Transaction ID"><br>
+<button onclick="deleteTransaction()">Delete</button>
 
-            <div class="button-group">
-                <button id="btnSave" class="btn-login" onclick="createTransaction()">Guardar Transacción</button>
-                <button id="btnEdit" class="btn-edit-action" onclick="editTransaction()" style="display:none;">Actualizar Cambios</button>
-                <button id="btnCancel" class="btn-logout" onclick="resetForm()" style="display:none; border:none; margin-top:0">Cancelar</button>
-            </div>
-            
-            <div id="result" style="margin-top: 20px; padding: 10px; border-radius: 10px; text-align: center; font-size: 0.8rem;"></div>
-        </div>
-    </div>
+<hr>
 
-    <script th:inline="javascript">
-        const BASE_URL = "/transaction";
+<h2>Edit Transaction</h2>
+<input id="conceptE" placeholder="Concept"><br>
+<input id="createAmountE" placeholder="Amount"><br>
+<input id="typeE" placeholder="Transaction Type"><br>
+<input id="catIdE" placeholder="Category Id"><br>
+<input id="groupIdE" placeholder="Group Id"><br>
+<input id="creatorE" placeholder="Creator Id"><br>
+<button onclick="editTransaction()">Edit</button>
 
-        function getToken() {
-            const token = sessionStorage.getItem("token");
-            if (!token) { window.location.href = '/web/auth/login'; return null; }
-            return token;
+<hr>
+
+<p id="result"></p>
+
+<script th:inline="javascript">
+    const BASE_URL = "/transaction";
+
+    function getToken() {
+        const token = sessionStorage.getItem("token");
+        if (!token) {
+            showError("No token found in sessionStorage");
+            throw new Error("Missing token");
         }
+        return token;
+    }
 
-        function loadTransactions() {
-            const token = getToken(); 
-            if (!token) return;
+    function createTransaction() {
+        const token = getToken();
 
-            fetch("/transaction/all?token=" + token)
-                .then(res => {
-                    if (res.status === 401) window.location.href = "/web/auth/login";
-                    return res.json();
-                })
-                .then(data => renderTable(data))
-                .catch(err => console.error("Error:", err));
-        }
+        fetch(BASE_URL + "/create", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                token: token,
+                concepto: document.getElementById("conceptC").value,
+                importeTotal: document.getElementById("createAmountC").value,
+                tipoTransaccion: document.getElementById("typeC").value,
+                categoriaId: document.getElementById("catIdC").value,
+                groupId: document.getElementById("groupIdC").value,
+                creadorId: document.getElementById("creatorC").value
+            })
+        })
+            .then(res => showResult(res))
+            .catch(err => showError(err));
+    }
 
-        function renderTable(data) {
-            const tbody = document.getElementById("transactionsTableBody");
-            tbody.innerHTML = "";
+    function deleteTransaction() {
+        const token = getToken();
 
-            if (!data || data.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="3" style="text-align:center; padding:40px; color:#999;">
-                            <div style="font-size: 40px;">📂</div>
-                            <p>No hay movimientos aún.<br>Pulsa el botón <b>+</b> para empezar.</p>
-                        </td>
-                    </tr>`;
-                return;
-            }
-            data.forEach(t => {
-                const importe = t.importeTotal || t.importe_total || 0;
-                const tipo = (t.tipoTransaccion || t.tipo_transaccion || "GASTO").toUpperCase();
-                tbody.innerHTML += `
-                    <tr>
-                        <td>${t.concepto || 'Sin concepto'}</td>
-                        <td class="${tipo === 'GASTO' ? 'text-red' : 'text-green'}">${importe}€</td>
-                        <td>
-                            <button class="btn-mini-edit" onclick='prepareEdit(${JSON.stringify(t)})'>✏️</button>
-                            <button class="btn-mini-delete" onclick="quickDelete(${t.id})">🗑️</button>
-                        </td>
-                    </tr>`;
-            });
-        }
+        fetch(BASE_URL + "/delete", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                accessToken: token,
+                transactionId: document.getElementById("deleteId").value
+            })
+        })
+            .then(res => showResult(res))
+            .catch(err => showError(err));
+    }
 
+    function editTransaction() {
+        const token = getToken();
+        const id = document.getElementById("editId").value;
 
-        function showForm(isEdit = false) {
-            const panel = document.querySelector(".card-principal");
-            panel.style.display = "block"; 
-            
-            document.getElementById("btnSave").style.display = isEdit ? "none" : "block";
-            document.getElementById("btnEdit").style.display = isEdit ? "block" : "none";
-            document.getElementById("btnCancel").style.display = "block";
-        }
+        fetch(BASE_URL + "/edit/" + id, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                accessToken: token,
+                concepto: document.getElementById("conceptE").value,
+                importeTotal: document.getElementById("createAmountE").value,
+                tipoTransaccion: document.getElementById("typeE").value,
+                categoriaId: document.getElementById("catIdE").value,
+                groupId: document.getElementById("groupIdE").value,
+                creadorId: document.getElementById("creatorE").value
+            })
+        })
+            .then(res => showResult(res))
+            .catch(err => showError(err));
+    }
 
-        function resetForm() {
-            document.getElementById("formTitle").innerText = "Registrar Movimiento";
-            document.getElementById("editId").value = "";
-            document.getElementById("conceptC").value = "";
-            document.getElementById("createAmountC").value = "";
-            document.getElementById("typeC").value = "";
-            document.getElementById("catIdC").value = "";
-            document.getElementById("groupIdC").value = "";
-            document.getElementById("creatorC").value = "";
-            
-            document.querySelector(".card-principal").style.display = "none";
-        }
+    function showResult(res) {
+        document.getElementById("result").innerText =
+            "Status: " + res.status;
+    }
 
-        function prepareNewTransaction() {
-            resetForm();
-            document.getElementById("formTitle").innerText = "Nueva Transaccion";
-            showForm(false);
-        }
+    function showError(err) {
+        document.getElementById("result").innerText =
+            "Error: " + err;
+    }
+</script>
 
-        function prepareEdit(t) {
-            resetForm();
-            document.getElementById("formTitle").innerText = "Editar Transaccion";
-            
-            document.getElementById("editId").value = t.id;
-            document.getElementById("conceptC").value = t.concepto || "";
-            document.getElementById("createAmountC").value = t.importeTotal || t.importe_total || 0;
-            document.getElementById("typeC").value = t.tipoTransaccion || t.tipo_transaccion || "";
-            document.getElementById("catIdC").value = t.categoria ? t.categoria.id : "";
-            document.getElementById("groupIdC").value = t.groupId || "";
-            document.getElementById("creatorC").value = t.creador ? t.creador.id : "";
-
-            showForm(true);
-        }
-
-        // --- API ---
-
-        function createTransaction() {
-            const token = getToken();
-            fetch(BASE_URL + "/create", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    token: token,
-                    concepto: document.getElementById("conceptC").value,
-                    importeTotal: document.getElementById("createAmountC").value,
-                    tipoTransaccion: document.getElementById("typeC").value,
-                    categoriaId: document.getElementById("catIdC").value,
-                    groupId: document.getElementById("groupIdC").value,
-                    creadorId: document.getElementById("creatorC").value
-                })
-            }).then(res => { 
-                if(res.ok) { loadTransactions(); resetForm(); }
-                showResult(res, "creada"); 
-            }).catch(err => showError(err));
-        }
-
-        function editTransaction() {
-            const token = getToken();
-            const id = document.getElementById("editId").value;
-            fetch(BASE_URL + "/edit/" + id, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    accessToken: token,
-                    concepto: document.getElementById("conceptC").value,
-                    importeTotal: document.getElementById("createAmountC").value,
-                    tipoTransaccion: document.getElementById("typeC").value,
-                    categoriaId: document.getElementById("catIdC").value,
-                    groupId: document.getElementById("groupIdC").value,
-                    creadorId: document.getElementById("creatorC").value
-                })
-            }).then(res => {
-                if(res.ok) { loadTransactions(); resetForm(); }
-                showResult(res, "editada");
-            }).catch(err => showError(err));
-        }
-
-        function quickDelete(id) {
-            if(!confirm("¿Seguro que quieres borrar esto?")) return;
-            const token = getToken();
-            fetch(BASE_URL + "/delete", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ accessToken: token, transactionId: id })
-            }).then(res => {
-                if(res.ok) loadTransactions();
-                showResult(res, "eliminada");
-            }).catch(err => showError(err));
-        }
-
-        function showResult(res, action) {
-            const resDiv = document.getElementById("result");
-            resDiv.style.display = "block";
-            resDiv.style.background = res.ok ? "#dcfce7" : "#fee2e2";
-            resDiv.style.color = res.ok ? "#166534" : "#dc2626";
-            resDiv.innerText = res.ok ? `Éxito: Transacción ${action}` : `Error: ${res.status}`;
-            setTimeout(() => resDiv.style.display = "none", 3000);
-        }
-
-        function showError(err) {
-            const resDiv = document.getElementById("result");
-            resDiv.innerText = "Error: " + err;
-        }
-
-        window.onload = function() {
-            loadTransactions();
-            document.querySelector(".card-principal").style.display = "none";
-        };
-    </script>
 </body>
 </html>
