@@ -1,49 +1,23 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExpenSense - Registro</title>
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>Create User</title>
 </head>
 <body>
+<h1>Create User</h1>
 
-    <div class="login-box">
-        <h1 class="logo">Expen<span>Sense</span></h1>
-        <p class="subtitle">Crea tu cuenta y toma el control.</p>
+<p th:if="${error}" th:text="${error}" style="color:red"></p>
+<p th:if="${message}" th:text="${message}" style="color:green"></p>
 
-        <div th:if="${error}" th:text="${error}" class="error-msg"></div>
-        <div th:if="${message}" th:text="${message}" class="alert-success"></div>
-
-        <form method="post" action="/web/user/create">
-            <div class="input-group">
-                <label>Nombre de usuario</label>
-                <input type="text" name="username" placeholder="Ej: JuanPerez" required/>
-            </div>
-
-            <div class="input-group">
-                <label>Email</label>
-                <input type="email" name="email" placeholder="tu@email.com" required/>
-            </div>
-
-            <div class="input-group">
-                <label>Contraseña</label>
-                <input type="password" name="password" placeholder="••••••••" required/>
-            </div>
-
-            <div class="input-group">
-                <label>Balance Inicial (€)</label>
-                <input type="number" name="balance" step="0.01" value="0.00" class="input-balance"/>
-            </div>
-
-            <button type="submit" class="btn-login">Crear cuenta</button>
-        </form>
-        
-        <div class="footer">
-            ¿Ya tienes cuenta? <a href="/web/auth/login">Inicia sesión</a>
-        </div>
-    </div>
-
+<form method="post" action="/web/user/create">
+    <label>Username: <input type="text" name="username" required/></label><br/><br/>
+    <label>Email: <input type="email" name="email" required/></label><br/><br/>
+    <label>Contraseña: <input type="password" name="password" required/></label><br/><br/>
+    <label>Balance: <input type="number" name="balance" step="0.01" value="0.00"/></label><br/><br/>
+    <button type="submit">Create</button>
+</form>
+<br/>
+<a href="/web/auth/login">Log in</a>
 </body>
 </html>

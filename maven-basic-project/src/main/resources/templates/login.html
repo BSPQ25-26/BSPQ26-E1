@@ -1,60 +1,54 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExpenSense - Login</title>
-    
-    <link rel="stylesheet" th:href="@{/css/style.css}">
-    
-    </head>
+    <title>Login</title>
+</head>
 <body>
+<h1>Login</h1>
 
-    <div class="login-box">
-        <h1 class="logo">Expen<span>Sense</span></h1>
-        <p class="subtitle">Tus finanzas, con sentido.</p>
+<p id="error" style="color:red; display:none"></p>
 
-        <div id="error" class="error-msg" style="display:none"></div>
+<label>Email: <input type="email" id="email"/></label><br/><br/>
+<label>Password: <input type="password" id="password"/></label><br/><br/>
+<button onclick="login()">Log in</button> <button onclick="logout()">Logout (for debuggin)</button>
+<br/><br/>
+<a href="/web/user/create">Sign in</a>
 
-        <div class="input-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="nombre@correo.com"/>
-        </div>
+<script>
+    // Si ya tiene token, redirige directamente
+    if (sessionStorage.getItem('token')) {
+        window.location.href = '/web/user/info';
+    }
 
-        <div class="input-group">
-            <label for="password">Contraseña</label>
-            <input type="password" id="password" placeholder="••••••••"/>
-        </div>
+    async function login() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
 
-        <button class="btn-login" onclick="login()">Entrar</button>
-       
-        <div class="footer">
-            ¿Nuevo aquí? <a href="/web/user/create">Crea una cuenta</a>
-        </div>
-    </div>
+        const response = await fetch('/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
 
-    <script>
-        async function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('error');
-
-            const response = await fetch('/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-
-            if (response.ok) {
-                const token = await response.text();
-                sessionStorage.setItem('token', token);
-                sessionStorage.setItem('email', email);
-                window.location.href = '/web/user/info';
-            } else {
-                errorDiv.style.display = 'block';
-                errorDiv.textContent = 'Credenciales inválidas. Revisa tu email y contraseña.';
-            }
+        if (response.ok) {
+            const token = await response.text();
+            sessionStorage.setItem('token', token);
+            sessionStorage.setItem('email', email);
+            window.location.href = '/web/user/info';
+        } else {
+            const error = document.getElementById('error');
+            error.style.display = 'block';
+            error.textContent = 'Invalid credentials';
         }
-    </script>
+    }
+
+    async function logout() {
+        const token = sessionStorage.getItem('token');
+        await fetch(`/auth/logout?token=${token}`, { method: 'POST' });
+        sessionStorage.clear();
+        window.location.href = '/web/auth/login';
+    }
+</script>
 </body>
 </html>

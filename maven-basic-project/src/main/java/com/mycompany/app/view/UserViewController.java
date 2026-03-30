@@ -1,4 +1,4 @@
-package com.mycompany.app.view;
+package com.mycompany.app.facade;
 
 import com.mycompany.app.dto.UserCreationDTO;
 import com.mycompany.app.dto.UserInfoDTO;
