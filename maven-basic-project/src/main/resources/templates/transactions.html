@@ -31,6 +31,7 @@
 <input id="catIdE" placeholder="Category Id"><br>
 <input id="groupIdE" placeholder="Group Id"><br>
 <input id="creatorE" placeholder="Creator Id"><br>
+<input id="transE" placeholder="Transaction Id"><br>
 <button onclick="editTransaction()">Edit</button>
 
 <hr>
@@ -90,7 +91,7 @@
 
     function editTransaction() {
         const token = getToken();
-        const id = document.getElementById("editId").value;
+        const id = document.getElementById("transE").value;
 
         fetch(BASE_URL + "/edit/" + id, {
             method: "POST",
