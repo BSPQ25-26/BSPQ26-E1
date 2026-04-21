@@ -1,4 +1,4 @@
-package com.mycompany.app.facade;
+package com.mycompany.app.view;
 
 import com.mycompany.app.dto.CredentialsDTO;
 import com.mycompany.app.service.AuthService;
