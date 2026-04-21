@@ -4,57 +4,31 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ExpenSense - Login</title>
-    
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    
-    </head>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
 <body>
-
     <div class="login-box">
         <h1 class="logo">Expen<span>Sense</span></h1>
         <p class="subtitle">Tus finanzas, con sentido.</p>
 
-        <div id="error" class="error-msg" style="display:none"></div>
+        <div th:if="${error}" th:text="${error}" class="error-msg"></div>
 
-        <div class="input-group">
-            <label for="email">Email</label>
-            <input type="email" id="email" placeholder="nombre@correo.com"/>
-        </div>
+        <form th:action="@{/web/auth/login}" method="post">
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="nombre@correo.com" required/>
+            </div>
+            <div class="input-group">
+                <label for="password">Contraseña</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required/>
+            </div>
+            <button type="submit" class="btn-login">Entrar</button>
+        </form>
 
-        <div class="input-group">
-            <label for="password">Contraseña</label>
-            <input type="password" id="password" placeholder="••••••••"/>
-        </div>
-
-        <button class="btn-login" onclick="login()">Entrar</button>
-       
         <div class="footer">
             ¿Nuevo aquí? <a href="/web/user/create">Crea una cuenta</a>
         </div>
     </div>
-
-    <script>
-        async function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            const errorDiv = document.getElementById('error');
-
-            const response = await fetch('/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-
-            if (response.ok) {
-                const token = await response.text();
-                sessionStorage.setItem('token', token);
-                sessionStorage.setItem('email', email);
-                window.location.href = '/web/user/info';
-            } else {
-                errorDiv.style.display = 'block';
-                errorDiv.textContent = 'Credenciales inválidas. Revisa tu email y contraseña.';
-            }
-        }
-    </script>
 </body>
 </html>
