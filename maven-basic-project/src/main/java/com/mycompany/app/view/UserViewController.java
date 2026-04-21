@@ -1,4 +1,4 @@
-package com.mycompany.app.view;
+package com.mycompany.app.facade;
 
 import java.util.List;
 
@@ -42,10 +42,10 @@ public class UserViewController {
     public String createUser(UserCreationDTO userCreationDTO, Model model) {
         try {
             if (!userService.createUser(userCreationDTO)) {
-                model.addAttribute("error", "User not found");
+                model.addAttribute("error", "User found");
                 return "user-create";
             }
-            model.addAttribute("message", "User found correctly");
+            model.addAttribute("message", "User created correctly");
             return "user-create";
         } catch (Exception e) {
             model.addAttribute("error", "Internal server error");

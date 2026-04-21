@@ -1,20 +1,16 @@
 package com.mycompany.app.facade;
 
-import java.util.List; 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping; 
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mycompany.app.dto.TransactionCreationDTO;
 import com.mycompany.app.dto.TransactionDeletionDTO;
 import com.mycompany.app.dto.TransactionEditionDTO;
-import com.mycompany.app.model.Transaction; 
 import com.mycompany.app.service.AuthService;
 import com.mycompany.app.service.TransactionService;
 
@@ -90,16 +86,5 @@ public class TransactionController {
         Boolean result = transactionService.editTransaction(request, transactionId);
         if(result){ return new ResponseEntity<>(HttpStatus.OK); }
         else{ return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
-    }
-    @GetMapping("/all")
-    public ResponseEntity<List<Transaction>> getAllTransactions(@RequestParam("token") String token) {
-        System.out.println("DEBUG: Recibido token: [" + token + "]");
-        
-        if (!authService.isValidToken(token)) {
-            System.out.println("DEBUG: El token no existe en activeTokens");
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        
-        return new ResponseEntity<>(transactionService.findAll(), HttpStatus.OK);
     }
 }
