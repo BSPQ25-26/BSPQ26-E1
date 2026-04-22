@@ -9,69 +9,55 @@ import com.mycompany.app.repository.UsuarioRepository;
 import com.mycompany.app.service.AuthService;
 import com.mycompany.app.service.CategoryService;
 import com.mycompany.app.service.TransactionService;
-
-import jakarta.servlet.http.HttpSession;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/web/transaction")
 public class TransactionViewController {
 
-    private final CategoryService categoryService;
-    private final CategoryRepository categoryRepository;
-    private final GroupRepository groupRepository;
-    private final TransactionRepository transactionRepository;
-    private final UsuarioRepository usuarioRepository;
     private final AuthService authService;
     private final TransactionService transactionService;
+    private final TransactionRepository transactionRepository;
+    private final CategoryRepository categoryRepository;
+    private final CategoryService categoryService;
+    private final GroupRepository groupRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public TransactionViewController(CategoryService categoryService,
-                                      CategoryRepository categoryRepository,
-                                      GroupRepository groupRepository,
+    public TransactionViewController(AuthService authService,
+                                      TransactionService transactionService,
                                       TransactionRepository transactionRepository,
-                                      UsuarioRepository usuarioRepository,
-                                      AuthService authService,
-                                      TransactionService transactionService) {
-        this.categoryService = categoryService;
-        this.categoryRepository = categoryRepository;
-        this.groupRepository = groupRepository;
-        this.transactionRepository = transactionRepository;
-        this.usuarioRepository = usuarioRepository;
+                                      CategoryRepository categoryRepository,
+                                      CategoryService categoryService,
+                                      GroupRepository groupRepository,
+                                      UsuarioRepository usuarioRepository) {
         this.authService = authService;
         this.transactionService = transactionService;
+        this.transactionRepository = transactionRepository;
+        this.categoryRepository = categoryRepository;
+        this.categoryService = categoryService;
+        this.groupRepository = groupRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     @GetMapping
-    public String transactions(@RequestParam(required = false) String token,
-                               @RequestParam(required = false) Boolean showForm,
-                               @RequestParam(required = false) Integer editId,
-                               HttpSession session, Model model) {
-        if (token != null) session.setAttribute("token", token);
+    public String transactions(
+            @CookieValue(value = "token", required = false) String token,
+            @RequestParam(required = false) Boolean showForm,
+            @RequestParam(required = false) Integer editId,
+            Model model
+    ) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
 
-        String storedToken = (String) session.getAttribute("token");
-        if (storedToken == null || !authService.isValidToken(storedToken)) {
-            return "redirect:/web/auth/login";
-        }
-
-        String email = authService.getEmailFromToken(storedToken);
-        session.setAttribute("userEmail", email);
-
+        String email = authService.getEmailFromToken(token);
         Usuario user = usuarioRepository.findByEmail(email);
         if (user == null) return "redirect:/web/auth/login";
 
         loadModelAttributes(user, email, model);
 
         if (editId != null) {
-            transactionRepository.findById(editId).ifPresent(t ->
-                model.addAttribute("editTransaction", t));
+            transactionRepository.findById(editId).ifPresent(t -> model.addAttribute("editTransaction", t));
             model.addAttribute("showForm", true);
         } else {
             model.addAttribute("showForm", Boolean.TRUE.equals(showForm));
@@ -82,49 +68,44 @@ public class TransactionViewController {
 
     @PostMapping("/create")
     public String createTransaction(
+            @CookieValue(value = "token", required = false) String token,
             @RequestParam(required = false) String concepto,
             @RequestParam(required = false) Double importeTotal,
             @RequestParam(required = false) String tipoTransaccion,
             @RequestParam(required = false) Integer categoriaId,
             @RequestParam(required = false) Integer grupoId,
-            HttpSession session,
-            Model model) {
+            Model model
+    ) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
 
-        String storedToken = (String) session.getAttribute("token");
-        String email = (String) session.getAttribute("userEmail");
-        if (storedToken == null || email == null) return "redirect:/web/auth/login";
-
+        String email = authService.getEmailFromToken(token);
         Usuario user = usuarioRepository.findByEmail(email);
         if (user == null) return "redirect:/web/auth/login";
 
-        if (concepto == null || concepto.isBlank()
-                || importeTotal == null || importeTotal <= 0
+        if (concepto == null || concepto.isBlank() || importeTotal == null || importeTotal <= 0
                 || tipoTransaccion == null || tipoTransaccion.isBlank()) {
             loadModelAttributes(user, email, model);
-            model.addAttribute("error", "Por favor, rellena todos los campos obligatorios.");
+            model.addAttribute("error", "Please fill in all required fields.");
             model.addAttribute("showForm", true);
             return "transactions";
         }
 
-        TransactionCreationDTO dto = new TransactionCreationDTO(
-            concepto, importeTotal, tipoTransaccion, categoriaId, grupoId, user.getId(), storedToken
-        );
-        transactionService.createTransaction(dto);
+        transactionService.createTransaction(new TransactionCreationDTO(
+                concepto, importeTotal, tipoTransaccion, categoriaId, grupoId, user.getId(), token));
         return "redirect:/web/transaction";
     }
 
     @PostMapping("/edit/{id}")
     public String editTransaction(
+            @CookieValue(value = "token", required = false) String token,
             @PathVariable Integer id,
             @RequestParam String concepto,
             @RequestParam Double importeTotal,
             @RequestParam String tipoTransaccion,
             @RequestParam(required = false) Integer categoriaId,
-            @RequestParam(required = false) Integer grupoId,
-            HttpSession session,
-            RedirectAttributes ra) {
-
-        if (session.getAttribute("token") == null) return "redirect:/web/auth/login";
+            @RequestParam(required = false) Integer grupoId
+    ) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
 
         transactionRepository.findById(id).ifPresent(t -> {
             t.setConcepto(concepto);
@@ -138,18 +119,21 @@ public class TransactionViewController {
         return "redirect:/web/transaction";
     }
 
+
+    //HTML forms do not support DELETE so this function has to be a POST
     @PostMapping("/delete")
-    public String deleteTransaction(@RequestParam Integer transactionId,
-                                    HttpSession session,
-                                    RedirectAttributes ra) {
-        if (session.getAttribute("token") == null) return "redirect:/web/auth/login";
+    public String deleteTransaction(
+            @CookieValue(value = "token", required = false) String token,
+            @RequestParam Integer transactionId
+    ) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
         if (transactionId != null) transactionRepository.deleteById(transactionId);
         return "redirect:/web/transaction";
     }
 
     private void loadModelAttributes(Usuario user, String email, Model model) {
-        model.addAttribute("listaCategorias", categoryService.getCategoriesByUser(user.getId()));
-        model.addAttribute("listaGrupos", groupRepository.findByMiembrosEmail(email));
-        model.addAttribute("listaTransacciones", transactionRepository.findByCreador(user));
+        model.addAttribute("transactions", transactionRepository.findByCreador(user));
+        model.addAttribute("categories", categoryService.getCategoriesByUser(user.getId()));
+        model.addAttribute("groups", groupRepository.findByMiembrosEmail(email));
     }
 }

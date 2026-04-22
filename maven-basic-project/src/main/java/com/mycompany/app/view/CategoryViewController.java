@@ -6,15 +6,9 @@ import com.mycompany.app.repository.CategoryRepository;
 import com.mycompany.app.repository.UsuarioRepository;
 import com.mycompany.app.service.AuthService;
 import com.mycompany.app.service.CategoryService;
-
-import jakarta.servlet.http.HttpSession;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/web/categories")
@@ -36,19 +30,14 @@ public class CategoryViewController {
     }
 
     @GetMapping
-    public String category(@RequestParam(required = false) String token,
-                           @RequestParam(required = false) Boolean showForm,
-                           HttpSession session, Model model) {
-        if (token != null) session.setAttribute("token", token);
+    public String category(
+            @CookieValue(value = "token", required = false) String token,
+            @RequestParam(required = false) Boolean showForm,
+            Model model
+    ) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
 
-        String storedToken = (String) session.getAttribute("token");
-        if (storedToken == null || !authService.isValidToken(storedToken)) {
-            return "redirect:/web/auth/login";
-        }
-
-        String email = authService.getEmailFromToken(storedToken);
-        session.setAttribute("userEmail", email);
-
+        String email = authService.getEmailFromToken(token);
         Usuario user = usuarioRepository.findByEmail(email);
         if (user == null) return "redirect:/web/auth/login";
 
@@ -59,26 +48,32 @@ public class CategoryViewController {
     }
 
     @PostMapping("/create")
-    public String createCategory(@RequestParam String name, HttpSession session) {
-        String storedToken = (String) session.getAttribute("token");
-        String email = (String) session.getAttribute("userEmail");
-        if (storedToken == null || email == null) return "redirect:/web/auth/login";
+    public String createCategory(
+            @CookieValue(value = "token", required = false) String token,
+            @RequestParam String name
+    ) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
 
+        String email = authService.getEmailFromToken(token);
         Usuario user = usuarioRepository.findByEmail(email);
         if (user == null) return "redirect:/web/auth/login";
 
         CategoryCreationDTO dto = new CategoryCreationDTO();
         dto.setName(name);
         dto.setUserId(user.getId());
-        dto.setToken(storedToken);
+        dto.setToken(token);
         categoryService.createCategory(dto);
 
         return "redirect:/web/categories";
     }
 
+    //HTML forms do not support DELETE functions so this has to be a POST
     @PostMapping("/delete")
-    public String deleteCategory(@RequestParam Integer categoryId, HttpSession session) {
-        if (session.getAttribute("token") == null) return "redirect:/web/auth/login";
+    public String deleteCategory(
+            @CookieValue(value = "token", required = false) String token,
+            @RequestParam Integer categoryId
+    ) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
         if (categoryId != null) categoryRepository.deleteById(categoryId);
         return "redirect:/web/categories";
     }

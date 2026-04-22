@@ -12,14 +12,9 @@ import com.mycompany.app.repository.UsuarioRepository;
 import com.mycompany.app.service.AuthService;
 import com.mycompany.app.service.GroupService;
 
-import jakarta.servlet.http.HttpSession;
-
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -39,25 +34,18 @@ public class GroupViewController {
     }
 
     @GetMapping
-    public String groups(@RequestParam(required = false) String token,
-                         @RequestParam(required = false) Boolean showPanel,
-                         HttpSession session, Model model) {
-        if (token != null) {
-            session.setAttribute("token", token);
-        }
-        String storedToken = (String) session.getAttribute("token");
-        if (storedToken == null || !authService.isValidToken(storedToken)) {
-            return "redirect:/web/auth/login";
-        }
+    public String groups(
+            @CookieValue(value = "token", required = false) String token,
+            @RequestParam(required = false) Boolean showPanel,
+            Model model
+    ) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
 
-        String email = authService.getEmailFromToken(storedToken);
-        session.setAttribute("userEmail", email);
-
+        String email = authService.getEmailFromToken(token);
         Usuario user = usuarioRepository.findByEmail(email);
         if (user == null) return "redirect:/web/auth/login";
-        session.setAttribute("userId", user.getId());
 
-        List<GroupInfoDTO> listaGrupos = groupService.getUserGroups(user.getId(), storedToken);
+        List<GroupInfoDTO> listaGrupos = groupService.getUserGroups(user.getId(), token);
         model.addAttribute("listaGrupos", listaGrupos);
         model.addAttribute("showPanel", Boolean.TRUE.equals(showPanel));
 
@@ -66,84 +54,81 @@ public class GroupViewController {
 
     @PostMapping("/create")
     public String createGroup(
+            @CookieValue(value = "token", required = false) String token,
             @RequestParam String nombre,
             @RequestParam(required = false) String descripcion,
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
-
-        String storedToken = (String) session.getAttribute("token");
-        if (storedToken == null) return "redirect:/web/auth/login";
+            RedirectAttributes redirectAttributes
+    ) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
 
         if (nombre == null || nombre.isBlank()) {
-            redirectAttributes.addFlashAttribute("error", "El nombre del grupo no puede estar vacío.");
+            redirectAttributes.addFlashAttribute("error", "Group name cannot be empty.");
             return "redirect:/web/groups";
         }
 
         try {
-            GroupCreationDTO dto = new GroupCreationDTO(storedToken, nombre.trim(),
+            GroupCreationDTO dto = new GroupCreationDTO(token, nombre.trim(),
                     descripcion != null ? descripcion.trim() : "");
             groupService.createGroup(dto);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "No se pudo crear el grupo: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Could not create group: " + e.getMessage());
         }
         return "redirect:/web/groups";
     }
 
     @PostMapping("/addMember")
     public String addMember(
+            @CookieValue(value = "token", required = false) String token,
             @RequestParam Integer groupId,
             @RequestParam String userEmail,
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
-
-        String storedToken = (String) session.getAttribute("token");
-        if (storedToken == null) return "redirect:/web/auth/login";
+            RedirectAttributes redirectAttributes
+    ) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
 
         try {
-            AddUserToGroupDTO dto = new AddUserToGroupDTO(storedToken, groupId, userEmail.trim());
+            AddUserToGroupDTO dto = new AddUserToGroupDTO(token, groupId, userEmail.trim());
             boolean added = groupService.addUserToGroup(dto);
             if (!added) {
-                redirectAttributes.addFlashAttribute("error", "'" + userEmail + "' ya es miembro del grupo.");
+                redirectAttributes.addFlashAttribute("error", "'" + userEmail + "' is already a member of this group.");
             }
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "No se pudo añadir al usuario: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Could not add user: " + e.getMessage());
         }
         return "redirect:/web/groups";
     }
 
     @PostMapping("/removeMember")
     public String removeMember(
+            @CookieValue(value = "token", required = false) String token,
             @RequestParam Integer groupId,
             @RequestParam String userEmail,
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
-
-        String storedToken = (String) session.getAttribute("token");
-        if (storedToken == null) return "redirect:/web/auth/login";
+            RedirectAttributes redirectAttributes
+    ) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
 
         try {
-            RemoveUserFromGroupDTO dto = new RemoveUserFromGroupDTO(storedToken, groupId, userEmail);
+            RemoveUserFromGroupDTO dto = new RemoveUserFromGroupDTO(token, groupId, userEmail);
             groupService.removeUserFromGroup(dto);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "No se pudo expulsar al usuario: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Could not remove user: " + e.getMessage());
         }
         return "redirect:/web/groups";
     }
 
+    //HTML forms do not support DELETE functions, so this has to be a POST
     @PostMapping("/delete")
     public String deleteGroup(
+            @CookieValue(value = "token", required = false) String token,
             @RequestParam Integer groupId,
-            HttpSession session,
-            RedirectAttributes redirectAttributes) {
-
-        String storedToken = (String) session.getAttribute("token");
-        if (storedToken == null) return "redirect:/web/auth/login";
+            RedirectAttributes redirectAttributes
+    ) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
 
         try {
-            DeleteGroupDTO dto = new DeleteGroupDTO(storedToken, groupId);
+            DeleteGroupDTO dto = new DeleteGroupDTO(token, groupId);
             groupService.deleteGroup(dto);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "No se pudo eliminar el grupo: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Could not delete group: " + e.getMessage());
         }
         return "redirect:/web/groups";
     }

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExpenSense - Categorías</title>
+    <title>ExpenSense - Categories</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
@@ -11,51 +11,52 @@
 
     <div class="nav-header">
         <a th:href="@{/web/user/profile}" class="logo">Expen<span>Sense</span></a>
-        <a th:href="@{/web/user/profile}" class="back-link">← Volver al Perfil</a>
+        <a th:href="@{/web/user/profile}" class="back-link">← Back to Profile</a>
     </div>
 
     <div class="container-grid">
 
-        <!-- ===== LISTA ===== -->
+        <!-- ===== LIST ===== -->
         <div class="glass-card card-lista">
             <div class="header-inline">
-                <h2 class="card-title">Categorías</h2>
+                <h2 class="card-title">Categories</h2>
                 <div class="button-group-top">
-                    <a th:href="@{/web/categories(showForm=true)}" class="btn-add" title="Nueva categoría">＋</a>
-                    <a th:href="@{/web/categories}" class="btn-refresh" title="Refrescar">↻</a>
+                    <a th:href="@{/web/categories(showForm=true)}" th:if="${!showForm}" class="btn-add" title="New category">＋</a>
+                    <a th:href="@{/web/categories}" th:if="${showForm}" class="btn-add" title="Hide form">✕</a>
+                    <a th:href="@{/web/categories}" class="btn-refresh" title="Refresh">↻</a>
                 </div>
             </div>
 
             <div id="categoriesGrid" class="categories-grid">
                 <p th:if="${listaCategorias.empty}"
                    style="grid-column:1/-1; text-align:center; color:#999; padding:20px;">
-                    No hay categorías aún.
+                    No categories yet.
                 </p>
                 <div th:each="cat : ${listaCategorias}" class="category-card">
                     <form th:action="@{/web/categories/delete}" method="post"
                           style="position:absolute; top:8px; right:8px; margin:0"
-                          onsubmit="return confirm('¿Borrar categoría?')">
+                          onsubmit="return confirm('Delete this category?')">
                         <input type="hidden" name="categoryId" th:value="${cat.id}">
-                        <button type="submit" class="btn-mini-delete" title="Borrar">🗑</button>
+                        <button type="submit" class="btn-mini-delete" title="Delete">🗑</button>
                     </form>
                     <div class="category-icon">📁</div>
-                    <h3 th:text="${cat.name}">Nombre</h3>
+                    <h3 th:text="${cat.name}">Name</h3>
                 </div>
             </div>
         </div>
 
-        <!-- ===== FORMULARIO nueva categoría ===== -->
+        <!-- ===== NEW CATEGORY FORM ===== -->
         <div class="glass-card card-principal" th:if="${showForm}">
-            <h2 class="card-title">Nueva Categoría</h2>
+            <h2 class="card-title">New Category</h2>
 
             <form th:action="@{/web/categories/create}" method="post">
                 <div class="input-group">
-                    <label>Nombre de Categoría</label>
-                    <input name="name" placeholder="Ej: Ocio, Salud..." required>
+                    <label>Category Name</label>
+                    <input name="name" placeholder="e.g. Leisure, Health..." required>
                 </div>
                 <div class="button-group">
-                    <button type="submit" class="btn-login">Crear Categoría</button>
-                    <a th:href="@{/web/categories}" class="btn-logout">Cancelar</a>
+                    <button type="submit" class="btn-login">Create Category</button>
+                    <a th:href="@{/web/categories}" class="btn-logout">Cancel</a>
                 </div>
             </form>
         </div>

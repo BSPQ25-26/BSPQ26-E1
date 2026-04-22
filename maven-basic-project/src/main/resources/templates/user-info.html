@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ExpenSense - Mi Perfil</title>
+    <title>ExpenSense - My Profile</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
@@ -15,36 +15,36 @@
         <div class="profile-content">
             <div class="avatar"
                  th:text="${username != null ? #strings.toUpperCase(#strings.substring(username, 0, 1)) : 'U'}">U</div>
-            <h2 class="user-name" th:text="${username ?: 'Usuario'}">Nombre</h2>
-            <p class="user-email" th:text="${email ?: ''}">email@ejemplo.com</p>
+            <h2 class="user-name" th:text="${username ?: 'User'}">Name</h2>
+            <p class="user-email" th:text="${email ?: ''}">email@example.com</p>
 
             <div class="balance-card">
-                <span class="balance-label">Tu Balance Actual</span>
+                <span class="balance-label">Current Balance</span>
                 <span class="balance-amount"
                       th:style="${(balance != null and balance < 0) ? 'color: #ff4d4d' : 'color: #2ecc71'}">
-                    <span th:text="${balance != null} ? ${#numbers.formatDecimal(balance, 1, 'POINT', 2, 'COMMA')} : '0,00'">0,00</span> €
+                    <span th:text="${balance != null} ? ${#numbers.formatDecimal(balance, 1, 'POINT', 2, 'COMMA')} : '0.00'">0.00</span> €
                 </span>
             </div>
 
             <div class="debt-row">
                 <div class="debt-card debt-positive">
-                    <span class="debt-label">Te deben</span>
+                    <span class="debt-label">Owed to you</span>
                     <span class="debt-amount"
-                          th:text="${queMeDeben != null} ? ${#numbers.formatDecimal(queMeDeben, 1, 'POINT', 2, 'COMMA')} + ' €' : '0,00 €'">0,00 €</span>
+                          th:text="${owed != null} ? ${#numbers.formatDecimal(owed, 1, 'POINT', 2, 'COMMA')} + ' €' : '0.00 €'">0.00 €</span>
                 </div>
                 <div class="debt-card debt-negative">
-                    <span class="debt-label">Debes</span>
+                    <span class="debt-label">You owe</span>
                     <span class="debt-amount"
-                          th:text="${queDebo != null} ? ${#numbers.formatDecimal(queDebo, 1, 'POINT', 2, 'COMMA')} + ' €' : '0,00 €'">0,00 €</span>
+                          th:text="${owes != null} ? ${#numbers.formatDecimal(owes, 1, 'POINT', 2, 'COMMA')} + ' €' : '0.00 €'">0.00 €</span>
                 </div>
             </div>
 
             <div class="actions">
-                <a th:href="@{/web/transaction}" class="btn-login">Ver Transacciones</a>
-                <a th:href="@{/web/categories}" class="btn-secondary">Gestionar Categorías</a>
-                <a th:href="@{/web/groups}" class="btn-secondary">Mis Grupos</a>
+                <a th:href="@{/web/transaction}" class="btn-login">View Transactions</a>
+                <a th:href="@{/web/categories}" class="btn-secondary">Manage Categories</a>
+                <a th:href="@{/web/groups}" class="btn-secondary">My Groups</a>
                 <form th:action="@{/web/auth/logout}" method="post" style="margin:0">
-                    <button type="submit" class="btn-logout">Cerrar Sesión</button>
+                    <button type="submit" class="btn-logout">Sign Out</button>
                 </form>
             </div>
         </div>
