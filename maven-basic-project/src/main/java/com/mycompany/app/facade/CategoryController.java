@@ -19,8 +19,11 @@ import com.mycompany.app.service.AuthService;
 import com.mycompany.app.service.CategoryService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
+@Tag(name = "Categories", description = "Endpoints for managing user categories, including creation, retrieval, and deletion operations")
 @RestController
 @RequestMapping("/categories")
 public class CategoryController {
@@ -34,16 +37,19 @@ public class CategoryController {
     }
 
     @Operation(
-            summary = "Create category",
-            description = "Creates a new category for a specific user",
+            summary = "Create a new category",
+            description = "Creates a new custom category associated with a specific user. The request must include valid category details and an active authorization token.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "OK: category creation completed"),
-                    @ApiResponse(responseCode = "400", description = "Bad Request: category could not be created"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
+                    @ApiResponse(responseCode = "200", description = "Category successfully created."),
+                    @ApiResponse(responseCode = "400", description = "Bad Request. The category could not be created due to invalid data or constraints."),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized. The provided token is invalid or expired.")
             }
     )
     @PostMapping("/create")
-    public ResponseEntity<String> createCategory(@RequestBody CategoryCreationDTO request) {
+    public ResponseEntity<String> createCategory(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Data transfer object containing the category details and authorization token", required = true)
+            @RequestBody CategoryCreationDTO request
+    ) {
         if (!authService.isValidToken(request.getToken())) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
@@ -57,17 +63,21 @@ public class CategoryController {
     }
 
     @Operation(
-            summary = "Get user categories",
-            description = "Retrieves all categories for a specific user (including global categories)",
+            summary = "Get all categories for a user",
+            description = "Retrieves a complete list of categories accessible to a specific user. This includes their personal custom categories as well as any globally available categories.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "OK: categories retrieved successfully"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
+                    @ApiResponse(responseCode = "200", description = "Categories retrieved successfully. Returns a list of category objects."),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized. The provided token is invalid or missing.")
             }
     )
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Category>> getUserCategories(
+            @Parameter(description = "The unique identifier (ID) of the user", required = true)
             @PathVariable("userId") Integer userId,
-            @RequestParam("token") String token) { 
+            
+            @Parameter(description = "A valid authorization token to verify the user's session", required = true)
+            @RequestParam("token") String token
+    ) { 
             
         if (!authService.isValidToken(token)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
@@ -78,16 +88,19 @@ public class CategoryController {
     }
 
     @Operation(
-            summary = "Delete category",
-            description = "Deletes an existing category",
+            summary = "Delete an existing category",
+            description = "Permanently deletes a category from the system based on the provided details. The request requires an active authorization token to verify permissions.",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "OK: category deletion completed"),
-                    @ApiResponse(responseCode = "400", description = "Bad Request: category could not be deleted"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
+                    @ApiResponse(responseCode = "200", description = "Category successfully deleted."),
+                    @ApiResponse(responseCode = "400", description = "Bad Request. The category could not be deleted (e.g., it does not exist or has dependent items)."),
+                    @ApiResponse(responseCode = "401", description = "Unauthorized. The provided token is invalid or expired.")
             }
     )
     @PostMapping("/delete")
-    public ResponseEntity<String> deleteCategory(@RequestBody CategoryDeletionDTO request) {
+    public ResponseEntity<String> deleteCategory(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Data transfer object containing the target category ID and authorization token", required = true)
+            @RequestBody CategoryDeletionDTO request
+    ) {
         if (!authService.isValidToken(request.getToken())) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
