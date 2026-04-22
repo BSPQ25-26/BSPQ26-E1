@@ -1,5 +1,6 @@
 package com.mycompany.app.facade;
 
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -30,64 +31,60 @@ public class TransactionController {
         this.authService = authService;
     }
 
-    @Operation(
-            summary = "Create transaction",
-            description = "Create a new transation",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "OK: transaction creation completed"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
-            }
-    )
+    @Operation(summary = "Create transaction", description = "Create a new transation", responses = {
+            @ApiResponse(responseCode = "200", description = "OK: transaction creation completed"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
+    })
     @PostMapping("/create")
-    public ResponseEntity<String> createTransaction(@RequestBody TransactionCreationDTO request){
+    public ResponseEntity<String> createTransaction(@RequestBody TransactionCreationDTO request) {
         if (!authService.isValidToken(request.getToken())) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         Boolean result = transactionService.createTransaction(request);
-        if(result){ return new ResponseEntity<>(HttpStatus.OK); }
-        else{ return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
-        
+        if (result) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
     }
 
-    @Operation(
-            summary = "Delete transaction",
-            description = "Deleting a new transation",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "OK: transaction deletion completed"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
-            }
-    )
+    @Operation(summary = "Delete transaction", description = "Deleting a new transation", responses = {
+            @ApiResponse(responseCode = "200", description = "OK: transaction deletion completed"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
+    })
     @PostMapping("/delete")
-    public ResponseEntity<String> deleteTransaction(@RequestBody TransactionDeletionDTO request){
+    public ResponseEntity<String> deleteTransaction(@RequestBody TransactionDeletionDTO request) {
         if (!authService.isValidToken(request.getAccessToken())) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         Boolean result = transactionService.deleteTransaction(request);
-        if(result){ return new ResponseEntity<>(HttpStatus.OK); }
-        else{ return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
+        if (result) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
-    @Operation(
-            summary = "Edit transaction",
-            description = "Editing a new transation",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "OK: transaction edition completed"),
-                    @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
-            }
-    )
+    @Operation(summary = "Edit transaction", description = "Editing a new transation", responses = {
+            @ApiResponse(responseCode = "200", description = "OK: transaction edition completed"),
+            @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
+    })
     @PostMapping("/edit/{transactionId}")
     public ResponseEntity<String> editTransaction(@RequestBody TransactionEditionDTO request,
-            @PathVariable("transactionId") Integer transactionId
-        ){
+            @PathVariable("transactionId") Integer transactionId) {
         if (!authService.isValidToken(request.getAccessToken())) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
 
         Boolean result = transactionService.editTransaction(request, transactionId);
-        if(result){ return new ResponseEntity<>(HttpStatus.OK); }
-        else{ return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
+        if (result) {
+            return new ResponseEntity<>(HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Operation(

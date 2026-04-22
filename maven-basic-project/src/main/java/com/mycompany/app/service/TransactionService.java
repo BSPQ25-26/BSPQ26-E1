@@ -1,6 +1,7 @@
 package com.mycompany.app.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -183,6 +184,14 @@ public class TransactionService {
         } catch (Exception e) {
             return false;
         }
+    }
+
+    public List<Transaction> getTransactionsByUserId(Integer userId) {
+        return transactionRepository.findByCreadorId(userId);
+    }
+
+    public List<Transaction> getTransactionsByGroupId(Integer groupId) {
+        return transactionRepository.findByGrupoId(groupId);
     }
 
     public List<Deuda> getDeudaByUsuarioId(Integer usuarioId) {

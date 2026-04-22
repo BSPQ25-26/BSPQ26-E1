@@ -10,6 +10,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "usuario")
 public class Usuario {
@@ -23,6 +25,7 @@ public class Usuario {
     private String contraseña;
     private Double balance;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "miembros")
     private Set<Group> groups = new HashSet<>();
 
@@ -36,12 +39,33 @@ public class Usuario {
         this.balance = balance;
     }
 
-    public Integer getId() { return id; }
-    public String getNombre() { return nombre; }
-    public String getEmail() { return email; }
-    public String getContraseña() { return contraseña; }
-    public Double getBalance() { return balance; }
-    public Set<Group> getGroups() { return groups; }
+    public Integer getId() {
+        return id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getContraseña() {
+        return contraseña;
+    }
+
+    public Double getBalance() {
+        return balance;
+    }
+
+    public Set<Group> getGroups() {
+        return groups;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public void setId(Integer id) { this.id = id; }
     public void setNombre(String nombre) { this.nombre = nombre; }

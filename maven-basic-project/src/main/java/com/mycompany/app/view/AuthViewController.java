@@ -1,4 +1,4 @@
-package com.mycompany.app.facade;
+package com.mycompany.app.view;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
