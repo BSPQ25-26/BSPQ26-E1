@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mycompany.app.dto.DeudaCreationDTO;
+import com.mycompany.app.dto.PayDebtDTO;
 import com.mycompany.app.dto.TransactionCreationDTO;
 import com.mycompany.app.dto.TransactionDeletionDTO;
 import com.mycompany.app.dto.TransactionEditionDTO;
@@ -86,5 +88,46 @@ public class TransactionController {
         Boolean result = transactionService.editTransaction(request, transactionId);
         if(result){ return new ResponseEntity<>(HttpStatus.OK); }
         else{ return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
+    }
+
+    @Operation(
+        summary = "Create debt",
+        description = "Create a new pending debt between two users",
+        responses = {
+                @ApiResponse(responseCode = "200", description = "OK: debt created successfully"),
+                @ApiResponse(responseCode = "400", description = "Bad Request: invalid data or users not found"),
+                @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
+        }
+    )
+    @PostMapping("/crear")
+    public ResponseEntity<String> createDeuda(@RequestBody DeudaCreationDTO request) {
+        if (!authService.isValidToken(request.getToken())) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Boolean result = transactionService.createDeuda(request);
+        if (result) { return new ResponseEntity<>(HttpStatus.OK); }
+        else { return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
+    }
+
+   @Operation(
+        summary = "Pay debt",
+        description = "Mark a pending debt as paid",
+        responses = {
+                @ApiResponse(responseCode = "200", description = "OK: debt paid successfully"),
+                @ApiResponse(responseCode = "400", description = "Bad Request: debt not found or already paid"),
+                @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
+        }
+    )
+    @PostMapping("/pay/{deudaId}")
+    public ResponseEntity<String> pagarDeuda(@RequestBody PayDebtDTO request,
+            @PathVariable("deudaId") Integer deudaId) {
+        if (!authService.isValidToken(request.getToken())) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Boolean result = transactionService.pagarDeuda(deudaId);
+        if (result) { return new ResponseEntity<>(HttpStatus.OK); }
+        else { return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
     }
 }

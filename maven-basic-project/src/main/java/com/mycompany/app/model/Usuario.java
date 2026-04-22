@@ -1,13 +1,14 @@
 package com.mycompany.app.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
 @Table(name = "usuario")
@@ -48,4 +49,7 @@ public class Usuario {
     public void setContraseña(String contraseña) { this.contraseña = contraseña; }
     public void setBalance(Double balance) { this.balance = balance; }
     public void setGroups(Set<Group> groups) { this.groups = groups; }
+
+    public void addBalance(Double sum) { this.balance = this.balance + sum; }
+    public void substractBalance(Double sum) { this.balance = this.balance - sum; }
 }
