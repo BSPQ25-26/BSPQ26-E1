@@ -1,6 +1,8 @@
 com/mycompany/app/dto/UserInfoDTO.class
 com/mycompany/app/service/TransactionService.class
 com/mycompany/app/App.class
+com/mycompany/app/model/EstadoDeuda.class
+com/mycompany/app/dto/PayDebtDTO.class
 com/mycompany/app/repository/GroupRepository.class
 com/mycompany/app/facade/TransactionViewController.class
 com/mycompany/app/repository/TransactionRepository.class
@@ -9,8 +11,10 @@ com/mycompany/app/dto/UpdateGroupDTO.class
 com/mycompany/app/repository/CategoryRepository.class
 com/mycompany/app/dto/CategoryCreationDTO.class
 com/mycompany/app/dto/TransactionCreationDTO.class
+com/mycompany/app/model/Deuda.class
 com/mycompany/app/dto/AuthResponseDTO.class
 com/mycompany/app/dto/CredentialsDTO.class
+com/mycompany/app/dto/DeudaCreationDTO.class
 com/mycompany/app/facade/TransactionController.class
 com/mycompany/app/service/GroupService.class
 com/mycompany/app/facade/CategoryController.class
@@ -19,6 +23,7 @@ com/mycompany/app/service/AuthService.class
 com/mycompany/app/dto/ErrorResponseDTO.class
 com/mycompany/app/service/CategoryService.class
 com/mycompany/app/dto/TransactionDeletionDTO.class
+com/mycompany/app/repository/DeudaRepository.class
 com/mycompany/app/repository/UsuarioRepository.class
 com/mycompany/app/config/AppConfig.class
 com/mycompany/app/dto/AddUserToGroupDTO.class
