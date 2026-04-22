@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenSense - My Groups</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body class="transaction-body">
+
+    <div class="nav-header">
+        <a th:href="@{/web/user/profile}" class="logo">Expen<span>Sense</span></a>
+        <a th:href="@{/web/user/profile}" class="back-link">← Back to Profile</a>
+    </div>
+
+    <div class="container-grid">
+
+        <!-- ===== LEFT COLUMN: group list ===== -->
+        <div class="glass-card card-lista">
+            <div class="header-inline">
+                <h2 class="card-title">My Groups</h2>
+                <div class="button-group-top">
+                    <a th:href="@{/web/groups(showPanel=true)}" th:if="${!showPanel}" class="btn-add" title="New group">＋</a>
+                    <a th:href="@{/web/groups}" th:if="${showPanel}" class="btn-add" title="Hide form">✕</a>
+                    <a th:href="@{/web/groups}" class="btn-refresh" title="Refresh">↻</a>
+                </div>
+            </div>
+
+            <div th:if="${error}" class="flash-error" th:text="${error}"></div>
+
+            <div th:if="${listaGrupos.empty}" class="empty-state">
+                <div style="font-size:3rem">👥</div>
+                <p>You are not in any group yet.<br>
+                   <b>Create one to start splitting expenses with friends!</b></p>
+                <a th:href="@{/web/groups(showPanel=true)}" class="btn-login"
+                   style="max-width:260px; margin:0 auto;">Create my first group</a>
+            </div>
+
+            <div class="groups-list" th:if="${!listaGrupos.empty}">
+                <div th:each="grupo : ${listaGrupos}" class="group-card">
+
+                    <div class="group-card-header">
+                        <div>
+                            <h3 class="group-name" th:text="${grupo.nombre}">Name</h3>
+                            <p class="group-desc"
+                               th:text="${grupo.descripcion != null and !grupo.descripcion.blank} ? ${grupo.descripcion} : 'No description'">
+                               No description</p>
+                        </div>
+                        <span class="group-badge" th:text="${grupo.numeroMiembros} + ' 👤'">1 👤</span>
+                    </div>
+
+                    <div class="group-members">
+                        <p class="members-title">Members</p>
+                        <div th:each="email : ${grupo.miembrosEmails}" class="member-row">
+                            <span th:text="${email}">email</span>
+                            <form th:action="@{/web/groups/removeMember}" method="post" class="inline-form">
+                                <input type="hidden" name="groupId" th:value="${grupo.id}">
+                                <input type="hidden" name="userEmail" th:value="${email}">
+                                <button type="submit" class="btn-mini-delete" title="Remove member">✕</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <form th:action="@{/web/groups/addMember}" method="post" class="invite-form">
+                        <input type="hidden" name="groupId" th:value="${grupo.id}">
+                        <input type="email" name="userEmail" placeholder="Invite by email..." required>
+                        <button type="submit" class="btn-invite">Invite</button>
+                    </form>
+
+                    <form th:action="@{/web/groups/delete}" method="post"
+                          onsubmit="return confirm('Are you sure you want to delete this group? This cannot be undone.')">
+                        <input type="hidden" name="groupId" th:value="${grupo.id}">
+                        <button type="submit" class="btn-delete-group">🗑 Delete Group</button>
+                    </form>
+
+                    <small class="group-date"
+                           th:if="${grupo.fechaCreacion != null}"
+                           th:text="'Created on ' + ${#temporals.format(grupo.fechaCreacion, 'MM/dd/yyyy')}">
+                    </small>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== RIGHT COLUMN: create group form ===== -->
+        <div class="glass-card card-principal" th:if="${showPanel}">
+            <h2 class="card-title">New Group</h2>
+
+            <form th:action="@{/web/groups/create}" method="post">
+
+                <div class="input-group">
+                    <label>Group Name</label>
+                    <input type="text" name="nombre"
+                           placeholder="e.g. Home, Rome Trip, Dinners..." required>
+                </div>
+
+                <div class="input-group">
+                    <label>Description <span style="opacity:0.5; font-weight:400">(optional)</span></label>
+                    <input type="text" name="descripcion"
+                           placeholder="What is this group about?">
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn-login">Create Group</button>
+                    <a th:href="@{/web/groups}" class="btn-logout">Cancel</a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+</body>
+</html>

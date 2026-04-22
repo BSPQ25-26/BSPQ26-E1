@@ -18,7 +18,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain webFilterChain(HttpSecurity http) throws Exception{
         http
-                .securityMatcher("/web/**")
+                .securityMatcher("/web/**", "/css/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .anyRequest().permitAll()

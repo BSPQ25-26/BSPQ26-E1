@@ -1,127 +1,152 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <title>Transactions</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenSense - Transactions</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
-<h1>Transaction UI</h1>
+    <div class="nav-header">
+        <a th:href="@{/web/user/profile}" class="logo">Expen<span>Sense</span></a>
+        <a th:href="@{/web/user/profile}" class="back-link">← Back to Profile</a>
+    </div>
 
-<h2>Create Transaction</h2>
-<input id="conceptC" placeholder="Concept"><br>
-<input id="createAmountC" placeholder="Amount"><br>
-<input id="typeC" placeholder="Transaction Type"><br>
-<input id="catIdC" placeholder="Category Id"><br>
-<input id="groupIdC" placeholder="Group Id"><br>
-<input id="creatorC" placeholder="Creator Id"><br>
-<button onclick="createTransaction()">Create</button>
+    <div class="container-grid">
 
-<hr>
+        <!-- ===== LIST ===== -->
+        <div class="glass-card card-lista">
+            <div class="header-inline">
+                <h2 class="card-title">My Transactions</h2>
+                <div class="button-group-top">
+                    <a th:href="@{/web/transaction(showForm=true)}" th:if="${!showForm}" class="btn-add" title="Add new">＋</a>
+                    <a th:href="@{/web/transaction}" th:if="${showForm}" class="btn-add" title="Hide form">✕</a>
+                    <a th:href="@{/web/transaction}" class="btn-refresh" title="Refresh">↻</a>
+                </div>
+            </div>
 
-<h2>Delete Transaction</h2>
-<input id="deleteId" placeholder="Transaction ID"><br>
-<button onclick="deleteTransaction()">Delete</button>
+            <div th:if="${error}" class="flash-error" th:text="${error}"></div>
 
-<hr>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:if="${transactions.empty}">
+                            <td colspan="3" style="text-align:center; padding:40px; color:#999;">
+                                <div style="font-size:40px">📂</div>
+                                <p>No transactions yet.<br>Press the <b>+</b> button to get started.</p>
+                            </td>
+                        </tr>
+                        <tr th:each="t : ${transactions}">
+                            <td>
+                                <span th:text="${t.concepto}">Description</span>
+                                <span th:if="${t.grupo != null}" class="badge-group" th:text="${t.grupo.nombre}">Group</span>
+                            </td>
+                            <td th:classappend="${t.tipoTransaccion == 'GASTO'} ? 'text-red' : 'text-green'"
+                                th:text="${#numbers.formatDecimal(txShares.get(t.id), 1, 'POINT', 2, 'COMMA')} + ' €'">0.00 €</td>
+                            <td style="white-space:nowrap">
+                                <a th:href="@{/web/transaction(editId=${t.id})}"
+                                   class="btn-mini-edit" title="Edit">✏️</a>
+                                <form th:action="@{/web/transaction/delete}" method="post"
+                                      style="display:inline"
+                                      onsubmit="return confirm('Are you sure you want to delete this?')">
+                                    <input type="hidden" name="transactionId" th:value="${t.id}">
+                                    <button type="submit" class="btn-mini-delete" title="Delete">🗑️</button>
+                                </form>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-<h2>Edit Transaction</h2>
-<input id="conceptE" placeholder="Concept"><br>
-<input id="createAmountE" placeholder="Amount"><br>
-<input id="typeE" placeholder="Transaction Type"><br>
-<input id="catIdE" placeholder="Category Id"><br>
-<input id="groupIdE" placeholder="Group Id"><br>
-<input id="creatorE" placeholder="Creator Id"><br>
-<input id="transE" placeholder="Transaction Id"><br>
-<button onclick="editTransaction()">Edit</button>
+        <!-- ===== FORM (create or edit) ===== -->
+        <div class="glass-card card-principal" th:if="${showForm}">
 
-<hr>
+            <h2 class="card-title"
+                th:text="${editTransaction != null} ? 'Edit Transaction' : 'New Transaction'">
+                New Transaction
+            </h2>
 
-<p id="result"></p>
+            <form th:action="${editTransaction != null}
+                                ? @{/web/transaction/edit/{id}(id=${editTransaction.id})}
+                                : @{/web/transaction/create}"
+                  method="post">
 
-<script th:inline="javascript">
-    const BASE_URL = "/transaction";
+                <div class="input-group">
+                    <label>Description</label>
+                    <input name="concepto" placeholder="e.g. Dinner with friends"
+                           th:value="${editTransaction != null} ? ${editTransaction.concepto} : ''"
+                           required>
+                </div>
 
-    function getToken() {
-        const token = sessionStorage.getItem("token");
-        if (!token) {
-            showError("No token found in sessionStorage");
-            throw new Error("Missing token");
-        }
-        return token;
-    }
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Amount (€)</label>
+                        <input name="importeTotal" type="number" step="0.01" min="0.01"
+                               placeholder="0.00"
+                               th:value="${editTransaction != null} ? ${editTransaction.importeTotal} : ''"
+                               required>
+                    </div>
+                    <div class="input-group">
+                        <label>Type</label>
+                        <select name="tipoTransaccion" required>
+                            <option value="">-- Select --</option>
+                            <option value="GASTO"
+                                    th:selected="${editTransaction != null and editTransaction.tipoTransaccion == 'GASTO'}">Expense</option>
+                            <option value="INGRESO"
+                                    th:selected="${editTransaction != null and editTransaction.tipoTransaccion == 'INGRESO'}">Income</option>
+                        </select>
+                    </div>
+                </div>
 
-    function createTransaction() {
-        const token = getToken();
+                <div class="form-row">
+                    <div class="input-group">
+                        <label>Category</label>
+                        <select name="categoriaId">
+                            <option value="">-- No category --</option>
+                            <option th:each="cat : ${categories}"
+                                    th:value="${cat.id}"
+                                    th:text="${cat.name}"
+                                    th:selected="${editTransaction != null
+                                                   and editTransaction.categoria != null
+                                                   and editTransaction.categoria.id == cat.id}">
+                            </option>
+                        </select>
+                    </div>
+                    <div class="input-group">
+                        <label>Group</label>
+                        <select name="grupoId">
+                            <option value="">-- No group --</option>
+                            <option th:each="g : ${groups}"
+                                    th:value="${g.id}"
+                                    th:text="${g.nombre}"
+                                    th:selected="${editTransaction != null
+                                                   and editTransaction.grupo != null
+                                                   and editTransaction.grupo.id == g.id}">
+                            </option>
+                        </select>
+                    </div>
+                </div>
 
-        fetch(BASE_URL + "/create", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                token: token,
-                concepto: document.getElementById("conceptC").value,
-                importeTotal: document.getElementById("createAmountC").value,
-                tipoTransaccion: document.getElementById("typeC").value,
-                categoriaId: document.getElementById("catIdC").value,
-                groupId: document.getElementById("groupIdC").value,
-                creadorId: document.getElementById("creatorC").value
-            })
-        })
-            .then(res => showResult(res))
-            .catch(err => showError(err));
-    }
+                <div class="button-group">
+                    <button type="submit" class="btn-login"
+                            th:text="${editTransaction != null} ? 'Save Changes' : 'Save Transaction'">
+                        Save Transaction
+                    </button>
+                    <a th:href="@{/web/transaction}" class="btn-logout">Cancel</a>
+                </div>
+            </form>
+        </div>
 
-    function deleteTransaction() {
-        const token = getToken();
-
-        fetch(BASE_URL + "/delete", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                accessToken: token,
-                transactionId: document.getElementById("deleteId").value
-            })
-        })
-            .then(res => showResult(res))
-            .catch(err => showError(err));
-    }
-
-    function editTransaction() {
-        const token = getToken();
-        const id = document.getElementById("transE").value;
-
-        fetch(BASE_URL + "/edit/" + id, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                accessToken: token,
-                concepto: document.getElementById("conceptE").value,
-                importeTotal: document.getElementById("createAmountE").value,
-                tipoTransaccion: document.getElementById("typeE").value,
-                categoriaId: document.getElementById("catIdE").value,
-                groupId: document.getElementById("groupIdE").value,
-                creadorId: document.getElementById("creatorE").value
-            })
-        })
-            .then(res => showResult(res))
-            .catch(err => showError(err));
-    }
-
-    function showResult(res) {
-        document.getElementById("result").innerText =
-            "Status: " + res.status;
-    }
-
-    function showError(err) {
-        document.getElementById("result").innerText =
-            "Error: " + err;
-    }
-</script>
-
+    </div>
 </body>
 </html>

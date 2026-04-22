@@ -51,3 +51,15 @@ Once the database is ready, we can start the application.
 > If the console gets stuck or the command is not recognized, make sure you are inside the `maven-basic-project` folder and that you have restarted the terminal after installing Java/Maven.
 
 ---
+
+## 3. Accessing the Application
+
+Once both the database and the backend are running, open your browser and navigate to:
+
+```
+http://localhost:8080/web/auth/login
+```
+
+This is the main entry point of the application. From here you can log in with your credentials or create a new account.
+
+> If the page does not load, verify that the Spring Boot application started correctly — look for a line like `Started App in X seconds` in the terminal output.

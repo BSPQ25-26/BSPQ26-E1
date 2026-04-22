@@ -2,53 +2,33 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8"/>
-    <title>Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ExpenSense - Login</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
-<h1>Login</h1>
+    <div class="login-box">
+        <h1 class="logo">Expen<span>Sense</span></h1>
+        <p class="subtitle">Your finances, with purpose.</p>
 
-<p id="error" style="color:red; display:none"></p>
+        <div th:if="${error}" th:text="${error}" class="error-msg"></div>
 
-<label>Email: <input type="email" id="email"/></label><br/><br/>
-<label>Password: <input type="password" id="password"/></label><br/><br/>
-<button onclick="login()">Log in</button> <button onclick="logout()">Logout (for debuggin)</button>
-<br/><br/>
-<a href="/web/user/create">Sign in</a>
+        <form th:action="@{/web/auth/login}" method="post">
+            <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="name@example.com" required/>
+            </div>
+            <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required/>
+            </div>
+            <button type="submit" class="btn-login">Sign In</button>
+        </form>
 
-<script>
-    // Si ya tiene token, redirige directamente
-    if (sessionStorage.getItem('token')) {
-        window.location.href = '/web/user/info';
-    }
-
-    async function login() {
-        const email = document.getElementById('email').value;
-        const password = document.getElementById('password').value;
-
-        const response = await fetch('/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, password })
-        });
-
-        if (response.ok) {
-            const token = await response.text();
-            sessionStorage.setItem('token', token);
-            sessionStorage.setItem('email', email);
-            window.location.href = '/web/user/info';
-        } else {
-            const error = document.getElementById('error');
-            error.style.display = 'block';
-            error.textContent = 'Invalid credentials';
-        }
-    }
-
-    async function logout() {
-        const token = sessionStorage.getItem('token');
-        await fetch(`/auth/logout?token=${token}`, { method: 'POST' });
-        sessionStorage.clear();
-        window.location.href = '/web/auth/login';
-    }
-</script>
+        <div class="footer">
+            New here? <a th:href="@{/web/user/create}">Create an account</a>
+        </div>
+    </div>
 </body>
 </html>
