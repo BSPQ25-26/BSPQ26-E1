@@ -1,13 +1,16 @@
 package com.mycompany.app.model;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
-import java.util.HashSet;
-import java.util.Set;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "usuario")
@@ -22,6 +25,7 @@ public class Usuario {
     private String contraseña;
     private Double balance;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "miembros")
     private Set<Group> groups = new HashSet<>();
 
@@ -35,12 +39,33 @@ public class Usuario {
         this.balance = balance;
     }
 
-    public Integer getId() { return id; }
-    public String getNombre() { return nombre; }
-    public String getEmail() { return email; }
-    public String getContraseña() { return contraseña; }
-    public Double getBalance() { return balance; }
-    public Set<Group> getGroups() { return groups; }
+    public Integer getId() {
+        return id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getContraseña() {
+        return contraseña;
+    }
+
+    public Double getBalance() {
+        return balance;
+    }
+
+    public Set<Group> getGroups() {
+        return groups;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
     public void setId(Integer id) { this.id = id; }
     public void setNombre(String nombre) { this.nombre = nombre; }
@@ -48,4 +73,7 @@ public class Usuario {
     public void setContraseña(String contraseña) { this.contraseña = contraseña; }
     public void setBalance(Double balance) { this.balance = balance; }
     public void setGroups(Set<Group> groups) { this.groups = groups; }
+
+    public void addBalance(Double sum) { this.balance = this.balance + sum; }
+    public void substractBalance(Double sum) { this.balance = this.balance - sum; }
 }
