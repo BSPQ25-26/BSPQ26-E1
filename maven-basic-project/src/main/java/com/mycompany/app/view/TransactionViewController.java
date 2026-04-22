@@ -1,6 +1,8 @@
 package com.mycompany.app.view;
 
 import com.mycompany.app.dto.TransactionCreationDTO;
+import com.mycompany.app.model.Group;
+import com.mycompany.app.model.Transaction;
 import com.mycompany.app.model.Usuario;
 import com.mycompany.app.repository.CategoryRepository;
 import com.mycompany.app.repository.GroupRepository;
@@ -12,6 +14,10 @@ import com.mycompany.app.service.TransactionService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/web/transaction")
@@ -132,8 +138,28 @@ public class TransactionViewController {
     }
 
     private void loadModelAttributes(Usuario user, String email, Model model) {
-        model.addAttribute("transactions", transactionRepository.findByCreador(user));
+        List<Group> myGroups = groupRepository.findByMiembrosEmail(email);
+
+        List<Transaction> allTransactions = myGroups.isEmpty()
+                ? transactionRepository.findByCreador(user)
+                : transactionRepository.findByCreadorOrGrupoIn(user, myGroups);
+
+        Map<Integer, Double> txShares = new HashMap<>();
+        for (Transaction t : allTransactions) {
+            if (t.getGrupo() != null) {
+                Group withMembers = groupRepository.findByIdWithMiembros(t.getGrupo().getId()).orElse(null);
+                int numMembers = (withMembers != null && withMembers.getMiembros() != null
+                        && !withMembers.getMiembros().isEmpty())
+                        ? withMembers.getMiembros().size() : 1;
+                txShares.put(t.getId(), Math.round(t.getImporteTotal() / numMembers * 100.0) / 100.0);
+            } else {
+                txShares.put(t.getId(), t.getImporteTotal());
+            }
+        }
+
+        model.addAttribute("transactions", allTransactions);
+        model.addAttribute("txShares", txShares);
         model.addAttribute("categories", categoryService.getCategoriesByUser(user.getId()));
-        model.addAttribute("groups", groupRepository.findByMiembrosEmail(email));
+        model.addAttribute("groups", myGroups);
     }
 }

@@ -46,9 +46,12 @@
                             </td>
                         </tr>
                         <tr th:each="t : ${transactions}">
-                            <td th:text="${t.concepto}">Description</td>
-                            <td th:classappend="${t.tipoTransaccion == 'EXPENSE'} ? 'text-red' : 'text-green'"
-                                th:text="${#numbers.formatDecimal(t.importeTotal, 1, 'POINT', 2, 'COMMA')} + ' €'">0.00 €</td>
+                            <td>
+                                <span th:text="${t.concepto}">Description</span>
+                                <span th:if="${t.grupo != null}" class="badge-group" th:text="${t.grupo.nombre}">Group</span>
+                            </td>
+                            <td th:classappend="${t.tipoTransaccion == 'GASTO'} ? 'text-red' : 'text-green'"
+                                th:text="${#numbers.formatDecimal(txShares.get(t.id), 1, 'POINT', 2, 'COMMA')} + ' €'">0.00 €</td>
                             <td style="white-space:nowrap">
                                 <a th:href="@{/web/transaction(editId=${t.id})}"
                                    class="btn-mini-edit" title="Edit">✏️</a>
@@ -97,10 +100,10 @@
                         <label>Type</label>
                         <select name="tipoTransaccion" required>
                             <option value="">-- Select --</option>
-                            <option value="EXPENSE"
-                                    th:selected="${editTransaction != null and editTransaction.tipoTransaccion == 'EXPENSE'}">EXPENSE</option>
-                            <option value="INCOME"
-                                    th:selected="${editTransaction != null and editTransaction.tipoTransaccion == 'INCOME'}">INCOME</option>
+                            <option value="GASTO"
+                                    th:selected="${editTransaction != null and editTransaction.tipoTransaccion == 'GASTO'}">Expense</option>
+                            <option value="INGRESO"
+                                    th:selected="${editTransaction != null and editTransaction.tipoTransaccion == 'INGRESO'}">Income</option>
                         </select>
                     </div>
                 </div>

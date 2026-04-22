@@ -83,9 +83,9 @@ public class UserViewController {
         List<Transaction> myTransactions = transactionRepository.findByCreador(user);
         double balance = 0.0;
         for (Transaction t : myTransactions) {
-            if ("INCOME".equals(t.getTipoTransaccion())) {
+            if ("INGRESO".equals(t.getTipoTransaccion())) {
                 balance += t.getImporteTotal();
-            } else if ("EXPENSE".equals(t.getTipoTransaccion()) && t.getGrupo() == null) {
+            } else if ("GASTO".equals(t.getTipoTransaccion()) && t.getGrupo() == null) {
                 balance -= t.getImporteTotal();
             }
         }
@@ -101,7 +101,7 @@ public class UserViewController {
 
             List<Transaction> groupTx = transactionRepository.findByGrupo(group);
             for (Transaction t : groupTx) {
-                if (!"EXPENSE".equals(t.getTipoTransaccion())) continue;
+                if (!"GASTO".equals(t.getTipoTransaccion())) continue;
                 double share = t.getImporteTotal() / numMembers;
                 balance -= share;
                 if (numMembers > 1) {
