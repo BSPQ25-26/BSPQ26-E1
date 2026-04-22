@@ -9,6 +9,8 @@ import jakarta.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "usuario")
 public class Usuario {
@@ -22,6 +24,7 @@ public class Usuario {
     private String contraseña;
     private Double balance;
 
+    @JsonIgnore
     @ManyToMany(mappedBy = "miembros")
     private Set<Group> groups = new HashSet<>();
 
@@ -35,17 +38,51 @@ public class Usuario {
         this.balance = balance;
     }
 
-    public Integer getId() { return id; }
-    public String getNombre() { return nombre; }
-    public String getEmail() { return email; }
-    public String getContraseña() { return contraseña; }
-    public Double getBalance() { return balance; }
-    public Set<Group> getGroups() { return groups; }
+    public Integer getId() {
+        return id;
+    }
 
-    public void setId(Integer id) { this.id = id; }
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    public void setEmail(String email) { this.email = email; }
-    public void setContraseña(String contraseña) { this.contraseña = contraseña; }
-    public void setBalance(Double balance) { this.balance = balance; }
-    public void setGroups(Set<Group> groups) { this.groups = groups; }
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getContraseña() {
+        return contraseña;
+    }
+
+    public Double getBalance() {
+        return balance;
+    }
+
+    public Set<Group> getGroups() {
+        return groups;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public void setContraseña(String contraseña) {
+        this.contraseña = contraseña;
+    }
+
+    public void setBalance(Double balance) {
+        this.balance = balance;
+    }
+
+    public void setGroups(Set<Group> groups) {
+        this.groups = groups;
+    }
 }

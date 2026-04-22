@@ -1,5 +1,6 @@
 package com.mycompany.app.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
@@ -23,17 +24,17 @@ public class TransactionService {
     private final UsuarioRepository usuarioRepository;
     private final GroupRepository groupRepository;
 
-    public TransactionService(TransactionRepository transactionRepository, 
-                              CategoryRepository categoryRepository, 
-                              UsuarioRepository usuarioRepository,
-                              GroupRepository groupRepository) {
+    public TransactionService(TransactionRepository transactionRepository,
+            CategoryRepository categoryRepository,
+            UsuarioRepository usuarioRepository,
+            GroupRepository groupRepository) {
         this.transactionRepository = transactionRepository;
         this.categoryRepository = categoryRepository;
         this.usuarioRepository = usuarioRepository;
         this.groupRepository = groupRepository;
     }
 
-    public boolean createTransaction(TransactionCreationDTO transactionCreationDTO){
+    public boolean createTransaction(TransactionCreationDTO transactionCreationDTO) {
         try {
             Optional<Usuario> creadorOpt = usuarioRepository.findById(transactionCreationDTO.getCreadorId());
             if (creadorOpt.isEmpty()) {
@@ -51,13 +52,12 @@ public class TransactionService {
             }
 
             Transaction transaction = new Transaction(
-                transactionCreationDTO.getConcepto(),
-                transactionCreationDTO.getImporteTotal(),
-                transactionCreationDTO.getTipoTransaccion(),
-                categoria,
-                grupo,
-                creadorOpt.get()
-            );
+                    transactionCreationDTO.getConcepto(),
+                    transactionCreationDTO.getImporteTotal(),
+                    transactionCreationDTO.getTipoTransaccion(),
+                    categoria,
+                    grupo,
+                    creadorOpt.get());
 
             transactionRepository.saveAndFlush(transaction);
             return true;
@@ -67,15 +67,15 @@ public class TransactionService {
         }
     }
 
-    public boolean deleteTransaction(TransactionDeletionDTO request){
+    public boolean deleteTransaction(TransactionDeletionDTO request) {
         try {
-            if(transactionRepository.existsById(request.getTransactionId())){
+            if (transactionRepository.existsById(request.getTransactionId())) {
                 transactionRepository.deleteById(request.getTransactionId());
                 return true;
             } else {
                 return false;
             }
-        } catch(Exception e) {
+        } catch (Exception e) {
             return false;
         }
     }
@@ -119,4 +119,13 @@ public class TransactionService {
             return false;
         }
     }
+
+    public List<Transaction> getTransactionsByUserId(Integer userId) {
+        return transactionRepository.findByCreadorId(userId);
+    }
+
+    public List<Transaction> getTransactionsByGroupId(Integer groupId) {
+        return transactionRepository.findByGrupoId(groupId);
+    }
+
 }

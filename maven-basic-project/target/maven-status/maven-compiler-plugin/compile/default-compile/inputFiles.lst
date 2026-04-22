@@ -1,29 +1,43 @@
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\exception\AuthException.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\UserCreationDTO.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\facade\CategoryController.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\exception\GlobalExceptionHandler.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\facade\UserController.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\service\CategoryService.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\ErrorResponseDTO.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\TransactionDeletionDTO.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\config\AppConfig.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\facade\AuthController.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\config\SecurityConfig.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\TransactionEditionDTO.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\facade\TransactionController.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\service\TransactionService.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\CredentialsDTO.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\TransactionCreationDTO.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\UserInfoDTO.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\facade\UserViewController.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\model\Category.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\repository\TransactionRepository.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\repository\CategoryRepository.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\service\UserService.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\facade\AuthViewController.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\dto\AuthResponseDTO.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\repository\UsuarioRepository.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\model\Usuario.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\service\AuthService.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\model\Transaction.java
-C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\main\java\com\mycompany\app\App.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/config/AppConfig.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/exception/AuthException.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/TransactionController.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/TransactionDeletionDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/repository/GroupRepository.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/service/TransactionService.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/CredentialsDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/GroupInfoDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/CategoryController.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/UserController.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/GroupCreationDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/CategoryDeletionDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/view/UserViewController.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/TransactionEditionDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/repository/UsuarioRepository.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/model/Usuario.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/view/TransactionViewController.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/ErrorResponseDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/service/AuthService.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/DeleteGroupDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/UserCreationDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/model/Group.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/repository/CategoryRepository.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/GroupController.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/UserInfoDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/service/CategoryService.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/facade/AuthController.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/service/UserService.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/CategoryCreationDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/model/Transaction.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/service/GroupService.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/config/SecurityConfig.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/TransactionCreationDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/RemoveUserFromGroupDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/AuthResponseDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/AddUserToGroupDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/dto/UpdateGroupDTO.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/view/AuthViewController.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/App.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/model/Category.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/repository/TransactionRepository.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/exception/GlobalExceptionHandler.java
+/Users/aimarpagonabarragagallastegui/git/BSPQ26-E1/maven-basic-project/src/main/java/com/mycompany/app/view/CategoryViewController.java
