@@ -3,15 +3,18 @@ package com.mycompany.app.facade;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mycompany.app.dto.TransactionCreationDTO;
 import com.mycompany.app.dto.TransactionDeletionDTO;
 import com.mycompany.app.dto.TransactionEditionDTO;
+import com.mycompany.app.model.Transaction;
 import com.mycompany.app.service.AuthService;
 import com.mycompany.app.service.TransactionService;
 
@@ -84,4 +87,35 @@ public class TransactionController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
     }
+
+    @Operation(summary = "Get transactions by User", description = "Returns all transactions created by a specific user.")
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<Transaction>> getTransactionsByUser(
+            @PathVariable("userId") Integer userId,
+            @RequestParam("token") String token) {
+        
+        // Security check
+        if (!authService.isValidToken(token)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        List<Transaction> transactions = transactionService.getTransactionsByUserId(userId);
+        return new ResponseEntity<>(transactions, HttpStatus.OK);
+    }
+
+    @Operation(summary = "Get transactions by Group", description = "Returns all transactions belonging to a specific group.")
+    @GetMapping("/group/{groupId}")
+    public ResponseEntity<List<Transaction>> getTransactionsByGroup(
+            @PathVariable("groupId") Integer groupId,
+            @RequestParam("token") String token) {
+        
+        // Security check
+        if (!authService.isValidToken(token)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        List<Transaction> transactions = transactionService.getTransactionsByGroupId(groupId);
+        return new ResponseEntity<>(transactions, HttpStatus.OK);
+    }
+
 }
