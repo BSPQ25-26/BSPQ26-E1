@@ -19,12 +19,12 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup Java 17 with Maven cache
-      - name: Set up Java 17
+      # 2. Setup Java 21 with Maven cache
+      - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
           cache: maven
 
       # 3. Build and repackage Spring Boot jar
@@ -41,5 +41,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-jar
-          path: maven-basic-project/target/*.jar
+          path: maven-basic-project/target/*-SNAPSHOT.jar
+          if-no-files-found: error
+          retention-days: 7
 
