@@ -5,10 +5,12 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.mycompany.app.dto.DebtEditionDTO;
 import com.mycompany.app.dto.DeudaCreationDTO;
 import com.mycompany.app.dto.TransactionCreationDTO;
 import com.mycompany.app.dto.TransactionDeletionDTO;
 import com.mycompany.app.dto.TransactionEditionDTO;
+import com.mycompany.app.dto.TranscactionDebtEditionDTO;
 import com.mycompany.app.model.Category;
 import com.mycompany.app.model.Deuda;
 import com.mycompany.app.model.EstadoDeuda;
@@ -199,5 +201,70 @@ public class TransactionService {
 
     public List<Deuda> getDeudaByTransaccionId(Integer transaccionId) {
         return deudaRepository.findByTransaccionOriginalId(transaccionId);
+    }
+
+    @Transactional
+    public boolean editTransactionWithDeudas(TranscactionDebtEditionDTO request, Integer transactionId) {
+        try {
+            if (request.getDeudas() != null) {
+                for (DebtEditionDTO deudaDTO : request.getDeudas()) {
+                    Deuda deuda = deudaRepository.findById(deudaDTO.getId()).orElse(null);
+                    if (deuda == null) return false;
+                    if (deuda.getEstado() == EstadoDeuda.PAGADO) return false;
+                }
+            }
+
+            boolean transactionOk = editTransaction(
+                new TransactionEditionDTO(
+                    null,
+                    request.getConcepto(),
+                    request.getImporteTotal(),
+                    request.getTipoTransaccion(),
+                    request.getGrupoId(),
+                    request.getCategoriaId(),
+                    request.getCreadorId()
+                ), transactionId
+            );
+            if (!transactionOk) return false;
+
+            if (request.getDeudas() != null) {
+                for (DebtEditionDTO deudaDTO : request.getDeudas()) {
+                    boolean deudaOk = editDeuda(deudaDTO, deudaDTO.getId());
+                    if (!deudaOk) return false;
+                }
+            }
+
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    public boolean editDeuda(DebtEditionDTO request, Integer deudaId) {
+        try {
+            Deuda deuda = deudaRepository.findById(deudaId).orElse(null);
+            if (deuda == null || deuda.getEstado() == EstadoDeuda.PAGADO) return false;
+
+            if (request.getImporte() != null) {
+                deuda.setImporte(request.getImporte());
+            }
+
+            if (request.getDeudorId() != null) {
+                Usuario deudor = usuarioRepository.findById(request.getDeudorId()).orElse(null);
+                if (deudor == null) return false;
+                deuda.setDeudor(deudor);
+            }
+
+            if (request.getAcreedorId() != null) {
+                Usuario acreedor = usuarioRepository.findById(request.getAcreedorId()).orElse(null);
+                if (acreedor == null) return false;
+                deuda.setAcreedor(acreedor);
+            }
+
+            deudaRepository.save(deuda);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
