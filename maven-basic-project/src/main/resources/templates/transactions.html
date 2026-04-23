@@ -16,13 +16,12 @@
 
     <div class="container-grid">
 
-        <!-- ===== LIST ===== -->
+        <!-- ===== TRANSACTION LIST ===== -->
         <div class="glass-card card-lista">
             <div class="header-inline">
                 <h2 class="card-title">My Transactions</h2>
                 <div class="button-group-top">
-                    <a th:href="@{/web/transaction(showForm=true)}" th:if="${!showForm}" class="btn-add" title="Add new">＋</a>
-                    <a th:href="@{/web/transaction}" th:if="${showForm}" class="btn-add" title="Hide form">✕</a>
+                    <button id="btn-new-tx" class="btn-add" title="Add new" onclick="showCreateForm()">＋</button>
                     <a th:href="@{/web/transaction}" class="btn-refresh" title="Refresh">↻</a>
                 </div>
             </div>
@@ -35,118 +34,488 @@
                         <tr>
                             <th>Description</th>
                             <th>Amount</th>
-                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
+
                         <tr th:if="${transactions.empty}">
-                            <td colspan="3" style="text-align:center; padding:40px; color:#999;">
+                            <td colspan="2" class="empty-state">
                                 <div style="font-size:40px">📂</div>
                                 <p>No transactions yet.<br>Press the <b>+</b> button to get started.</p>
                             </td>
                         </tr>
-                        <tr th:each="t : ${transactions}">
-                            <td>
-                                <span th:text="${t.concepto}">Description</span>
-                                <span th:if="${t.grupo != null}" class="badge-group" th:text="${t.grupo.nombre}">Group</span>
-                            </td>
-                            <td th:classappend="${t.tipoTransaccion == 'GASTO'} ? 'text-red' : 'text-green'"
-                                th:text="${#numbers.formatDecimal(txShares.get(t.id), 1, 'POINT', 2, 'COMMA')} + ' €'">0.00 €</td>
-                            <td style="white-space:nowrap">
-                                <a th:href="@{/web/transaction(editId=${t.id})}"
-                                   class="btn-mini-edit" title="Edit">✏️</a>
-                                <form th:action="@{/web/transaction/delete}" method="post"
-                                      style="display:inline"
-                                      onsubmit="return confirm('Are you sure you want to delete this?')">
-                                    <input type="hidden" name="transactionId" th:value="${t.id}">
-                                    <button type="submit" class="btn-mini-delete" title="Delete">🗑️</button>
-                                </form>
-                            </td>
-                        </tr>
+
+                        <th:block th:each="t : ${transactions}">
+                            <tr class="tx-row"
+                                th:classappend="${t.tipoTransaccion == 'LIQUIDACION' ? ' row-liquidacion' :
+                                               (t.tipoTransaccion == 'INGRESO' and t.concepto != null and #strings.startsWith(t.concepto,'Pago de deuda')) ? ' row-cobro-deuda' :
+                                               (t.grupo != null and t.tipoTransaccion == 'GASTO') ? ' row-grupo-gasto' : ''}"
+                                th:attr="data-id=${t.id},
+                                         data-concepto=${t.concepto},
+                                         data-importe=${t.importeTotal},
+                                         data-tipo=${t.tipoTransaccion},
+                                         data-cat-id=${t.categoria != null ? t.categoria.id : ''},
+                                         data-grupo-id=${t.grupo != null ? t.grupo.id : ''},
+                                         data-pagador-id=${t.creador != null ? t.creador.id : ''},
+                                         data-is-split=${txWithDebts.contains(t.id)},
+                                         data-is-pago=${#strings.startsWith(t.concepto,'Pago de deuda')}"
+                                onclick="selectTransaction(this)">
+
+                                <!-- Description + badges -->
+                                <td>
+                                    <span th:text="${t.concepto}">Description</span>
+                                    <span th:if="${t.grupo != null}" class="badge-group"
+                                          th:text="${t.grupo.nombre}">Group</span>
+                                    <span th:if="${t.tipoTransaccion == 'LIQUIDACION'}"
+                                          class="badge-tipo badge-liquidacion">Liquidación</span>
+                                    <span th:if="${t.tipoTransaccion == 'INGRESO' and #strings.startsWith(t.concepto,'Pago de deuda')}"
+                                          class="badge-tipo badge-cobro-deuda">Cobro deuda</span>
+                                    <span th:if="${t.tipoTransaccion == 'INGRESO' and !#strings.startsWith(t.concepto,'Pago de deuda')}"
+                                          class="badge-tipo badge-ingreso">Ingreso</span>
+                                </td>
+
+                                <!-- Amount -->
+                                <td th:classappend="${t.tipoTransaccion == 'INGRESO' ? ' text-green' : (t.tipoTransaccion == 'LIQUIDACION' ? ' text-orange' : ' text-red')}"
+                                    th:text="${(t.tipoTransaccion == 'INGRESO' ? '+' : '-') + #numbers.formatDecimal(t.importeTotal, 1, 'POINT', 2, 'COMMA') + ' €'}">
+                                    0.00 €
+                                </td>
+                            </tr>
+                        </th:block>
+
                     </tbody>
                 </table>
             </div>
         </div>
 
-        <!-- ===== FORM (create or edit) ===== -->
-        <div class="glass-card card-principal" th:if="${showForm}">
+        <!-- ===== SIDE PANEL ===== -->
+        <div class="glass-card card-principal" id="side-panel">
 
-            <h2 class="card-title"
-                th:text="${editTransaction != null} ? 'Edit Transaction' : 'New Transaction'">
-                New Transaction
-            </h2>
+            <!-- Form area (hidden until selection) -->
+            <div id="panel-form-area" style="display:none">
+                <h2 class="card-title" id="panel-title">Edit Transaction</h2>
 
-            <form th:action="${editTransaction != null}
-                                ? @{/web/transaction/edit/{id}(id=${editTransaction.id})}
-                                : @{/web/transaction/create}"
-                  method="post">
+                <form id="tx-form" method="post">
 
-                <div class="input-group">
-                    <label>Description</label>
-                    <input name="concepto" placeholder="e.g. Dinner with friends"
-                           th:value="${editTransaction != null} ? ${editTransaction.concepto} : ''"
-                           required>
-                </div>
-
-                <div class="form-row">
                     <div class="input-group">
-                        <label>Amount (€)</label>
-                        <input name="importeTotal" type="number" step="0.01" min="0.01"
-                               placeholder="0.00"
-                               th:value="${editTransaction != null} ? ${editTransaction.importeTotal} : ''"
-                               required>
+                        <label>Description</label>
+                        <input id="f-concepto" name="concepto"
+                               placeholder="e.g. Dinner with friends"
+                               oninput="checkChanges()" required>
                     </div>
-                    <div class="input-group">
-                        <label>Type</label>
-                        <select name="tipoTransaccion" required>
-                            <option value="">-- Select --</option>
-                            <option value="GASTO"
-                                    th:selected="${editTransaction != null and editTransaction.tipoTransaccion == 'GASTO'}">Expense</option>
-                            <option value="INGRESO"
-                                    th:selected="${editTransaction != null and editTransaction.tipoTransaccion == 'INGRESO'}">Income</option>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Amount (€)</label>
+                            <input id="f-importe" name="importeTotal"
+                                   type="number" step="0.01" min="0.01"
+                                   placeholder="0.00"
+                                   oninput="checkChanges()" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Type</label>
+                            <select id="f-tipo" name="tipoTransaccion"
+                                    onchange="checkChanges()" required>
+                                <option value="">-- Select --</option>
+                                <option value="GASTO">Expense</option>
+                                <option value="INGRESO">Income</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="input-group">
+                            <label>Category</label>
+                            <select id="f-cat" name="categoriaId" onchange="checkChanges()">
+                                <option value="">-- No category --</option>
+                                <option th:each="cat : ${categories}"
+                                        th:value="${cat.id}"
+                                        th:text="${cat.name}"></option>
+                            </select>
+                        </div>
+                        <div class="input-group">
+                            <label>Group</label>
+                            <select id="f-grupo" name="grupoId"
+                                    onchange="onGrupoChange(this.value)">
+                                <option value="">-- No group --</option>
+                                <option th:each="g : ${groups}"
+                                        th:value="${g.id}"
+                                        th:text="${g.nombre}"></option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Pagador (only for create mode with group selected) -->
+                    <div class="input-group" id="pagador-group" style="display:none">
+                        <label>Pagador</label>
+                        <select name="pagadorId" id="pagadorSelect">
+                            <option value="">-- Yo (por defecto) --</option>
                         </select>
                     </div>
-                </div>
 
-                <div class="form-row">
-                    <div class="input-group">
-                        <label>Category</label>
-                        <select name="categoriaId">
-                            <option value="">-- No category --</option>
-                            <option th:each="cat : ${categories}"
-                                    th:value="${cat.id}"
-                                    th:text="${cat.name}"
-                                    th:selected="${editTransaction != null
-                                                   and editTransaction.categoria != null
-                                                   and editTransaction.categoria.id == cat.id}">
-                            </option>
-                        </select>
+                    <!-- Split section (shown for group GASTO not yet split, edit mode only) -->
+                    <div id="split-section" style="display:none">
+                        <div class="section-divider" style="margin:14px 0"></div>
+                        <p class="members-title" style="margin-bottom:8px">Split this expense</p>
+                        <div id="split-members-list"></div>
+                        <div class="split-summary-row" style="margin-top:8px">
+                            <span class="split-summary-label">Total assigned:</span>
+                            <span>
+                                <strong id="side-split-sum" class="split-sum">0.00</strong> €
+                                &nbsp;/&nbsp;
+                                <strong id="side-split-total">0 €</strong>
+                            </span>
+                            <span id="side-split-status" class="split-status-badge"></span>
+                        </div>
+                        <button type="button" id="btn-side-split-save"
+                                class="btn-repartir-confirm"
+                                style="width:100%;margin-top:8px"
+                                disabled
+                                onclick="guardarDeudasSide(this)">
+                            Guardar Deudas
+                        </button>
                     </div>
-                    <div class="input-group">
-                        <label>Group</label>
-                        <select name="grupoId">
-                            <option value="">-- No group --</option>
-                            <option th:each="g : ${groups}"
-                                    th:value="${g.id}"
-                                    th:text="${g.nombre}"
-                                    th:selected="${editTransaction != null
-                                                   and editTransaction.grupo != null
-                                                   and editTransaction.grupo.id == g.id}">
-                            </option>
-                        </select>
-                    </div>
-                </div>
 
-                <div class="button-group">
-                    <button type="submit" class="btn-login"
-                            th:text="${editTransaction != null} ? 'Save Changes' : 'Save Transaction'">
-                        Save Transaction
-                    </button>
-                    <a th:href="@{/web/transaction}" class="btn-logout">Cancel</a>
-                </div>
+                    <!-- Action buttons -->
+                    <div class="panel-btn-stack">
+                        <button type="submit" id="btn-update" class="btn-login"
+                                style="display:none" disabled>
+                            No changes to save
+                        </button>
+                        <button type="submit" id="btn-create" class="btn-login"
+                                style="display:none">
+                            Save Transaction
+                        </button>
+                        <button type="button" id="btn-delete" class="btn-danger"
+                                style="display:none" onclick="deleteTransaction()">
+                            🗑 Delete Transaction
+                        </button>
+                        <button type="button" class="btn-logout" onclick="clearSelection()">
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Hidden delete form -->
+            <form id="delete-form" th:action="@{/web/transaction/delete}"
+                  method="post" style="display:none">
+                <input type="hidden" id="delete-tx-id" name="transactionId" value="">
             </form>
         </div>
 
     </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script th:inline="javascript">
+        var groupMembers  = /*[[${groupMembersData}]]*/ {};
+        var currentUserId = /*[[${currentUserId}]]*/ 0;
+        var initEditId    = /*[[${editTransaction != null ? editTransaction.id : null}]]*/ null;
+        var initShowForm  = /*[[${showForm}]]*/ false;
+    </script>
+
+    <script>
+        /* ── State ── */
+        var originalValues  = null;
+        var currentTxId     = null;
+        var currentPagadorId = null;
+        var currentTotal    = 0;
+
+        /* ── Row selection ── */
+        function selectTransaction(row) {
+            document.querySelectorAll('.tx-row.selected-row')
+                    .forEach(function(r) { r.classList.remove('selected-row'); });
+            row.classList.add('selected-row');
+
+            var id       = row.dataset.id;
+            var concepto = row.dataset.concepto;
+            var importe  = row.dataset.importe;
+            var tipo     = row.dataset.tipo;
+            var catId    = row.dataset.catId    || '';
+            var grupoId  = row.dataset.grupoId  || '';
+            var pagadorId = row.dataset.pagadorId || String(currentUserId);
+            var isSplit  = row.dataset.isSplit  === 'true';
+
+            currentTxId      = id;
+            currentPagadorId = pagadorId;
+            currentTotal     = parseFloat(importe);
+
+            // Populate fields
+            setVal('f-concepto', concepto);
+            setVal('f-importe',  importe);
+            setOpt('f-tipo',  tipo);
+            setOpt('f-cat',   catId);
+            setOpt('f-grupo', grupoId);
+
+            // Pagador hidden in edit mode
+            document.getElementById('pagador-group').style.display = 'none';
+
+            // Form action
+            document.getElementById('tx-form').action = '/web/transaction/edit/' + id;
+
+            // Snapshot for change detection
+            originalValues = { concepto: concepto, importe: importe,
+                               tipo: tipo, catId: catId, grupoId: grupoId };
+
+            setEditMode();
+            checkChanges();
+
+            // Split section
+            var isGroupGasto = grupoId && tipo === 'GASTO';
+            var splitSec = document.getElementById('split-section');
+            if (isGroupGasto && !isSplit) {
+                splitSec.style.display = '';
+                buildSplitSection(id, grupoId, pagadorId, currentTotal);
+            } else {
+                splitSec.style.display = 'none';
+            }
+
+            showPanel('Edit Transaction');
+            updateNewButton(true);
+        }
+
+        /* ── Create form ── */
+        function showCreateForm() {
+            document.querySelectorAll('.tx-row.selected-row')
+                    .forEach(function(r) { r.classList.remove('selected-row'); });
+            currentTxId = null;
+            originalValues = null;
+
+            setVal('f-concepto', '');
+            setVal('f-importe',  '');
+            setOpt('f-tipo',  '');
+            setOpt('f-cat',   '');
+            setOpt('f-grupo', '');
+            document.getElementById('pagadorSelect').innerHTML =
+                '<option value="">-- Yo (por defecto) --</option>';
+            document.getElementById('pagador-group').style.display = 'none';
+            document.getElementById('split-section').style.display = 'none';
+
+            document.getElementById('tx-form').action = '/web/transaction/create';
+            setCreateMode();
+            showPanel('New Transaction');
+            updateNewButton(true);
+        }
+
+        /* ── Clear / cancel ── */
+        function clearSelection() {
+            document.querySelectorAll('.tx-row.selected-row')
+                    .forEach(function(r) { r.classList.remove('selected-row'); });
+            currentTxId = null;
+            originalValues = null;
+            document.querySelector('.container-grid').classList.remove('panel-open');
+            document.getElementById('side-panel').classList.remove('panel-visible');
+            document.getElementById('panel-form-area').style.display = 'none';
+            updateNewButton(false);
+        }
+
+        /* ── Mode switches ── */
+        function setEditMode() {
+            show('btn-update');
+            hide('btn-create');
+            show('btn-delete');
+        }
+        function setCreateMode() {
+            hide('btn-update');
+            show('btn-create');
+            hide('btn-delete');
+        }
+        function showPanel(title) {
+            document.querySelector('.container-grid').classList.add('panel-open');
+            document.getElementById('side-panel').classList.add('panel-visible');
+            document.getElementById('panel-form-area').style.display = '';
+            document.getElementById('panel-title').textContent = title;
+        }
+
+        /* ── Change detection ── */
+        function checkChanges() {
+            if (!originalValues) return;
+            var btn = document.getElementById('btn-update');
+            var changed =
+                document.getElementById('f-concepto').value !== originalValues.concepto ||
+                parseFloat(document.getElementById('f-importe').value) !== parseFloat(originalValues.importe) ||
+                document.getElementById('f-tipo').value    !== originalValues.tipo  ||
+                document.getElementById('f-cat').value     !== originalValues.catId ||
+                document.getElementById('f-grupo').value   !== originalValues.grupoId;
+            btn.disabled    = !changed;
+            btn.textContent = changed ? 'Save Changes' : 'No changes to save';
+        }
+
+        /* ── Delete ── */
+        function deleteTransaction() {
+            if (!currentTxId) return;
+            if (!confirm('Delete this transaction?')) return;
+            document.getElementById('delete-tx-id').value = currentTxId;
+            document.getElementById('delete-form').submit();
+        }
+
+        /* ── Group / pagador interaction ── */
+        function onGrupoChange(groupId) {
+            checkChanges();
+            // Only show pagador in create mode
+            if (!currentTxId) {
+                updatePagadorSelector(groupId, null);
+            }
+        }
+
+        function updatePagadorSelector(groupId, preselectId) {
+            var pagadorGroup  = document.getElementById('pagador-group');
+            var pagadorSelect = document.getElementById('pagadorSelect');
+            pagadorSelect.innerHTML = '<option value="">-- Yo (por defecto) --</option>';
+
+            if (groupId && groupMembers[groupId]) {
+                groupMembers[groupId].forEach(function(m) {
+                    var opt = document.createElement('option');
+                    opt.value = m.id;
+                    opt.text  = m.nombre;
+                    var sel = preselectId
+                        ? String(m.id) === String(preselectId)
+                        : String(m.id) === String(currentUserId);
+                    if (sel) opt.selected = true;
+                    pagadorSelect.appendChild(opt);
+                });
+                pagadorGroup.style.display = '';
+            } else {
+                pagadorGroup.style.display = 'none';
+            }
+        }
+
+        /* ── Split in side panel ── */
+        function buildSplitSection(txId, grupoId, pagadorId, total) {
+            var list = document.getElementById('split-members-list');
+            list.innerHTML = '';
+            document.getElementById('side-split-sum').textContent    = '0.00';
+            document.getElementById('side-split-total').textContent  =
+                parseFloat(total).toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('side-split-status').textContent = '';
+            document.getElementById('side-split-status').className   = 'split-status-badge';
+
+            var saveBtn = document.getElementById('btn-side-split-save');
+            saveBtn.disabled             = true;
+            saveBtn.dataset.txId         = txId;
+            saveBtn.dataset.pagadorId    = pagadorId;
+            saveBtn.dataset.total        = total;
+            saveBtn.textContent          = 'Guardar Deudas';
+
+            var members = groupMembers[String(grupoId)] || [];
+            members.forEach(function(m) {
+                if (String(m.id) === String(pagadorId)) return;
+                var row = document.createElement('div');
+                row.className = 'split-member-row';
+                row.innerHTML =
+                    '<span class="split-member-name">' + escHtml(m.nombre) + '</span>' +
+                    '<div class="split-input-wrap">' +
+                        '<input type="number" step="0.01" min="0" placeholder="0.00" ' +
+                               'class="split-amount-input side-split-input" ' +
+                               'data-member-id="' + m.id + '" ' +
+                               'oninput="updateSideSplitTotal(' + parseFloat(total) + ')">' +
+                        '<span class="split-euro">€</span>' +
+                    '</div>';
+                list.appendChild(row);
+            });
+        }
+
+        function updateSideSplitTotal(totalAmount) {
+            var inputs = document.querySelectorAll('.side-split-input');
+            var sum = 0;
+            inputs.forEach(function(inp) { sum += parseFloat(inp.value) || 0; });
+            sum = Math.round(sum * 100) / 100;
+
+            document.getElementById('side-split-sum').textContent = sum.toFixed(2);
+
+            var valid    = sum > 0 && sum <= totalAmount + 0.001;
+            var saveBtn  = document.getElementById('btn-side-split-save');
+            var statusEl = document.getElementById('side-split-status');
+            if (saveBtn) saveBtn.disabled = !valid;
+            if (statusEl) {
+                if (sum > totalAmount + 0.001) {
+                    statusEl.textContent = '⚠ Supera el total';
+                    statusEl.className   = 'split-status-badge split-status-error';
+                } else if (valid) {
+                    statusEl.textContent = '✓ OK';
+                    statusEl.className   = 'split-status-badge split-status-ok';
+                } else {
+                    statusEl.textContent = '';
+                    statusEl.className   = 'split-status-badge';
+                }
+            }
+        }
+
+        async function guardarDeudasSide(btn) {
+            var txId      = btn.dataset.txId;
+            var pagadorId = btn.dataset.pagadorId;
+            var inputs    = document.querySelectorAll('.side-split-input');
+            var debts     = [];
+            inputs.forEach(function(inp) {
+                var amount = parseFloat(inp.value);
+                if (amount > 0) debts.push({ memberId: inp.dataset.memberId, amount: amount });
+            });
+            if (debts.length === 0) return;
+
+            btn.disabled    = true;
+            btn.textContent = 'Guardando…';
+
+            try {
+                var promises = debts.map(function(debt) {
+                    var params = new URLSearchParams();
+                    params.append('transaccionId', txId);
+                    params.append('deudorId',      debt.memberId);
+                    params.append('acreedorId',    pagadorId);
+                    params.append('importe',       debt.amount);
+                    return fetch('/web/transaction/crear-deuda', { method: 'POST', body: params, credentials: 'include' });
+                });
+                var responses = await Promise.all(promises);
+                if (responses.every(function(r) { return r.ok; })) {
+                    window.location.href = '/web/transaction';
+                } else {
+                    throw new Error('server');
+                }
+            } catch(e) {
+                btn.disabled    = false;
+                btn.textContent = 'Guardar Deudas';
+                alert('Error al guardar las deudas. Inténtalo de nuevo.');
+            }
+        }
+
+        /* ── Button toggle (＋ / ✕) ── */
+        function updateNewButton(panelOpen) {
+            var btn = document.getElementById('btn-new-tx');
+            if (panelOpen) {
+                btn.textContent = '✕';
+                btn.title       = 'Close';
+                btn.onclick     = clearSelection;
+            } else {
+                btn.textContent = '＋';
+                btn.title       = 'Add new';
+                btn.onclick     = showCreateForm;
+            }
+        }
+
+        /* ── Helpers ── */
+        function setVal(id, val) { document.getElementById(id).value = val || ''; }
+        function setOpt(id, val) {
+            var sel = document.getElementById(id);
+            for (var i = 0; i < sel.options.length; i++) {
+                sel.options[i].selected = sel.options[i].value === String(val);
+            }
+        }
+        function show(id) { document.getElementById(id).style.display = ''; }
+        function hide(id) { document.getElementById(id).style.display = 'none'; }
+        function escHtml(str) {
+            return String(str)
+                .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+                .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        /* ── Init: handle ?editId or ?showForm from server ── */
+        document.addEventListener('DOMContentLoaded', function() {
+            if (initEditId) {
+                var row = document.querySelector('.tx-row[data-id="' + initEditId + '"]');
+                if (row) selectTransaction(row);
+            } else if (initShowForm) {
+                showCreateForm();
+            }
+        });
+    </script>
+
 </body>
 </html>
