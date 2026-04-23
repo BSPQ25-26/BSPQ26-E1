@@ -14,7 +14,7 @@
         <a th:href="@{/web/user/profile}" class="back-link">← Back to Profile</a>
     </div>
 
-    <div class="container-grid">
+    <div class="container-grid" th:classappend="${showPanel} ? 'panel-open'">
 
         <!-- ===== LEFT COLUMN: group list ===== -->
         <div class="glass-card card-lista">
@@ -96,7 +96,6 @@
                                      class="activity-empty">
                                     No group expenses recorded yet
                                 </div>
-
                                 <th:block th:each="tx : ${groupTransactions[grupo.id]}">
                                     <div class="activity-tx">
                                         <div class="activity-tx-header">
@@ -179,7 +178,7 @@
         </div>
 
         <!-- ===== RIGHT COLUMN: create group form ===== -->
-        <div class="glass-card card-principal" th:if="${showPanel}">
+        <div class="glass-card card-principal" th:if="${showPanel}" th:classappend="'panel-visible'">
             <h2 class="card-title">New Group</h2>
 
             <form th:action="@{/web/groups/create}" method="post">
