@@ -13,32 +13,88 @@
         <h1 class="logo">Expen<span>Sense</span></h1>
 
         <div class="profile-content">
+
+            <!-- Avatar + identity -->
             <div class="avatar"
-                 th:text="${username != null ? #strings.toUpperCase(#strings.substring(username, 0, 1)) : 'U'}">U</div>
+                 th:text="${username != null ? #strings.toUpperCase(#strings.substring(username,0,1)) : 'U'}">U</div>
             <h2 class="user-name" th:text="${username ?: 'User'}">Name</h2>
             <p class="user-email" th:text="${email ?: ''}">email@example.com</p>
 
+            <!-- Balance -->
             <div class="balance-card">
-                <span class="balance-label">Current Balance</span>
+                <span class="balance-label">Net Balance</span>
                 <span class="balance-amount"
-                      th:style="${(balance != null and balance < 0) ? 'color: #ff4d4d' : 'color: #2ecc71'}">
-                    <span th:text="${balance != null} ? ${#numbers.formatDecimal(balance, 1, 'POINT', 2, 'COMMA')} : '0.00'">0.00</span> €
+                      th:style="${(balance != null and balance < 0) ? 'color:#ef4444' : 'color:#10b981'}">
+                    <span th:text="${balance != null}
+                                   ? ${#numbers.formatDecimal(balance,1,'POINT',2,'COMMA')}
+                                   : '0.00'">0.00</span> €
                 </span>
             </div>
 
-            <div class="debt-row">
-                <div class="debt-card debt-positive">
-                    <span class="debt-label">Owed to you</span>
-                    <span class="debt-amount"
-                          th:text="${owed != null} ? ${#numbers.formatDecimal(owed, 1, 'POINT', 2, 'COMMA')} + ' €' : '0.00 €'">0.00 €</span>
-                </div>
-                <div class="debt-card debt-negative">
+            <!-- Summary row: owes / owed (hidden when zero) -->
+            <div class="debt-row"
+                 th:if="${(owes != null and owes > 0) or (owed != null and owed > 0)}">
+                <div class="debt-card debt-negative" th:if="${owes != null and owes > 0}">
                     <span class="debt-label">You owe</span>
                     <span class="debt-amount"
-                          th:text="${owes != null} ? ${#numbers.formatDecimal(owes, 1, 'POINT', 2, 'COMMA')} + ' €' : '0.00 €'">0.00 €</span>
+                          th:text="${#numbers.formatDecimal(owes,1,'POINT',2,'COMMA')} + ' €'">0.00 €</span>
+                </div>
+                <div class="debt-card debt-positive" th:if="${owed != null and owed > 0}">
+                    <span class="debt-label">Owed to you</span>
+                    <span class="debt-amount"
+                          th:text="${#numbers.formatDecimal(owed,1,'POINT',2,'COMMA')} + ' €'">0.00 €</span>
                 </div>
             </div>
 
+            <!-- ===== DEBES (user is debtor) ===== -->
+            <div class="debt-section"
+                 th:if="${debtsAsDebtor != null and !debtsAsDebtor.empty}">
+                <h3 class="debt-section-title">Debes</h3>
+
+                <div th:each="d : ${debtsAsDebtor}" class="debt-item debt-item-owe">
+                    <div class="debt-item-info">
+                        <p class="debt-item-concepto"
+                           th:text="${d.transaccionOriginal.concepto}">Concepto</p>
+                        <p class="debt-item-person">
+                            A: <span th:text="${d.acreedor.nombre}">Acreedor</span>
+                        </p>
+                    </div>
+                    <span class="debt-item-amount amount-owe"
+                          th:text="${#numbers.formatDecimal(d.importe,1,'POINT',2,'COMMA')} + ' €'">0.00 €</span>
+                    <form th:action="@{/web/transaction/pay-debt}" method="post" style="margin:0">
+                        <input type="hidden" name="deudaId" th:value="${d.id}">
+                        <button type="submit" class="btn-pay"
+                                onclick="return confirm('Pay this debt?')">Pay</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ===== TE DEBEN (user is creditor) ===== -->
+            <div class="debt-section"
+                 th:if="${debtsAsCreditor != null and !debtsAsCreditor.empty}">
+                <h3 class="debt-section-title">Te deben</h3>
+
+                <div th:each="d : ${debtsAsCreditor}" class="debt-item debt-item-owed">
+                    <div class="debt-item-info">
+                        <p class="debt-item-concepto"
+                           th:text="${d.transaccionOriginal.concepto}">Concepto</p>
+                        <p class="debt-item-person">
+                            De: <span th:text="${d.deudor.nombre}">Deudor</span>
+                        </p>
+                    </div>
+                    <span class="debt-item-amount amount-owed"
+                          th:text="${#numbers.formatDecimal(d.importe,1,'POINT',2,'COMMA')} + ' €'">0.00 €</span>
+                </div>
+            </div>
+
+            <!-- No debts at all -->
+            <p th:if="${(debtsAsDebtor == null or debtsAsDebtor.empty)
+                        and (debtsAsCreditor == null or debtsAsCreditor.empty)}"
+               style="font-size:0.82rem; color:#9ca3af; margin:16px 0 0; text-align:center;">
+                No pending debts 🎉
+            </p>
+
+            <!-- Action buttons -->
             <div class="actions">
                 <a th:href="@{/web/transaction}" class="btn-login">View Transactions</a>
                 <a th:href="@{/web/categories}" class="btn-secondary">Manage Categories</a>
@@ -47,6 +103,7 @@
                     <button type="submit" class="btn-logout">Sign Out</button>
                 </form>
             </div>
+
         </div>
     </div>
 

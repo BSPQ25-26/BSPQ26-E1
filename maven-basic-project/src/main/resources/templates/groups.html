@@ -38,49 +38,144 @@
             </div>
 
             <div class="groups-list" th:if="${!listaGrupos.empty}">
-                <div th:each="grupo : ${listaGrupos}" class="group-card">
+                <div th:each="grupo : ${listaGrupos}" class="group-card"
+                     th:with="bal=${groupNetBalance[grupo.id] != null ? groupNetBalance[grupo.id] : 0.0}">
 
-                    <div class="group-card-header">
-                        <div>
+                    <!-- ── Accordion header (clickable) ── -->
+                    <div class="group-card-header" onclick="toggleGroup(this)">
+                        <div class="group-header-left">
                             <h3 class="group-name" th:text="${grupo.nombre}">Name</h3>
                             <p class="group-desc"
                                th:text="${grupo.descripcion != null and !grupo.descripcion.blank} ? ${grupo.descripcion} : 'No description'">
                                No description</p>
                         </div>
-                        <span class="group-badge" th:text="${grupo.numeroMiembros} + ' 👤'">1 👤</span>
-                    </div>
-
-                    <div class="group-members">
-                        <p class="members-title">Members</p>
-                        <div th:each="email : ${grupo.miembrosEmails}" class="member-row">
-                            <span th:text="${email}">email</span>
-                            <form th:action="@{/web/groups/removeMember}" method="post" class="inline-form">
-                                <input type="hidden" name="groupId" th:value="${grupo.id}">
-                                <input type="hidden" name="userEmail" th:value="${email}">
-                                <button type="submit" class="btn-mini-delete" title="Remove member">✕</button>
-                            </form>
+                        <div class="group-header-badges">
+                            <span class="group-badge" th:text="${grupo.numeroMiembros} + ' 👤'">1 👤</span>
+                            <span class="group-balance-badge bal-positive"
+                                  th:if="${bal > 0.001}"
+                                  th:text="'+' + ${#numbers.formatDecimal(bal,1,'POINT',2,'COMMA')} + ' €'">+0.00 €</span>
+                            <span class="group-balance-badge bal-negative"
+                                  th:if="${bal < -0.001}"
+                                  th:text="${#numbers.formatDecimal(bal,1,'POINT',2,'COMMA')} + ' €'">-0.00 €</span>
+                            <span class="group-balance-badge bal-zero"
+                                  th:if="${bal >= -0.001 and bal <= 0.001}">✓</span>
+                            <span class="group-chevron">&#9662;</span>
                         </div>
                     </div>
 
-                    <form th:action="@{/web/groups/addMember}" method="post" class="invite-form">
-                        <input type="hidden" name="groupId" th:value="${grupo.id}">
-                        <input type="email" name="userEmail" placeholder="Invite by email..." required>
-                        <button type="submit" class="btn-invite">Invite</button>
-                    </form>
+                    <!-- ── Collapsible body ── -->
+                    <div class="group-card-body">
+                        <div class="group-card-body-inner">
 
-                    <form th:action="@{/web/groups/delete}" method="post"
-                          onsubmit="return confirm('Are you sure you want to delete this group? This cannot be undone.')">
-                        <input type="hidden" name="groupId" th:value="${grupo.id}">
-                        <button type="submit" class="btn-delete-group">🗑 Delete Group</button>
-                    </form>
+                            <!-- Members + Invite -->
+                            <div class="group-members-block">
+                                <p class="members-title">Members</p>
+                                <div th:each="email : ${grupo.miembrosEmails}" class="member-row">
+                                    <span th:text="${email}">email</span>
+                                    <form th:action="@{/web/groups/removeMember}" method="post" class="inline-form">
+                                        <input type="hidden" name="groupId" th:value="${grupo.id}">
+                                        <input type="hidden" name="userEmail" th:value="${email}">
+                                        <button type="submit" class="btn-mini-delete" title="Remove member">✕</button>
+                                    </form>
+                                </div>
+                                <form th:action="@{/web/groups/addMember}" method="post" class="invite-form">
+                                    <input type="hidden" name="groupId" th:value="${grupo.id}">
+                                    <input type="email" name="userEmail" placeholder="Invite by email..." required>
+                                    <button type="submit" class="btn-invite">Invite</button>
+                                </form>
+                            </div>
 
-                    <small class="group-date"
-                           th:if="${grupo.fechaCreacion != null}"
-                           th:text="'Created on ' + ${#temporals.format(grupo.fechaCreacion, 'MM/dd/yyyy')}">
-                    </small>
+                            <!-- Separator -->
+                            <div class="section-divider"></div>
+
+                            <!-- Activity -->
+                            <div class="group-activity">
+                                <p class="members-title">Activity</p>
+
+                                <div th:if="${groupTransactions[grupo.id] == null or groupTransactions[grupo.id].empty}"
+                                     class="activity-empty">
+                                    No group expenses recorded yet
+                                </div>
+
+                                <th:block th:each="tx : ${groupTransactions[grupo.id]}">
+                                    <div class="activity-tx">
+                                        <div class="activity-tx-header">
+                                            <span class="activity-tx-name" th:text="${tx.concepto}">Expense</span>
+                                            <span class="activity-tx-amount"
+                                                  th:text="'-' + ${#numbers.formatDecimal(tx.importeTotal,1,'POINT',2,'COMMA')} + ' €'">0 €</span>
+                                        </div>
+                                        <div class="activity-tx-meta">
+                                            <span th:text="${tx.creador != null ? 'Paid by ' + tx.creador.nombre : ''}"></span>
+                                            <span th:if="${tx.fecha != null}"
+                                                  th:text="${#temporals.format(tx.fecha, 'MM/dd')}"></span>
+                                        </div>
+                                        <div class="activity-debts">
+                                            <div th:if="${txDebts[tx.id] == null or txDebts[tx.id].empty}"
+                                                 class="activity-no-split">Not split yet</div>
+                                            <div th:each="d : ${txDebts[tx.id]}"
+                                                 class="activity-debt"
+                                                 th:classappend="${d.deudor.id == currentUserId ? ' debt-highlight-owe' :
+                                                                  (d.acreedor.id == currentUserId ? ' debt-highlight-owed' : '')}">
+                                                <span class="debt-parties">
+                                                    <span th:text="${d.deudor.id == currentUserId ? 'Me' : d.deudor.nombre}">Deudor</span>
+                                                    <span class="debt-arrow">→</span>
+                                                    <span th:text="${d.acreedor.id == currentUserId ? 'Me' : d.acreedor.nombre}">Acreedor</span>
+                                                </span>
+                                                <span class="debt-right">
+                                                    <span class="debt-amount-small"
+                                                          th:text="${#numbers.formatDecimal(d.importe,1,'POINT',2,'COMMA')} + ' €'">0 €</span>
+                                                    <span class="debt-chip"
+                                                          th:classappend="${d.estado.name() == 'PENDIENTE' ? ' chip-pending' : ' chip-paid'}"
+                                                          th:text="${d.estado.name() == 'PENDIENTE' ? 'Pending' : 'Paid'}">Status</span>
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th:block>
+                            </div>
+
+                            <!-- Delete + date -->
+                            <form th:action="@{/web/groups/delete}" method="post"
+                                  onsubmit="return confirm('Are you sure you want to delete this group? This cannot be undone.')">
+                                <input type="hidden" name="groupId" th:value="${grupo.id}">
+                                <button type="submit" class="btn-delete-group">🗑 Delete Group</button>
+                            </form>
+
+                            <small class="group-date"
+                                   th:if="${grupo.fechaCreacion != null}"
+                                   th:text="'Created on ' + ${#temporals.format(grupo.fechaCreacion, 'MM/dd/yyyy')}">
+                            </small>
+
+                        </div>
+                    </div>
 
                 </div>
             </div>
+
+            <script>
+                function toggleGroup(header) {
+                    var card = header.closest('.group-card');
+                    var body = card.querySelector('.group-card-body');
+                    var isOpen = card.classList.contains('open');
+
+                    // Close all other cards (accordion behaviour)
+                    document.querySelectorAll('.group-card.open').forEach(function(c) {
+                        if (c !== card) {
+                            c.classList.remove('open');
+                            c.querySelector('.group-card-body').style.maxHeight = null;
+                        }
+                    });
+
+                    // Toggle this card
+                    if (isOpen) {
+                        card.classList.remove('open');
+                        body.style.maxHeight = null;
+                    } else {
+                        card.classList.add('open');
+                        body.style.maxHeight = body.scrollHeight + 'px';
+                    }
+                }
+            </script>
         </div>
 
         <!-- ===== RIGHT COLUMN: create group form ===== -->
