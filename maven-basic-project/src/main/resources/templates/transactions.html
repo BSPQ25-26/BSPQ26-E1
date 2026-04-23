@@ -28,6 +28,13 @@
 
             <div th:if="${error}" class="flash-error" th:text="${error}"></div>
 
+            <!-- Client-side filter bar — no page reload -->
+            <div class="filter-bar" id="tx-filter-bar">
+                <button class="filter-btn active" data-filter="ALL"    onclick="filterTx('ALL')">All</button>
+                <button class="filter-btn"         data-filter="GASTO"  onclick="filterTx('GASTO')">Expenses</button>
+                <button class="filter-btn"         data-filter="INGRESO" onclick="filterTx('INGRESO')">Income</button>
+            </div>
+
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -45,10 +52,10 @@
                             </td>
                         </tr>
 
-                        <th:block th:each="t : ${transactions}">
+                        <th:block th:each="t : ${transactions}"
+                                  th:with="isPago=${t.concepto != null and #strings.startsWith(t.concepto,'Pago de deuda')}">
                             <tr class="tx-row"
-                                th:classappend="${t.tipoTransaccion == 'LIQUIDACION' ? ' row-liquidacion' :
-                                               (t.tipoTransaccion == 'INGRESO' and t.concepto != null and #strings.startsWith(t.concepto,'Pago de deuda')) ? ' row-cobro-deuda' :
+                                th:classappend="${(t.tipoTransaccion == 'LIQUIDACION' or isPago) ? ' row-liquidacion' :
                                                (t.grupo != null and t.tipoTransaccion == 'GASTO') ? ' row-grupo-gasto' : ''}"
                                 th:attr="data-id=${t.id},
                                          data-concepto=${t.concepto},
@@ -58,24 +65,20 @@
                                          data-grupo-id=${t.grupo != null ? t.grupo.id : ''},
                                          data-pagador-id=${t.creador != null ? t.creador.id : ''},
                                          data-is-split=${txWithDebts.contains(t.id)},
-                                         data-is-pago=${#strings.startsWith(t.concepto,'Pago de deuda')}"
+                                         data-is-pago=${isPago}"
                                 onclick="selectTransaction(this)">
 
-                                <!-- Description + badges -->
+                                <!-- Description + group badge only (tipo badges removed) -->
                                 <td>
-                                    <span th:text="${t.concepto}">Description</span>
+                                    <span th:text="${#strings.replace(t.concepto, 'Pago de deuda', 'Debt Payment')}">Description</span>
                                     <span th:if="${t.grupo != null}" class="badge-group"
                                           th:text="${t.grupo.nombre}">Group</span>
-                                    <span th:if="${t.tipoTransaccion == 'LIQUIDACION'}"
-                                          class="badge-tipo badge-liquidacion">Liquidación</span>
-                                    <span th:if="${t.tipoTransaccion == 'INGRESO' and #strings.startsWith(t.concepto,'Pago de deuda')}"
-                                          class="badge-tipo badge-cobro-deuda">Cobro deuda</span>
-                                    <span th:if="${t.tipoTransaccion == 'INGRESO' and !#strings.startsWith(t.concepto,'Pago de deuda')}"
-                                          class="badge-tipo badge-ingreso">Ingreso</span>
                                 </td>
 
-                                <!-- Amount -->
-                                <td th:classappend="${t.tipoTransaccion == 'INGRESO' ? ' text-green' : (t.tipoTransaccion == 'LIQUIDACION' ? ' text-orange' : ' text-red')}"
+                                <!-- Amount: orange for debt-related, green for normal income, red for expenses -->
+                                <td th:classappend="${t.tipoTransaccion == 'GASTO' ? ' text-red' :
+                                                    (t.tipoTransaccion == 'INGRESO' and !isPago) ? ' text-green' :
+                                                    ' text-orange'}"
                                     th:text="${(t.tipoTransaccion == 'INGRESO' ? '+' : '-') + #numbers.formatDecimal(t.importeTotal, 1, 'POINT', 2, 'COMMA') + ' €'}">
                                     0.00 €
                                 </td>
@@ -84,6 +87,9 @@
 
                     </tbody>
                 </table>
+                <div id="filter-empty" class="empty-state" style="display:none">
+                    <p>No transactions match this filter.</p>
+                </div>
             </div>
         </div>
 
@@ -113,12 +119,18 @@
                         </div>
                         <div class="input-group">
                             <label>Type</label>
-                            <select id="f-tipo" name="tipoTransaccion"
-                                    onchange="checkChanges()" required>
+                            <!--
+                              Select has NO name — value is carried by the hidden input below.
+                              When a group is selected, the select is locked to GASTO via JS
+                              (.field-locked CSS + pointer-events:none) without using disabled,
+                              so the visual state is clear and the hidden input always submits.
+                            -->
+                            <select id="f-tipo" onchange="onTipoChange()" required>
                                 <option value="">-- Select --</option>
                                 <option value="GASTO">Expense</option>
                                 <option value="INGRESO">Income</option>
                             </select>
+                            <input type="hidden" id="f-tipo-val" name="tipoTransaccion">
                         </div>
                     </div>
 
@@ -196,6 +208,33 @@
                 </form>
             </div>
 
+            <!-- Read-only detail panel: shown for debt payments (LIQUIDACION) and collections -->
+            <div id="panel-detail-area" style="display:none">
+                <h2 class="card-title" id="detail-title">Transaction Detail</h2>
+
+                <div class="detail-field">
+                    <span class="detail-label">Description</span>
+                    <p id="detail-concepto" class="detail-value"></p>
+                </div>
+
+                <div class="form-row">
+                    <div class="detail-field">
+                        <span class="detail-label">Amount</span>
+                        <p id="detail-importe" class="detail-value detail-amount"></p>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">Type</span>
+                        <p id="detail-tipo" class="detail-value"></p>
+                    </div>
+                </div>
+
+                <p id="detail-note" class="detail-note"></p>
+
+                <div class="panel-btn-stack">
+                    <button type="button" class="btn-logout" onclick="clearSelection()">Close</button>
+                </div>
+            </div>
+
             <!-- Hidden delete form -->
             <form id="delete-form" th:action="@{/web/transaction/delete}"
                   method="post" style="display:none">
@@ -226,43 +265,50 @@
                     .forEach(function(r) { r.classList.remove('selected-row'); });
             row.classList.add('selected-row');
 
-            var id       = row.dataset.id;
-            var concepto = row.dataset.concepto;
-            var importe  = row.dataset.importe;
-            var tipo     = row.dataset.tipo;
-            var catId    = row.dataset.catId    || '';
-            var grupoId  = row.dataset.grupoId  || '';
-            var pagadorId = row.dataset.pagadorId || String(currentUserId);
-            var isSplit  = row.dataset.isSplit  === 'true';
+            var id        = row.dataset.id;
+            var concepto  = row.dataset.concepto;
+            var importe   = row.dataset.importe;
+            var tipo      = row.dataset.tipo;
+            var isPago    = row.dataset.isPago === 'true';
 
-            currentTxId      = id;
+            currentTxId = id;
+
+            // Debt payments (LIQUIDACION) and debt collections (INGRESO + isPago)
+            // → read-only detail panel, no form
+            if (tipo === 'LIQUIDACION' || isPago) {
+                showDebtDetail(tipo, concepto, importe);
+                updateNewButton(true);
+                return;
+            }
+
+            // Normal transactions → editable form
+            var catId     = row.dataset.catId    || '';
+            var grupoId   = row.dataset.grupoId  || '';
+            var pagadorId = row.dataset.pagadorId || String(currentUserId);
+            var isSplit   = row.dataset.isSplit  === 'true';
+
             currentPagadorId = pagadorId;
             currentTotal     = parseFloat(importe);
 
-            // Populate fields
             setVal('f-concepto', concepto);
             setVal('f-importe',  importe);
             setOpt('f-tipo',  tipo);
             setOpt('f-cat',   catId);
             setOpt('f-grupo', grupoId);
 
-            // Pagador hidden in edit mode
-            document.getElementById('pagador-group').style.display = 'none';
+            lockTipoForGroup(grupoId);
 
-            // Form action
+            document.getElementById('pagador-group').style.display = 'none';
             document.getElementById('tx-form').action = '/web/transaction/edit/' + id;
 
-            // Snapshot for change detection
             originalValues = { concepto: concepto, importe: importe,
                                tipo: tipo, catId: catId, grupoId: grupoId };
 
             setEditMode();
             checkChanges();
 
-            // Split section
-            var isGroupGasto = grupoId && tipo === 'GASTO';
             var splitSec = document.getElementById('split-section');
-            if (isGroupGasto && !isSplit) {
+            if (grupoId && tipo === 'GASTO' && !isSplit) {
                 splitSec.style.display = '';
                 buildSplitSection(id, grupoId, pagadorId, currentTotal);
             } else {
@@ -290,6 +336,9 @@
             document.getElementById('pagador-group').style.display = 'none';
             document.getElementById('split-section').style.display = 'none';
 
+            // Unlock type field for new transactions without a group
+            lockTipoForGroup('');
+
             document.getElementById('tx-form').action = '/web/transaction/create';
             setCreateMode();
             showPanel('New Transaction');
@@ -304,7 +353,8 @@
             originalValues = null;
             document.querySelector('.container-grid').classList.remove('panel-open');
             document.getElementById('side-panel').classList.remove('panel-visible');
-            document.getElementById('panel-form-area').style.display = 'none';
+            document.getElementById('panel-form-area').style.display  = 'none';
+            document.getElementById('panel-detail-area').style.display = 'none';
             updateNewButton(false);
         }
 
@@ -322,8 +372,33 @@
         function showPanel(title) {
             document.querySelector('.container-grid').classList.add('panel-open');
             document.getElementById('side-panel').classList.add('panel-visible');
-            document.getElementById('panel-form-area').style.display = '';
+            document.getElementById('panel-form-area').style.display  = '';
+            document.getElementById('panel-detail-area').style.display = 'none';
             document.getElementById('panel-title').textContent = title;
+        }
+
+        function showDebtDetail(tipo, concepto, importe) {
+            var isLiquidacion = tipo === 'LIQUIDACION';
+            var title     = isLiquidacion ? 'Debt Payment' : 'Debt Collection';
+            var typeLabel = isLiquidacion ? 'Settlement (paid out)' : 'Collected debt';
+            var sign      = isLiquidacion ? '−' : '+';
+            var label     = isLiquidacion
+                ? 'Generated automatically when a debt was settled.'
+                : 'Generated automatically when a debt payment was received.';
+
+            document.getElementById('detail-title').textContent    = title;
+            document.getElementById('detail-concepto').textContent  = concepto.replace('Pago de deuda', 'Debt Payment');
+            document.getElementById('detail-tipo').textContent      = typeLabel;
+            document.getElementById('detail-note').textContent      = label;
+
+            var amtEl = document.getElementById('detail-importe');
+            amtEl.textContent = sign + parseFloat(importe).toFixed(2).replace('.', ',') + ' €';
+            amtEl.className   = 'detail-value detail-amount text-orange';
+
+            document.querySelector('.container-grid').classList.add('panel-open');
+            document.getElementById('side-panel').classList.add('panel-visible');
+            document.getElementById('panel-form-area').style.display   = 'none';
+            document.getElementById('panel-detail-area').style.display = '';
         }
 
         /* ── Change detection ── */
@@ -350,8 +425,8 @@
 
         /* ── Group / pagador interaction ── */
         function onGrupoChange(groupId) {
+            lockTipoForGroup(groupId);   // enforce GASTO when group is selected
             checkChanges();
-            // Only show pagador in create mode
             if (!currentTxId) {
                 updatePagadorSelector(groupId, null);
             }
@@ -504,6 +579,46 @@
             return String(str)
                 .replace(/&/g,'&amp;').replace(/</g,'&lt;')
                 .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        /* ── Type field: sync hidden input & enforce group lock ── */
+        function onTipoChange() {
+            document.getElementById('f-tipo-val').value = document.getElementById('f-tipo').value;
+            checkChanges();
+        }
+
+        function lockTipoForGroup(groupId) {
+            var sel    = document.getElementById('f-tipo');
+            var hidden = document.getElementById('f-tipo-val');
+            if (groupId) {
+                sel.value    = 'GASTO';
+                hidden.value = 'GASTO';
+                sel.classList.add('field-locked');
+                sel.title = 'Group transactions must be Expenses';
+            } else {
+                sel.classList.remove('field-locked');
+                sel.title    = '';
+                hidden.value = sel.value;
+            }
+        }
+
+        /* ── Client-side filter ── */
+        function filterTx(tipo) {
+            document.querySelectorAll('.filter-btn').forEach(function(b) {
+                b.classList.toggle('active', b.dataset.filter === tipo);
+            });
+            var count = 0;
+            document.querySelectorAll('.tx-row').forEach(function(row) {
+                var visible = tipo === 'ALL' || row.dataset.tipo === tipo;
+                row.style.display = visible ? '' : 'none';
+                if (visible) count++;
+            });
+            // If the selected row became hidden, close the panel
+            var sel = document.querySelector('.tx-row.selected-row');
+            if (sel && sel.style.display === 'none') clearSelection();
+            // Show empty-state hint when filter yields zero results
+            var hint = document.getElementById('filter-empty');
+            if (hint) hint.style.display = count === 0 ? '' : 'none';
         }
 
         /* ── Init: handle ?editId or ?showForm from server ── */

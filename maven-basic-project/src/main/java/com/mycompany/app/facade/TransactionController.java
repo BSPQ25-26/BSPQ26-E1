@@ -1,6 +1,5 @@
 package com.mycompany.app.facade;
 
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +13,7 @@ import com.mycompany.app.dto.PayDebtDTO;
 import com.mycompany.app.dto.TransactionCreationDTO;
 import com.mycompany.app.dto.TransactionDeletionDTO;
 import com.mycompany.app.dto.TransactionEditionDTO;
+import com.mycompany.app.dto.TranscactionDebtEditionDTO;
 import com.mycompany.app.service.AuthService;
 import com.mycompany.app.service.TransactionService;
 
@@ -154,6 +154,27 @@ public class TransactionController {
         }
 
         Boolean result = transactionService.pagarDeuda(deudaId);
+        if (result) { return new ResponseEntity<>(HttpStatus.OK); }
+        else { return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
+    }
+
+    @Operation(
+        summary = "Edit transaction and its debts",
+        description = "Edit a transaction and all its associated debts. Fails if any debt is already paid.",
+        responses = {
+                @ApiResponse(responseCode = "200", description = "OK: transaction and debts edited successfully"),
+                @ApiResponse(responseCode = "400", description = "Bad Request: transaction not found or a debt is already paid"),
+                @ApiResponse(responseCode = "401", description = "Unauthorized: invalid credentials")
+        }
+    )
+    @PostMapping("/edit-with-deudas/{transactionId}")
+    public ResponseEntity<String> editTransactionWithDeudas(@RequestBody TranscactionDebtEditionDTO request,
+            @PathVariable("transactionId") Integer transactionId) {
+        if (!authService.isValidToken(request.getToken())) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Boolean result = transactionService.editTransactionWithDeudas(request, transactionId);
         if (result) { return new ResponseEntity<>(HttpStatus.OK); }
         else { return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
     }

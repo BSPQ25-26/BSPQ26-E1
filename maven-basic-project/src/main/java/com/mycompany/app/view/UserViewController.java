@@ -3,10 +3,8 @@ package com.mycompany.app.view;
 import com.mycompany.app.dto.UserCreationDTO;
 import com.mycompany.app.model.Deuda;
 import com.mycompany.app.model.EstadoDeuda;
-import com.mycompany.app.model.Transaction;
 import com.mycompany.app.model.Usuario;
 import com.mycompany.app.repository.DeudaRepository;
-import com.mycompany.app.repository.TransactionRepository;
 import com.mycompany.app.repository.UsuarioRepository;
 import com.mycompany.app.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -26,18 +24,15 @@ public class UserViewController {
 
     private final AuthService authService;
     private final UsuarioRepository usuarioRepository;
-    private final TransactionRepository transactionRepository;
     private final DeudaRepository deudaRepository;
     private final RestTemplate restTemplate;
 
     public UserViewController(AuthService authService,
                                UsuarioRepository usuarioRepository,
-                               TransactionRepository transactionRepository,
                                DeudaRepository deudaRepository,
                                RestTemplate restTemplate) {
         this.authService = authService;
         this.usuarioRepository = usuarioRepository;
-        this.transactionRepository = transactionRepository;
         this.deudaRepository = deudaRepository;
         this.restTemplate = restTemplate;
     }
@@ -82,17 +77,8 @@ public class UserViewController {
         Usuario user = usuarioRepository.findByEmail(email);
         if (user == null) return "redirect:/web/auth/login";
 
-        // Balance = INGRESO - GASTO - LIQUIDACION from all user's transactions
-        List<Transaction> myTransactions = transactionRepository.findByCreador(user);
-        double balance = 0.0;
-        for (Transaction t : myTransactions) {
-            switch (t.getTipoTransaccion()) {
-                case "INGRESO"     -> balance += t.getImporteTotal();
-                case "GASTO",
-                     "LIQUIDACION" -> balance -= t.getImporteTotal();
-                default            -> { /* ignore unknown types */ }
-            }
-        }
+        // Balance comes directly from the Usuario entity (maintained by TransactionService)
+        double balance = user.getBalance() != null ? user.getBalance() : 0.0;
 
         // Debts where user is debtor (PENDIENTE)
         List<Deuda> debtsAsDebtor = deudaRepository.findByDeudorId(user.getId()).stream()

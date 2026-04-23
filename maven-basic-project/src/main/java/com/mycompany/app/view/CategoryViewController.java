@@ -1,8 +1,8 @@
 package com.mycompany.app.view;
 
 import com.mycompany.app.dto.CategoryCreationDTO;
+import com.mycompany.app.dto.CategoryDeletionDTO;
 import com.mycompany.app.model.Usuario;
-import com.mycompany.app.repository.CategoryRepository;
 import com.mycompany.app.repository.UsuarioRepository;
 import com.mycompany.app.service.AuthService;
 import com.mycompany.app.service.CategoryService;
@@ -15,16 +15,13 @@ import org.springframework.web.bind.annotation.*;
 public class CategoryViewController {
 
     private final CategoryService categoryService;
-    private final CategoryRepository categoryRepository;
     private final UsuarioRepository usuarioRepository;
     private final AuthService authService;
 
     public CategoryViewController(CategoryService categoryService,
-                                   CategoryRepository categoryRepository,
                                    UsuarioRepository usuarioRepository,
                                    AuthService authService) {
         this.categoryService = categoryService;
-        this.categoryRepository = categoryRepository;
         this.usuarioRepository = usuarioRepository;
         this.authService = authService;
     }
@@ -67,14 +64,19 @@ public class CategoryViewController {
         return "redirect:/web/categories";
     }
 
-    //HTML forms do not support DELETE functions so this has to be a POST
+    // HTML forms do not support DELETE, so this has to be a POST
     @PostMapping("/delete")
     public String deleteCategory(
             @CookieValue(value = "token", required = false) String token,
             @RequestParam Integer categoryId
     ) {
         if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
-        if (categoryId != null) categoryRepository.deleteById(categoryId);
+        if (categoryId != null) {
+            CategoryDeletionDTO dto = new CategoryDeletionDTO();
+            dto.setCategoryId(categoryId);
+            dto.setToken(token);
+            categoryService.deleteCategory(dto);
+        }
         return "redirect:/web/categories";
     }
 }

@@ -222,8 +222,8 @@ public class TransactionViewController {
     }
 
     private void loadModelAttributes(Usuario user, String email, Model model) {
-        // Only user's own transactions, sorted newest first
-        List<Transaction> allTransactions = new ArrayList<>(transactionRepository.findByCreador(user));
+        // Only user's own transactions, sorted newest first (findByCreadorId avoids loading the full entity)
+        List<Transaction> allTransactions = new ArrayList<>(transactionRepository.findByCreadorId(user.getId()));
         allTransactions.sort(Comparator.comparing(Transaction::getFecha,
                 Comparator.nullsLast(Comparator.reverseOrder())));
 
@@ -241,47 +241,24 @@ public class TransactionViewController {
             }
         }
 
-        // Member counts for the Repartir panel
-        Set<Integer> groupIds = new HashSet<>();
-        for (Transaction t : allTransactions) {
-            if (t.getGrupo() != null && t.getGrupo().getId() != null) groupIds.add(t.getGrupo().getId());
-        }
-        Map<Integer, Integer> groupMemberCounts = new HashMap<>();
-        Map<String, Object> groupMembersData = new HashMap<>();
-        for (Integer gid : groupIds) {
-            Group withMembers = groupRepository.findByIdWithMiembros(gid).orElse(null);
-            if (withMembers != null && withMembers.getMiembros() != null) {
-                groupMemberCounts.put(gid, withMembers.getMiembros().size());
-                List<Map<String, Object>> members = new ArrayList<>();
-                for (Usuario m : withMembers.getMiembros()) {
-                    Map<String, Object> md = new HashMap<>();
-                    md.put("id", m.getId());
-                    md.put("nombre", m.getNombre());
-                    members.add(md);
-                }
-                groupMembersData.put(String.valueOf(gid), members);
-            }
-        }
-
         // Groups the user belongs to (for the create-form dropdown)
         List<Group> myGroups = groupRepository.findByMiembrosEmail(email);
 
-        // Ensure groupMembersData covers ALL user groups, not just those with prior transactions
+        // Build member map for all user groups in a single pass (eliminates duplicate iteration)
+        Map<Integer, Integer> groupMemberCounts = new HashMap<>();
+        Map<String, Object> groupMembersData = new HashMap<>();
         for (Group g : myGroups) {
-            String key = String.valueOf(g.getId());
-            if (!groupMembersData.containsKey(key)) {
-                Group withMembers = groupRepository.findByIdWithMiembros(g.getId()).orElse(null);
-                if (withMembers != null && withMembers.getMiembros() != null) {
-                    List<Map<String, Object>> members = new ArrayList<>();
-                    for (Usuario m : withMembers.getMiembros()) {
-                        Map<String, Object> md = new HashMap<>();
-                        md.put("id", m.getId());
-                        md.put("nombre", m.getNombre());
-                        members.add(md);
-                    }
-                    groupMembersData.put(key, members);
-                }
+            Group withMembers = groupRepository.findByIdWithMiembros(g.getId()).orElse(null);
+            if (withMembers == null || withMembers.getMiembros() == null) continue;
+            groupMemberCounts.put(withMembers.getId(), withMembers.getMiembros().size());
+            List<Map<String, Object>> members = new ArrayList<>();
+            for (Usuario m : withMembers.getMiembros()) {
+                Map<String, Object> md = new HashMap<>();
+                md.put("id", m.getId());
+                md.put("nombre", m.getNombre());
+                members.add(md);
             }
+            groupMembersData.put(String.valueOf(withMembers.getId()), members);
         }
 
         model.addAttribute("transactions", allTransactions);
