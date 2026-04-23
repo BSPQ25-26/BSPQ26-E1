@@ -3,6 +3,7 @@ package com.mycompany.app.view;
 import com.mycompany.app.dto.DeudaCreationDTO;
 import com.mycompany.app.dto.TransactionCreationDTO;
 import com.mycompany.app.model.Deuda;
+import com.mycompany.app.model.EstadoDeuda;
 import com.mycompany.app.model.Group;
 import com.mycompany.app.model.Transaction;
 import com.mycompany.app.model.Usuario;
@@ -26,6 +27,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/web/transaction")
@@ -76,8 +78,10 @@ public class TransactionViewController {
         if (editId != null) {
             transactionRepository.findById(editId).ifPresent(t -> model.addAttribute("editTransaction", t));
             model.addAttribute("showForm", true);
+            model.addAttribute("editTxHasDebts", !deudaRepository.findByTransaccionOriginalId(editId).isEmpty());
         } else {
             model.addAttribute("showForm", Boolean.TRUE.equals(showForm));
+            model.addAttribute("editTxHasDebts", false);
         }
 
         return "transactions";
@@ -180,41 +184,71 @@ public class TransactionViewController {
         return ResponseEntity.ok("OK");
     }
 
-    @PostMapping("/repartir/{id}")
-    public String repartirGasto(
+    @PostMapping("/edit-with-debts/{id}")
+    public String editWithDebts(
             @CookieValue(value = "token", required = false) String token,
-            @PathVariable Integer id
+            @PathVariable Integer id,
+            @RequestParam String concepto,
+            @RequestParam Double importeTotal,
+            @RequestParam String tipoTransaccion,
+            @RequestParam(required = false) Integer categoriaId,
+            @RequestParam(required = false) Integer grupoId,
+            @RequestParam(name = "debtIds",      required = false) List<Integer> debtIds,
+            @RequestParam(name = "debtImportes", required = false) List<Double>  debtImportes,
+            Model model
     ) {
         if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
+        String email = authService.getEmailFromToken(token);
+        Usuario user = usuarioRepository.findByEmail(email);
+        if (user == null) return "redirect:/web/auth/login";
 
-        Transaction tx = transactionRepository.findById(id).orElse(null);
-        if (tx == null || tx.getGrupo() == null || !"GASTO".equals(tx.getTipoTransaccion())) {
-            return "redirect:/web/transaction";
+        // Fetch all debts, split into pending / paid
+        List<Deuda> allDebts = deudaRepository.findByTransaccionOriginalId(id);
+        double paidSum = allDebts.stream()
+                .filter(d -> d.getEstado() == EstadoDeuda.PAGADO)
+                .mapToDouble(Deuda::getImporte).sum();
+
+        double pendienteSum = 0;
+        if (debtImportes != null) {
+            for (Double v : debtImportes) pendienteSum += (v != null ? v : 0);
         }
 
-        if (!deudaRepository.findByTransaccionOriginalId(id).isEmpty()) {
-            return "redirect:/web/transaction";
+        // Server-side validation: sum of all debt amounts must equal importeTotal
+        double total  = Math.round(importeTotal   * 100.0) / 100.0;
+        double sumAll = Math.round((paidSum + pendienteSum) * 100.0) / 100.0;
+        if (sumAll > total + 0.01) {
+            loadModelAttributes(user, email, model);
+            double payerWouldGet = total - sumAll;
+            model.addAttribute("error",
+                    String.format("Debt amounts (%.2f €) exceed the total (%.2f €). Payer would need to pay %.2f € extra.",
+                            sumAll, total, -payerWouldGet));
+            model.addAttribute("showForm", true);
+            return "transactions";
         }
 
-        Group withMembers = groupRepository.findByIdWithMiembros(tx.getGrupo().getId()).orElse(null);
-        if (withMembers == null || withMembers.getMiembros() == null || withMembers.getMiembros().size() < 2) {
-            return "redirect:/web/transaction";
-        }
+        // Update the transaction (direct repository access — same pattern as /edit/{id})
+        transactionRepository.findById(id).ifPresent(t -> {
+            t.setConcepto(concepto);
+            t.setImporteTotal(importeTotal);
+            t.setTipoTransaccion(tipoTransaccion);
+            t.setCategoria(categoriaId != null ? categoryRepository.findById(categoriaId).orElse(null) : null); // NOSONAR
+            t.setGrupo(grupoId != null ? groupRepository.findById(grupoId).orElse(null) : null); // NOSONAR
+            transactionRepository.save(t);
+        });
 
-        int numMembers = withMembers.getMiembros().size();
-        double share = Math.round(tx.getImporteTotal() / numMembers * 100.0) / 100.0;
-        Integer pagadorId = tx.getCreador() != null
-                ? tx.getCreador().getId()
-                : usuarioRepository.findByEmail(authService.getEmailFromToken(token)).getId();
-
-        for (Usuario member : withMembers.getMiembros()) {
-            if (!member.getId().equals(pagadorId)) {
-                DeudaCreationDTO dto = new DeudaCreationDTO();
-                dto.setTransaccionId(id);
-                dto.setDeudorId(member.getId());
-                dto.setAcreedorId(pagadorId);
-                dto.setImporte(share);
-                transactionService.createDeuda(dto);
+        // Update only PENDIENTE debts; skip PAGADO (immutable)
+        if (debtIds != null && debtImportes != null) {
+            int len = Math.min(debtIds.size(), debtImportes.size());
+            for (int i = 0; i < len; i++) {
+                Integer debtId   = debtIds.get(i);
+                Double  newImporte = debtImportes.get(i);
+                if (debtId == null || newImporte == null || newImporte <= 0) continue;
+                deudaRepository.findById(debtId).ifPresent(d -> {
+                    if (d.getEstado() != EstadoDeuda.PAGADO) {
+                        d.setImporte(newImporte);
+                        deudaRepository.save(d);
+                    }
+                });
             }
         }
 
@@ -222,7 +256,6 @@ public class TransactionViewController {
     }
 
     private void loadModelAttributes(Usuario user, String email, Model model) {
-        // Only user's own transactions, sorted newest first (findByCreadorId avoids loading the full entity)
         List<Transaction> allTransactions = new ArrayList<>(transactionRepository.findByCreadorId(user.getId()));
         allTransactions.sort(Comparator.comparing(Transaction::getFecha,
                 Comparator.nullsLast(Comparator.reverseOrder())));
@@ -244,13 +277,10 @@ public class TransactionViewController {
         // Groups the user belongs to (for the create-form dropdown)
         List<Group> myGroups = groupRepository.findByMiembrosEmail(email);
 
-        // Build member map for all user groups in a single pass (eliminates duplicate iteration)
-        Map<Integer, Integer> groupMemberCounts = new HashMap<>();
         Map<String, Object> groupMembersData = new HashMap<>();
         for (Group g : myGroups) {
             Group withMembers = groupRepository.findByIdWithMiembros(g.getId()).orElse(null);
             if (withMembers == null || withMembers.getMiembros() == null) continue;
-            groupMemberCounts.put(withMembers.getId(), withMembers.getMiembros().size());
             List<Map<String, Object>> members = new ArrayList<>();
             for (Usuario m : withMembers.getMiembros()) {
                 Map<String, Object> md = new HashMap<>();
@@ -261,13 +291,56 @@ public class TransactionViewController {
             groupMembersData.put(String.valueOf(withMembers.getId()), members);
         }
 
+        // Build map: debt payment transaction ID → other party's name (for detail panel)
+        Map<Integer, String> debtPartyMap = new HashMap<>();
+        List<Deuda> paidByUser = deudaRepository.findByDeudorId(user.getId())
+                .stream().filter(d -> d.getEstado() == EstadoDeuda.PAGADO).collect(Collectors.toList());
+        List<Deuda> receivedByUser = deudaRepository.findByAcreedorId(user.getId())
+                .stream().filter(d -> d.getEstado() == EstadoDeuda.PAGADO).collect(Collectors.toList());
+        for (Transaction t : allTransactions) {
+            String c = t.getConcepto();
+            if (c == null || !c.startsWith("Pago de deuda: ")) continue;
+            String orig = c.substring("Pago de deuda: ".length());
+            if ("LIQUIDACION".equals(t.getTipoTransaccion())) {
+                paidByUser.stream()
+                        .filter(d -> orig.equals(d.getTransaccionOriginal().getConcepto())
+                                && t.getImporteTotal() != null && t.getImporteTotal().equals(d.getImporte()))
+                        .findFirst()
+                        .ifPresent(d -> debtPartyMap.put(t.getId(), d.getAcreedor().getNombre()));
+            } else if ("INGRESO".equals(t.getTipoTransaccion())) {
+                receivedByUser.stream()
+                        .filter(d -> orig.equals(d.getTransaccionOriginal().getConcepto())
+                                && t.getImporteTotal() != null && t.getImporteTotal().equals(d.getImporte()))
+                        .findFirst()
+                        .ifPresent(d -> debtPartyMap.put(t.getId(), d.getDeudor().getNombre()));
+            }
+        }
+
+        Map<String, Object> txDeudasData = new HashMap<>();
+        for (Map.Entry<Integer, List<Deuda>> entry : txDeudas.entrySet()) {
+            List<Map<String, Object>> debtList = new ArrayList<>();
+            for (Deuda d : entry.getValue()) {
+                Map<String, Object> dm = new HashMap<>();
+                dm.put("id",            d.getId());
+                dm.put("importe",       d.getImporte());
+                dm.put("deudorId",      d.getDeudor().getId());
+                dm.put("deudorNombre",  d.getDeudor().getNombre());
+                dm.put("acreedorId",    d.getAcreedor().getId());
+                dm.put("acreedorNombre",d.getAcreedor().getNombre());
+                dm.put("estado",        d.getEstado().name());
+                debtList.add(dm);
+            }
+            txDeudasData.put(String.valueOf(entry.getKey()), debtList);
+        }
+
         model.addAttribute("transactions", allTransactions);
         model.addAttribute("txWithDebts", txWithDebts);
-        model.addAttribute("txDeudas", txDeudas);
-        model.addAttribute("groupMemberCounts", groupMemberCounts);
+        model.addAttribute("txDeudasData", txDeudasData);
         model.addAttribute("groupMembersData", groupMembersData);
         model.addAttribute("categories", categoryService.getCategoriesByUser(user.getId()));
         model.addAttribute("groups", myGroups);
         model.addAttribute("currentUserId", user.getId());
+        model.addAttribute("currentUserName", user.getNombre());
+        model.addAttribute("debtPartyMap", debtPartyMap);
     }
 }

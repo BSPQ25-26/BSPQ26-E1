@@ -48,7 +48,7 @@
             <!-- ===== DEBES (user is debtor) ===== -->
             <div class="debt-section"
                  th:if="${debtsAsDebtor != null and !debtsAsDebtor.empty}">
-                <h3 class="debt-section-title">Debes</h3>
+                <h3 class="debt-section-title">You Owe</h3>
 
                 <div th:each="d : ${debtsAsDebtor}" class="debt-item debt-item-owe">
                     <div class="debt-item-info">
@@ -71,7 +71,7 @@
             <!-- ===== TE DEBEN (user is creditor) ===== -->
             <div class="debt-section"
                  th:if="${debtsAsCreditor != null and !debtsAsCreditor.empty}">
-                <h3 class="debt-section-title">Te deben</h3>
+                <h3 class="debt-section-title">Owed to you</h3>
 
                 <div th:each="d : ${debtsAsCreditor}" class="debt-item debt-item-owed">
                     <div class="debt-item-info">

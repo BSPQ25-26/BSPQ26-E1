@@ -624,9 +624,7 @@ td {
 }
 .tx-row.selected-row td:first-child { border-left: 3px solid #8b5cf6; padding-left: 7px; }
 
-/* Shared badge base — all inline labels share these */
-.badge-group,
-.badge-tipo {
+.badge-group {
     display: inline-block;
     border-radius: var(--radius-btn);
     font-weight: 700;
@@ -926,90 +924,9 @@ td {
 
 /* ===================== TRANSACTION TYPE STYLES ===================== */
 
-.text-orange { color: #f59e0b; font-weight: 600; }
-
 /* Row tints by transaction type */
 .row-liquidacion td  { background: rgba(245, 158, 11, 0.05); }
 .row-grupo-gasto td  { background: rgba(139, 92, 246, 0.04); }
-.row-cobro-deuda td  { background: rgba(16, 185, 129, 0.05); }
-
-/* Type badges — display/border-radius/font-weight/white-space/vertical-align from shared rule above */
-.badge-tipo {
-    font-size: 0.63rem;
-    padding: 2px 8px;
-    margin-left: 6px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-}
-
-.badge-liquidacion {
-    background: rgba(245, 158, 11, 0.13);
-    color: #b45309;
-    border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.badge-cobro-deuda {
-    background: rgba(16, 185, 129, 0.12);
-    color: #047857;
-    border: 1px solid rgba(16, 185, 129, 0.25);
-}
-
-.badge-ingreso {
-    background: rgba(16, 185, 129, 0.1);
-    color: #065f46;
-    border: 1px solid rgba(16, 185, 129, 0.2);
-}
-
-/* Repartir Gasto button */
-.btn-repartir {
-    background: rgba(139, 92, 246, 0.1);
-    color: #7c3aed;
-    border: 1px solid rgba(139, 92, 246, 0.3);
-    padding: 4px 10px;
-    border-radius: 8px;
-    font-family: 'Poppins', sans-serif;
-    font-weight: 600;
-    font-size: 0.75rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    margin-left: 4px;
-}
-
-.btn-repartir:hover {
-    background: rgba(139, 92, 246, 0.2);
-    transform: translateY(-1px);
-}
-
-.btn-repartir-done {
-    display: inline-block;
-    background: rgba(16, 185, 129, 0.1);
-    color: #047857;
-    border: 1px solid rgba(16, 185, 129, 0.25);
-    padding: 4px 10px;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    white-space: nowrap;
-    margin-left: 4px;
-}
-
-/* Repartir expand panel */
-.repartir-panel-row td { padding: 0 10px 10px; }
-
-.repartir-panel {
-    background: rgba(139, 92, 246, 0.06);
-    border: 1px solid rgba(139, 92, 246, 0.18);
-    border-radius: 14px;
-    padding: 14px 18px;
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    flex-wrap: wrap;
-}
-
-.repartir-info p { margin: 0; font-size: 0.85rem; color: #374151; }
-.repartir-sub    { font-size: 0.78rem !important; color: #6b7280 !important; margin-top: 4px !important; }
 
 .btn-repartir-confirm {
     background: var(--primary-gradient);
@@ -1026,20 +943,6 @@ td {
 }
 
 .btn-repartir-confirm:hover { opacity: 0.88; }
-
-/* ── Side panel ── */
-.panel-placeholder {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-align: center;
-    padding: 40px 20px;
-    color: #9ca3af;
-    font-size: 0.9rem;
-    line-height: 1.6;
-    min-height: 200px;
-}
 
 .panel-btn-stack {
     display: flex;
@@ -1071,34 +974,7 @@ td {
     transform: translateY(-1px);
 }
 
-/* ===================== SPLIT DETAIL PANEL ===================== */
-
-.repartir-panel.split-detail {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 12px;
-    animation: splitFadeIn 0.22s ease;
-}
-
-@keyframes splitFadeIn {
-    from { opacity: 0; transform: translateY(-6px); }
-    to   { opacity: 1; transform: translateY(0); }
-}
-
-.split-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid rgba(139, 92, 246, 0.12);
-}
-
-.split-total-label { font-size: 0.82rem; color: #6b7280; }
-.split-total-label strong { color: var(--text-dark); }
-
-.split-members-grid { display: flex; flex-direction: column; gap: 8px; }
+/* ===================== SPLIT PANEL ===================== */
 
 .split-member-row {
     display: flex;
@@ -1144,7 +1020,6 @@ td {
 }
 
 .split-summary-label { font-weight: 600; }
-.split-sum { color: #7c3aed; font-size: 0.95rem; }
 
 .split-status-badge {
     font-size: 0.74rem;
@@ -1155,26 +1030,6 @@ td {
 
 .split-status-ok    { background: rgba(16,185,129,0.1); color: #047857; }
 .split-status-error { background: rgba(239,68,68,0.1);  color: #dc2626; }
-
-.split-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-.split-actions .btn-repartir-confirm { flex: 1; }
-.split-actions .btn-repartir-confirm:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
-
-.btn-split-cancel {
-    padding: 8px 18px;
-    background: white;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: #6b7280;
-    cursor: pointer;
-    transition: all 0.2s;
-    white-space: nowrap;
-}
-
-.btn-split-cancel:hover { background: #f3f4f6; color: #374151; }
 
 /* ===================== TRANSACTION DETAIL PANEL (read-only) ===================== */
 
