@@ -3,9 +3,14 @@ package com.mycompany.app.facade;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import org.databene.contiperf.PerfTest;
+import org.databene.contiperf.Required;
+import org.databene.contiperf.junit.ContiPerfRule;
+import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+//import org.junit.jupiter.api.Test;
+import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -54,6 +59,9 @@ class TransactionIntegrationTest {
     }
     */
 
+    @Rule
+    public ContiPerfRule rule = new ContiPerfRule();
+
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -83,7 +91,25 @@ class TransactionIntegrationTest {
     }
 
     @Test
+    @PerfTest(invocations = 50, threads = 5)
+    @Required(average = 1000) // Average response time should be under 1000ms
+    public void performanceTest_CreateTransaction_ShouldPass() {
+        executeTransactionFlow();
+    }
+
+    @Test
+    @PerfTest(invocations = 10, threads = 2)
+    @Required(max = 1) 
+    public void performanceTest_CreateTransaction_ShouldFailDeliberately() {
+        executeTransactionFlow();
+    }
+
+    @Test
     void createGroupTransactionAndDebt_PersistsInTransaccionesAndDeudasTables() {
+        executeTransactionFlow();
+    }
+
+    private void executeTransactionFlow() {
         // 1. Arrange: Setup initial users and group
         Usuario creditor = usuarioRepository.save(new Usuario("Creditor", "creditor@mail.com", "pwd", 100.0));
         Usuario debtor = usuarioRepository.save(new Usuario("Debtor", "debtor@mail.com", "pwd", 80.0));
