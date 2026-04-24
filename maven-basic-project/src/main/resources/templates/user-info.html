@@ -24,10 +24,9 @@
             <div class="balance-card">
                 <span class="balance-label">Net Balance</span>
                 <span class="balance-amount"
-                      th:style="${(balance != null and balance < 0) ? 'color:#ef4444' : 'color:#10b981'}">
-                    <span th:text="${balance != null}
-                                   ? ${#numbers.formatDecimal(balance,1,'POINT',2,'COMMA')}
-                                   : '0.00'">0.00</span> €
+                      th:classappend="${balance != null and balance < 0} ? 'amount-owe' : 'amount-owed'"
+                      th:text="${(balance != null ? #numbers.formatDecimal(balance,1,'POINT',2,'COMMA') : '0.00') + ' €'}">
+                    0.00 €
                 </span>
             </div>
 
@@ -49,7 +48,7 @@
             <!-- ===== DEBES (user is debtor) ===== -->
             <div class="debt-section"
                  th:if="${debtsAsDebtor != null and !debtsAsDebtor.empty}">
-                <h3 class="debt-section-title">Debes</h3>
+                <h3 class="debt-section-title">You Owe</h3>
 
                 <div th:each="d : ${debtsAsDebtor}" class="debt-item debt-item-owe">
                     <div class="debt-item-info">
@@ -72,7 +71,7 @@
             <!-- ===== TE DEBEN (user is creditor) ===== -->
             <div class="debt-section"
                  th:if="${debtsAsCreditor != null and !debtsAsCreditor.empty}">
-                <h3 class="debt-section-title">Te deben</h3>
+                <h3 class="debt-section-title">Owed to you</h3>
 
                 <div th:each="d : ${debtsAsCreditor}" class="debt-item debt-item-owed">
                     <div class="debt-item-info">
@@ -90,7 +89,7 @@
             <!-- No debts at all -->
             <p th:if="${(debtsAsDebtor == null or debtsAsDebtor.empty)
                         and (debtsAsCreditor == null or debtsAsCreditor.empty)}"
-               style="font-size:0.82rem; color:#9ca3af; margin:16px 0 0; text-align:center;">
+               class="no-debts-msg">
                 No pending debts 🎉
             </p>
 

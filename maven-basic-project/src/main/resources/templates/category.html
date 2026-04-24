@@ -14,7 +14,7 @@
         <a th:href="@{/web/user/profile}" class="back-link">← Back to Profile</a>
     </div>
 
-    <div class="container-grid">
+    <div class="container-grid" th:classappend="${showForm} ? ' panel-open' : ''">
 
         <!-- ===== LIST ===== -->
         <div class="glass-card card-lista">
@@ -46,7 +46,7 @@
         </div>
 
         <!-- ===== NEW CATEGORY FORM ===== -->
-        <div class="glass-card card-principal" th:if="${showForm}">
+        <div class="glass-card card-principal panel-visible" th:if="${showForm}">
             <h2 class="card-title">New Category</h2>
 
             <form th:action="@{/web/categories/create}" method="post">

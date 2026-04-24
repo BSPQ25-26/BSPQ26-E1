@@ -28,6 +28,13 @@
 
             <div th:if="${error}" class="flash-error" th:text="${error}"></div>
 
+            <!-- Client-side filter bar — no page reload -->
+            <div class="filter-bar" id="tx-filter-bar">
+                <button class="filter-btn active" data-filter="ALL"    onclick="filterTx('ALL')">All</button>
+                <button class="filter-btn"         data-filter="GASTO"  onclick="filterTx('GASTO')">Expenses</button>
+                <button class="filter-btn"         data-filter="INGRESO" onclick="filterTx('INGRESO')">Income</button>
+            </div>
+
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -45,10 +52,10 @@
                             </td>
                         </tr>
 
-                        <th:block th:each="t : ${transactions}">
+                        <th:block th:each="t : ${transactions}"
+                                  th:with="isPago=${t.concepto != null and #strings.startsWith(t.concepto,'Pago de deuda')}">
                             <tr class="tx-row"
-                                th:classappend="${t.tipoTransaccion == 'LIQUIDACION' ? ' row-liquidacion' :
-                                               (t.tipoTransaccion == 'INGRESO' and t.concepto != null and #strings.startsWith(t.concepto,'Pago de deuda')) ? ' row-cobro-deuda' :
+                                th:classappend="${(t.tipoTransaccion == 'LIQUIDACION' or isPago) ? ' row-liquidacion' :
                                                (t.grupo != null and t.tipoTransaccion == 'GASTO') ? ' row-grupo-gasto' : ''}"
                                 th:attr="data-id=${t.id},
                                          data-concepto=${t.concepto},
@@ -58,24 +65,17 @@
                                          data-grupo-id=${t.grupo != null ? t.grupo.id : ''},
                                          data-pagador-id=${t.creador != null ? t.creador.id : ''},
                                          data-is-split=${txWithDebts.contains(t.id)},
-                                         data-is-pago=${#strings.startsWith(t.concepto,'Pago de deuda')}"
+                                         data-is-pago=${isPago},
+                                         data-other-party=${debtPartyMap[t.id] ?: ''}"
                                 onclick="selectTransaction(this)">
 
-                                <!-- Description + badges -->
                                 <td>
-                                    <span th:text="${t.concepto}">Description</span>
+                                    <span th:text="${#strings.replace(t.concepto, 'Pago de deuda', 'Debt Payment')}">Description</span>
                                     <span th:if="${t.grupo != null}" class="badge-group"
                                           th:text="${t.grupo.nombre}">Group</span>
-                                    <span th:if="${t.tipoTransaccion == 'LIQUIDACION'}"
-                                          class="badge-tipo badge-liquidacion">Liquidación</span>
-                                    <span th:if="${t.tipoTransaccion == 'INGRESO' and #strings.startsWith(t.concepto,'Pago de deuda')}"
-                                          class="badge-tipo badge-cobro-deuda">Cobro deuda</span>
-                                    <span th:if="${t.tipoTransaccion == 'INGRESO' and !#strings.startsWith(t.concepto,'Pago de deuda')}"
-                                          class="badge-tipo badge-ingreso">Ingreso</span>
                                 </td>
 
-                                <!-- Amount -->
-                                <td th:classappend="${t.tipoTransaccion == 'INGRESO' ? ' text-green' : (t.tipoTransaccion == 'LIQUIDACION' ? ' text-orange' : ' text-red')}"
+                                <td th:classappend="${t.tipoTransaccion == 'INGRESO' ? ' text-green' : ' text-red'}"
                                     th:text="${(t.tipoTransaccion == 'INGRESO' ? '+' : '-') + #numbers.formatDecimal(t.importeTotal, 1, 'POINT', 2, 'COMMA') + ' €'}">
                                     0.00 €
                                 </td>
@@ -84,6 +84,9 @@
 
                     </tbody>
                 </table>
+                <div id="filter-empty" class="empty-state" style="display:none">
+                    <p>No transactions match this filter.</p>
+                </div>
             </div>
         </div>
 
@@ -94,7 +97,7 @@
             <div id="panel-form-area" style="display:none">
                 <h2 class="card-title" id="panel-title">Edit Transaction</h2>
 
-                <form id="tx-form" method="post">
+                <form id="tx-form" method="post" onsubmit="return validateBeforeSubmit()">
 
                     <div class="input-group">
                         <label>Description</label>
@@ -113,12 +116,18 @@
                         </div>
                         <div class="input-group">
                             <label>Type</label>
-                            <select id="f-tipo" name="tipoTransaccion"
-                                    onchange="checkChanges()" required>
+                            <!--
+                              Select has NO name — value is carried by the hidden input below.
+                              When a group is selected, the select is locked to GASTO via JS
+                              (.field-locked CSS + pointer-events:none) without using disabled,
+                              so the visual state is clear and the hidden input always submits.
+                            -->
+                            <select id="f-tipo" onchange="onTipoChange()" required>
                                 <option value="">-- Select --</option>
                                 <option value="GASTO">Expense</option>
                                 <option value="INGRESO">Income</option>
                             </select>
+                            <input type="hidden" id="f-tipo-val" name="tipoTransaccion">
                         </div>
                     </div>
 
@@ -155,16 +164,17 @@
                     <!-- Split section (shown for group GASTO not yet split, edit mode only) -->
                     <div id="split-section" style="display:none">
                         <div class="section-divider" style="margin:14px 0"></div>
-                        <p class="members-title" style="margin-bottom:8px">Split this expense</p>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                            <p class="members-title" style="margin:0">Split this expense</p>
+                            <button type="button" class="btn-repartir-confirm"
+                                    style="font-size:12px;padding:4px 12px"
+                                    onclick="splitSectionEqually()">Split Equally</button>
+                        </div>
                         <div id="split-members-list"></div>
                         <div class="split-summary-row" style="margin-top:8px">
-                            <span class="split-summary-label">Total assigned:</span>
-                            <span>
-                                <strong id="side-split-sum" class="split-sum">0.00</strong> €
-                                &nbsp;/&nbsp;
-                                <strong id="side-split-total">0 €</strong>
-                            </span>
-                            <span id="side-split-status" class="split-status-badge"></span>
+                            <span class="split-summary-label">Payer:</span>
+                            <strong id="side-payer-share" style="font-size:14px">—</strong>
+                            <span id="side-split-status" class="split-status-badge" style="margin-left:auto"></span>
                         </div>
                         <button type="button" id="btn-side-split-save"
                                 class="btn-repartir-confirm"
@@ -175,7 +185,23 @@
                         </button>
                     </div>
 
-                    <!-- Action buttons -->
+                    <!-- Debts-edit section (shown for group GASTO with existing debts, edit mode) -->
+                    <div id="debts-edit-section" style="display:none">
+                        <div class="section-divider" style="margin:14px 0"></div>
+                        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+                            <p class="members-title" style="margin:0">Edit debt amounts</p>
+                            <button type="button" id="btn-split-equally"
+                                    class="btn-repartir-confirm" style="font-size:12px;padding:4px 12px"
+                                    onclick="splitEqually()">Split Equally</button>
+                        </div>
+                        <div id="debts-edit-list"></div>
+                        <div class="split-summary-row" style="margin-top:10px">
+                            <span class="split-summary-label">Payer:</span>
+                            <strong id="debts-payer-share" style="font-size:14px">—</strong>
+                            <span id="debts-edit-status" class="split-status-badge" style="margin-left:auto"></span>
+                        </div>
+                    </div>
+
                     <div class="panel-btn-stack">
                         <button type="submit" id="btn-update" class="btn-login"
                                 style="display:none" disabled>
@@ -186,6 +212,7 @@
                             Save Transaction
                         </button>
                         <button type="button" id="btn-delete" class="btn-danger"
+                                th:unless="${editTxHasDebts}"
                                 style="display:none" onclick="deleteTransaction()">
                             🗑 Delete Transaction
                         </button>
@@ -196,7 +223,38 @@
                 </form>
             </div>
 
-            <!-- Hidden delete form -->
+            <!-- Read-only detail panel: shown for debt payments (LIQUIDACION) and collections -->
+            <div id="panel-detail-area" style="display:none">
+                <h2 class="card-title" id="detail-title">Transaction Detail</h2>
+
+                <div class="detail-field">
+                    <span class="detail-label">Description</span>
+                    <p id="detail-concepto" class="detail-value"></p>
+                </div>
+
+                <div class="detail-field">
+                    <span class="detail-label">Amount</span>
+                    <p id="detail-importe" class="detail-value detail-amount"></p>
+                </div>
+
+                <div class="form-row">
+                    <div class="detail-field">
+                        <span class="detail-label">From</span>
+                        <p id="detail-from" class="detail-value"></p>
+                    </div>
+                    <div class="detail-field">
+                        <span class="detail-label">To</span>
+                        <p id="detail-to" class="detail-value"></p>
+                    </div>
+                </div>
+
+                <p id="detail-note" class="detail-note"></p>
+
+                <div class="panel-btn-stack">
+                    <button type="button" class="btn-logout" onclick="clearSelection()">Close</button>
+                </div>
+            </div>
+
             <form id="delete-form" th:action="@{/web/transaction/delete}"
                   method="post" style="display:none">
                 <input type="hidden" id="delete-tx-id" name="transactionId" value="">
@@ -207,18 +265,23 @@
 
     <!-- ===== SCRIPTS ===== -->
     <script th:inline="javascript">
-        var groupMembers  = /*[[${groupMembersData}]]*/ {};
-        var currentUserId = /*[[${currentUserId}]]*/ 0;
-        var initEditId    = /*[[${editTransaction != null ? editTransaction.id : null}]]*/ null;
-        var initShowForm  = /*[[${showForm}]]*/ false;
+        var groupMembers    = /*[[${groupMembersData}]]*/ {};
+        var txDeudasData    = /*[[${txDeudasData}]]*/ {};
+        var currentUserId   = /*[[${currentUserId}]]*/ 0;
+        var currentUserName = /*[[${currentUserName}]]*/ '';
+        var initEditId      = /*[[${editTransaction != null ? editTransaction.id : null}]]*/ null;
+        var initShowForm    = /*[[${showForm}]]*/ false;
     </script>
 
     <script>
         /* ── State ── */
-        var originalValues  = null;
-        var currentTxId     = null;
+        var originalValues   = null;
+        var currentTxId      = null;
         var currentPagadorId = null;
-        var currentTotal    = 0;
+        var currentTotal     = 0;
+        var inDebtsMode      = false;
+        var debtsEditValid   = false;
+        var inDebtsReadOnly  = false;
 
         /* ── Row selection ── */
         function selectTransaction(row) {
@@ -226,47 +289,71 @@
                     .forEach(function(r) { r.classList.remove('selected-row'); });
             row.classList.add('selected-row');
 
-            var id       = row.dataset.id;
-            var concepto = row.dataset.concepto;
-            var importe  = row.dataset.importe;
-            var tipo     = row.dataset.tipo;
-            var catId    = row.dataset.catId    || '';
-            var grupoId  = row.dataset.grupoId  || '';
-            var pagadorId = row.dataset.pagadorId || String(currentUserId);
-            var isSplit  = row.dataset.isSplit  === 'true';
+            var id        = row.dataset.id;
+            var concepto  = row.dataset.concepto;
+            var importe   = row.dataset.importe;
+            var tipo      = row.dataset.tipo;
+            var isPago    = row.dataset.isPago === 'true';
 
-            currentTxId      = id;
+            currentTxId = id;
+
+            // Debt payments (LIQUIDACION) and debt collections (INGRESO + isPago)
+            // → read-only detail panel, no form
+            if (tipo === 'LIQUIDACION' || isPago) {
+                showDebtDetail(tipo, concepto, importe, row.dataset.otherParty || '');
+                updateNewButton(true);
+                return;
+            }
+
+            // Normal transactions → editable form
+            var catId     = row.dataset.catId    || '';
+            var grupoId   = row.dataset.grupoId  || '';
+            var pagadorId = row.dataset.pagadorId || String(currentUserId);
+            var isSplit   = row.dataset.isSplit  === 'true';
+
             currentPagadorId = pagadorId;
             currentTotal     = parseFloat(importe);
 
-            // Populate fields
             setVal('f-concepto', concepto);
             setVal('f-importe',  importe);
             setOpt('f-tipo',  tipo);
             setOpt('f-cat',   catId);
             setOpt('f-grupo', grupoId);
 
-            // Pagador hidden in edit mode
-            document.getElementById('pagador-group').style.display = 'none';
+            lockTipoForGroup(grupoId);
 
-            // Form action
+            document.getElementById('pagador-group').style.display = 'none';
             document.getElementById('tx-form').action = '/web/transaction/edit/' + id;
 
-            // Snapshot for change detection
             originalValues = { concepto: concepto, importe: importe,
                                tipo: tipo, catId: catId, grupoId: grupoId };
 
+            restoreFormInputs();
+            document.getElementById('f-grupo').classList.add('field-locked');
+            inDebtsMode = false;
             setEditMode();
             checkChanges();
 
-            // Split section
-            var isGroupGasto = grupoId && tipo === 'GASTO';
-            var splitSec = document.getElementById('split-section');
-            if (isGroupGasto && !isSplit) {
-                splitSec.style.display = '';
+            var splitSec     = document.getElementById('split-section');
+            var debtsEditSec = document.getElementById('debts-edit-section');
+
+            if (grupoId && tipo === 'GASTO' && isSplit) {
+                // Case 4: group expense with existing debts → complex edit, no delete
+                splitSec.style.display     = 'none';
+                debtsEditSec.style.display = '';
+                document.getElementById('tx-form').action = '/web/transaction/edit-with-debts/' + id;
+                hide('btn-delete');
+                buildDebtsEditSection(id, currentTotal);
+                inDebtsMode = true;
+            } else if (grupoId && tipo === 'GASTO' && !isSplit) {
+                // Case 2: group expense without debts → standard edit + split creator
+                splitSec.style.display     = '';
+                debtsEditSec.style.display = 'none';
                 buildSplitSection(id, grupoId, pagadorId, currentTotal);
             } else {
-                splitSec.style.display = 'none';
+                // Case 1: personal expense or income → standard edit
+                splitSec.style.display     = 'none';
+                debtsEditSec.style.display = 'none';
             }
 
             showPanel('Edit Transaction');
@@ -287,8 +374,14 @@
             setOpt('f-grupo', '');
             document.getElementById('pagadorSelect').innerHTML =
                 '<option value="">-- Yo (por defecto) --</option>';
-            document.getElementById('pagador-group').style.display = 'none';
-            document.getElementById('split-section').style.display = 'none';
+            restoreFormInputs();
+            document.getElementById('pagador-group').style.display        = 'none';
+            document.getElementById('split-section').style.display        = 'none';
+            document.getElementById('debts-edit-section').style.display   = 'none';
+            inDebtsMode = false;
+
+            // Unlock type field for new transactions without a group
+            lockTipoForGroup('');
 
             document.getElementById('tx-form').action = '/web/transaction/create';
             setCreateMode();
@@ -300,11 +393,15 @@
         function clearSelection() {
             document.querySelectorAll('.tx-row.selected-row')
                     .forEach(function(r) { r.classList.remove('selected-row'); });
+            restoreFormInputs();
             currentTxId = null;
             originalValues = null;
+            inDebtsMode = false;
+            debtsEditValid = false;
             document.querySelector('.container-grid').classList.remove('panel-open');
             document.getElementById('side-panel').classList.remove('panel-visible');
-            document.getElementById('panel-form-area').style.display = 'none';
+            document.getElementById('panel-form-area').style.display  = 'none';
+            document.getElementById('panel-detail-area').style.display = 'none';
             updateNewButton(false);
         }
 
@@ -322,12 +419,41 @@
         function showPanel(title) {
             document.querySelector('.container-grid').classList.add('panel-open');
             document.getElementById('side-panel').classList.add('panel-visible');
-            document.getElementById('panel-form-area').style.display = '';
+            document.getElementById('panel-form-area').style.display  = '';
+            document.getElementById('panel-detail-area').style.display = 'none';
             document.getElementById('panel-title').textContent = title;
+        }
+
+        function showDebtDetail(tipo, concepto, importe, otherParty) {
+            var isLiquidacion = tipo === 'LIQUIDACION';
+            var title = isLiquidacion ? 'Debt Payment' : 'Debt Collection';
+            var sign  = isLiquidacion ? '−' : '+';
+            var from  = isLiquidacion ? currentUserName : (otherParty || '—');
+            var to    = isLiquidacion ? (otherParty || '—') : currentUserName;
+
+            document.getElementById('detail-title').textContent    = title;
+            document.getElementById('detail-concepto').textContent = concepto.replace('Pago de deuda', 'Debt Payment');
+            document.getElementById('detail-from').textContent     = from;
+            document.getElementById('detail-to').textContent       = to;
+            document.getElementById('detail-note').textContent     = isLiquidacion
+                ? 'Generated automatically when a debt was settled.'
+                : 'Generated automatically when a debt payment was received.';
+
+            var amtEl = document.getElementById('detail-importe');
+            amtEl.textContent = sign + parseFloat(importe).toFixed(2).replace('.', ',') + ' €';
+            amtEl.className   = 'detail-value detail-amount ' + (isLiquidacion ? 'text-red' : 'text-green');
+
+            document.querySelector('.container-grid').classList.add('panel-open');
+            document.getElementById('side-panel').classList.add('panel-visible');
+            document.getElementById('panel-form-area').style.display   = 'none';
+            document.getElementById('panel-detail-area').style.display = '';
         }
 
         /* ── Change detection ── */
         function checkChanges() {
+            var splitSec = document.getElementById('split-section');
+            if (splitSec && splitSec.style.display !== 'none') { updateSideSplitTotal(); }
+            if (inDebtsMode) { updateDebtsEditTotal(); return; }
             if (!originalValues) return;
             var btn = document.getElementById('btn-update');
             var changed =
@@ -350,8 +476,8 @@
 
         /* ── Group / pagador interaction ── */
         function onGrupoChange(groupId) {
+            lockTipoForGroup(groupId);   // enforce GASTO when group is selected
             checkChanges();
-            // Only show pagador in create mode
             if (!currentTxId) {
                 updatePagadorSelector(groupId, null);
             }
@@ -383,9 +509,8 @@
         function buildSplitSection(txId, grupoId, pagadorId, total) {
             var list = document.getElementById('split-members-list');
             list.innerHTML = '';
-            document.getElementById('side-split-sum').textContent    = '0.00';
-            document.getElementById('side-split-total').textContent  =
-                parseFloat(total).toFixed(2).replace('.', ',') + ' €';
+            document.getElementById('side-payer-share').textContent  = '—';
+            document.getElementById('side-payer-share').style.color  = '';
             document.getElementById('side-split-status').textContent = '';
             document.getElementById('side-split-status').className   = 'split-status-badge';
 
@@ -407,36 +532,36 @@
                         '<input type="number" step="0.01" min="0" placeholder="0.00" ' +
                                'class="split-amount-input side-split-input" ' +
                                'data-member-id="' + m.id + '" ' +
-                               'oninput="updateSideSplitTotal(' + parseFloat(total) + ')">' +
+                               'oninput="updateSideSplitTotal()">' +
                         '<span class="split-euro">€</span>' +
                     '</div>';
                 list.appendChild(row);
             });
         }
 
-        function updateSideSplitTotal(totalAmount) {
+        function updateSideSplitTotal() {
+            var totalAmount = Math.round((parseFloat(document.getElementById('f-importe').value) || 0) * 100) / 100;
             var inputs = document.querySelectorAll('.side-split-input');
             var sum = 0;
             inputs.forEach(function(inp) { sum += parseFloat(inp.value) || 0; });
             sum = Math.round(sum * 100) / 100;
 
-            document.getElementById('side-split-sum').textContent = sum.toFixed(2);
+            var payerShare = Math.round((totalAmount - sum) * 100) / 100;
+            var over     = sum > totalAmount + 0.001;
+            var valid    = sum > 0 && !over;
 
-            var valid    = sum > 0 && sum <= totalAmount + 0.001;
+            var payerEl  = document.getElementById('side-payer-share');
             var saveBtn  = document.getElementById('btn-side-split-save');
             var statusEl = document.getElementById('side-split-status');
+
+            if (payerEl) {
+                payerEl.textContent = over ? '—' : (sum > 0 ? payerShare.toFixed(2).replace('.', ',') + ' €' : '—');
+                payerEl.style.color = over ? '#e74c3c' : '';
+            }
             if (saveBtn) saveBtn.disabled = !valid;
             if (statusEl) {
-                if (sum > totalAmount + 0.001) {
-                    statusEl.textContent = '⚠ Supera el total';
-                    statusEl.className   = 'split-status-badge split-status-error';
-                } else if (valid) {
-                    statusEl.textContent = '✓ OK';
-                    statusEl.className   = 'split-status-badge split-status-ok';
-                } else {
-                    statusEl.textContent = '';
-                    statusEl.className   = 'split-status-badge';
-                }
+                statusEl.textContent = over ? '⚠ Exceeds total' : '';
+                statusEl.className   = 'split-status-badge' + (over ? ' split-status-error' : '');
             }
         }
 
@@ -504,6 +629,173 @@
             return String(str)
                 .replace(/&/g,'&amp;').replace(/</g,'&lt;')
                 .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+        }
+
+        /* ── Type field: sync hidden input & enforce group lock ── */
+        function onTipoChange() {
+            document.getElementById('f-tipo-val').value = document.getElementById('f-tipo').value;
+            checkChanges();
+        }
+
+        function lockTipoForGroup(groupId) {
+            var sel    = document.getElementById('f-tipo');
+            var hidden = document.getElementById('f-tipo-val');
+            if (groupId) {
+                sel.value    = 'GASTO';
+                hidden.value = 'GASTO';
+                sel.classList.add('field-locked');
+                sel.title = 'Group transactions must be Expenses';
+            } else {
+                sel.classList.remove('field-locked');
+                sel.title    = '';
+                hidden.value = sel.value;
+            }
+        }
+
+        /* ── Debts-edit section ── */
+        function buildDebtsEditSection(txId, total) {
+            var debts   = txDeudasData[String(txId)] || [];
+            var list    = document.getElementById('debts-edit-list');
+            list.innerHTML = '';
+
+            var hasPaid = debts.some(function(d) { return d.estado === 'PAGADO'; });
+            var paidSum = debts.reduce(function(s, d) {
+                return s + (d.estado === 'PAGADO' ? d.importe : 0);
+            }, 0);
+            list.dataset.paidSum = paidSum;
+
+            debts.forEach(function(d) {
+                var isPaid = d.estado === 'PAGADO';
+                var row    = document.createElement('div');
+                row.className = 'split-member-row';
+                if (isPaid) {
+                    row.innerHTML =
+                        '<input type="hidden" name="debtIds"      value="' + d.id + '">' +
+                        '<input type="hidden" name="debtImportes" value="' + d.importe + '">' +
+                        '<span class="split-member-name">' + escHtml(d.deudorNombre) + '</span>' +
+                        '<span class="text-green" style="font-size:12px;margin-left:auto">✓ Paid (' +
+                            parseFloat(d.importe).toFixed(2).replace('.', ',') + ' €)</span>';
+                } else {
+                    row.innerHTML =
+                        '<input type="hidden" name="debtIds" value="' + d.id + '">' +
+                        '<span class="split-member-name">' + escHtml(d.deudorNombre) + '</span>' +
+                        '<div class="split-input-wrap">' +
+                            '<input type="number" step="0.01" min="0.01" ' +
+                                   'name="debtImportes" ' +
+                                   'value="' + parseFloat(d.importe).toFixed(2) + '" ' +
+                                   'class="split-amount-input debts-edit-input" ' +
+                                   (hasPaid ? 'readonly ' : '') +
+                                   'oninput="updateDebtsEditTotal()">' +
+                            '<span class="split-euro">€</span>' +
+                        '</div>';
+                }
+                list.appendChild(row);
+            });
+
+            if (hasPaid) {
+                inDebtsReadOnly = true;
+                hide('btn-split-equally');
+                hide('btn-update');
+                document.getElementById('f-concepto').setAttribute('readonly', 'readonly');
+                document.getElementById('f-importe').setAttribute('readonly', 'readonly');
+                document.getElementById('f-cat').classList.add('field-locked');
+            }
+
+            updateDebtsEditTotal();
+        }
+
+        function updateDebtsEditTotal() {
+            var list    = document.getElementById('debts-edit-list');
+            var paidSum = parseFloat(list.dataset.paidSum || 0);
+            var inputs  = document.querySelectorAll('.debts-edit-input');
+            var pendSum = 0;
+            inputs.forEach(function(inp) { pendSum += parseFloat(inp.value) || 0; });
+
+            var total      = Math.round((parseFloat(document.getElementById('f-importe').value) || 0) * 100) / 100;
+            var sumAll     = Math.round((paidSum + pendSum) * 100) / 100;
+            var payerShare = Math.round((total - sumAll) * 100) / 100;
+
+            var over     = sumAll > total + 0.001;
+            var valid    = !over && sumAll > 0;
+            debtsEditValid = valid;
+
+            var payerEl  = document.getElementById('debts-payer-share');
+            var statusEl = document.getElementById('debts-edit-status');
+
+            if (payerEl) {
+                payerEl.textContent = over ? '—' : (sumAll > 0 ? payerShare.toFixed(2).replace('.', ',') + ' €' : '—');
+                payerEl.style.color = over ? '#e74c3c' : '';
+            }
+            if (statusEl) {
+                statusEl.textContent = over ? '⚠ Exceeds total' : '';
+                statusEl.className   = 'split-status-badge' + (over ? ' split-status-error' : '');
+            }
+
+            var saveBtn = document.getElementById('btn-update');
+            if (saveBtn && !inDebtsReadOnly) {
+                saveBtn.disabled    = !valid;
+                saveBtn.textContent = over ? 'Exceeds total' : (valid ? 'Save Changes' : 'Enter amounts');
+            }
+        }
+
+        function splitEqually() {
+            if (inDebtsReadOnly) return;
+            var total  = parseFloat(document.getElementById('f-importe').value) || 0;
+            var inputs = document.querySelectorAll('.debts-edit-input');
+            if (inputs.length === 0 || total <= 0) return;
+            var share = Math.round(total / (inputs.length + 1) * 100) / 100;
+            inputs.forEach(function(inp) { inp.value = share.toFixed(2); });
+            updateDebtsEditTotal();
+        }
+
+        function splitSectionEqually() {
+            var total  = parseFloat(document.getElementById('f-importe').value) || 0;
+            var inputs = document.querySelectorAll('.side-split-input');
+            if (inputs.length === 0 || total <= 0) return;
+            var share = Math.round(total / (inputs.length + 1) * 100) / 100;
+            inputs.forEach(function(inp) { inp.value = share.toFixed(2); });
+            updateSideSplitTotal();
+        }
+
+        function restoreFormInputs() {
+            document.querySelectorAll('.debts-edit-input').forEach(function(inp) {
+                inp.removeAttribute('readonly');
+            });
+            document.getElementById('f-concepto').removeAttribute('readonly');
+            document.getElementById('f-importe').removeAttribute('readonly');
+            document.getElementById('f-cat').classList.remove('field-locked');
+            document.getElementById('f-grupo').classList.remove('field-locked');
+            inDebtsReadOnly = false;
+        }
+
+        function validateBeforeSubmit() {
+            if (!inDebtsMode) return true;
+            if (!debtsEditValid) {
+                alert('The debt amounts exceed the transaction total. Please reduce them.');
+                return false;
+            }
+            return true;
+        }
+
+        /* ── Client-side filter ── */
+        function filterTx(tipo) {
+            document.querySelectorAll('.filter-btn').forEach(function(b) {
+                b.classList.toggle('active', b.dataset.filter === tipo);
+            });
+            var count = 0;
+            document.querySelectorAll('.tx-row').forEach(function(row) {
+                var visible = tipo === 'ALL'
+                    || row.dataset.tipo === tipo
+                    || (tipo === 'GASTO' && row.dataset.tipo === 'LIQUIDACION');
+                row.style.display = visible ? '' : 'none';
+                if (visible) count++;
+            });
+            // If the selected row became hidden, close the panel
+            var sel = document.querySelector('.tx-row.selected-row');
+            if (sel && sel.style.display === 'none') clearSelection();
+            // Show empty-state hint when filter yields zero results
+            var hint = document.getElementById('filter-empty');
+            if (hint) hint.style.display = count === 0 ? '' : 'none';
         }
 
         /* ── Init: handle ?editId or ?showForm from server ── */
