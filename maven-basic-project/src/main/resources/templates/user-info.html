@@ -30,6 +30,57 @@
                 </span>
             </div>
 
+            <div class="balance-card" th:if="${objetivo != null}" 
+                 th:with="
+                    rawPercent=${balance > 0 ? (balance * 100.0 / objetivo.amount) : 0},
+                    percent=${rawPercent > 100 ? 100 : (rawPercent < 0 ? 0 : rawPercent)},
+                    hue=${percent * 1.2}
+                 "
+                 th:style="'background-color: hsl(' + ${hue} + ', 75%, 90%); border: 2px solid hsl(' + ${hue} + ', 75%, 40%);'">
+                
+                <span class="balance-label" style="color: #333;">Saving Goal</span>
+                
+                <span class="balance-amount" th:style="'color: hsl(' + ${hue} + ', 80%, 25%);'">
+                    <span th:text="${#numbers.formatDecimal(objetivo.amount, 1, 'POINT', 2, 'COMMA')}">0.00</span> €
+                </span>
+                
+                <div style="width: 100%; margin-top: 15px;">
+                    <div style="width: 100%; background-color: rgba(0,0,0,0.1); border-radius: 10px; height: 12px; overflow: hidden;">
+                        <div th:style="'height: 100%; transition: width 1s ease-in-out; background-color: hsl(' + ${hue} + ', 75%, 45%); width: ' + ${percent} + '%;'"></div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85em; margin-top: 5px; color: #444;">
+                        <span th:text="${#numbers.formatDecimal(percent, 1, 1)} + '% completed'">0% completed</span>
+                        <span th:if="${balance < objetivo.amount}">
+                            Remaining: <span th:text="${#numbers.formatDecimal(objetivo.amount - balance, 1, 'POINT', 2, 'COMMA')}">0</span> €
+                        </span>
+                    </div>
+                </div>
+
+                <p th:if="${balance >= objetivo.amount}" style="color: #1b5e20; font-weight: bold; margin-top: 10px; text-align: center;">
+                     Goal Achieved! 
+                </p>
+                
+                <p th:if="${balance < objetivo.amount}" style="color: #444; font-size: 0.8em; margin-top: 10px; text-align: center;">
+                    Deadline: <span th:text="${objetivo.endDate}"></span>
+                </p>
+
+                <form th:action="@{/web/user/objetivo/delete}" method="post" style="margin-top: 15px;">
+                    <button type="submit" class="btn-secondary" style="padding: 5px 10px; font-size: 0.8rem; width: 100%; background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.1); color: #333;">Delete Goal</button>
+                </form>
+            </div>
+
+            <div class="balance-card" th:if="${objetivo == null}">
+                <span class="balance-label">New Saving Goal</span>
+                <form th:action="@{/web/user/objetivo/create}" method="post" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
+                    <input type="number" name="amount" step="0.01" required placeholder="Amount to reach (€)" 
+                           style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+                    <input type="date" name="endDate" required 
+                           style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
+                    <button type="submit" class="btn-login" style="padding: 10px;">Set Goal</button>
+                </form>
+            </div>
+
             <!-- Summary row: owes / owed (hidden when zero) -->
             <div class="debt-row"
                  th:if="${(owes != null and owes > 0) or (owed != null and owed > 0)}">
