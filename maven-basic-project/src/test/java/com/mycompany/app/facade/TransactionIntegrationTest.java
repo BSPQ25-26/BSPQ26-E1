@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 //import org.junit.jupiter.api.Test;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,12 +31,14 @@ import com.mycompany.app.model.Group;
 import com.mycompany.app.model.Usuario;
 import com.mycompany.app.repository.GroupRepository;
 import com.mycompany.app.repository.UsuarioRepository;
+import org.springframework.test.context.junit4.SpringRunner;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 // @Testcontainers // Uncomment this when Docker network issues are resolved
 @AutoConfigureMockMvc(addFilters = false)
 @Tag("Layer1")
-class TransactionIntegrationTest {
+@RunWith(SpringRunner.class)
+public class TransactionIntegrationTest {
 
     /** * DOCKER CONFIGURATION (Currently disabled due to network issues)
      * To reactivate, uncomment the @Testcontainers annotation above, 
@@ -104,8 +107,8 @@ class TransactionIntegrationTest {
         executeTransactionFlow();
     }
 
-    @Test
-    void createGroupTransactionAndDebt_PersistsInTransaccionesAndDeudasTables() {
+        @Test
+        public void createGroupTransactionAndDebt_PersistsInTransaccionesAndDeudasTables() {
         executeTransactionFlow();
     }
 
@@ -137,17 +140,19 @@ class TransactionIntegrationTest {
         // 3. Assert: Verify transaction was created successfully
         assertEquals(HttpStatus.OK, createTxResponse.getStatusCode());
 
-        Integer txCountAfterCreate = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM transacciones WHERE grupo_id = ?",
+        Integer createdTransactionId = jdbcTemplate.queryForObject(
+                "SELECT id FROM transacciones WHERE grupo_id = ? AND concepto = ? ORDER BY id DESC LIMIT 1",
                 Integer.class,
-                savedGroup.getId());
+                savedGroup.getId(),
+                "Dinner");
+        assertNotNull(createdTransactionId);
+
+        Integer txCountAfterCreate = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM transacciones WHERE id = ?",
+                Integer.class,
+                createdTransactionId);
         assertNotNull(txCountAfterCreate);
         assertEquals(1, txCountAfterCreate.intValue());
-
-        Integer createdTransactionId = jdbcTemplate.queryForObject(
-                "SELECT id FROM transacciones ORDER BY id DESC LIMIT 1",
-                Integer.class);
-        assertNotNull(createdTransactionId);
 
         // 4. Act: Create a debt associated with the previous transaction
         DeudaCreationDTO deudaRequest = new DeudaCreationDTO();

@@ -153,8 +153,30 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.1.2</version>
           <configuration>
-            <argLine>-Dnet.bytebuddy.experimental=true</argLine>
+            <argLine>-Dnet.bytebuddy.experimental=true -Dorg.databene.contiperf.reportFormat=csv</argLine>
+            <systemPropertyVariables>
+              <org.databene.contiperf.reportDir>target/contiperf-report</org.databene.contiperf.reportDir>
+            </systemPropertyVariables>
           </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>0.8.10</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>report</id>
+              <phase>test</phase>
+              <goals>
+                <goal>report</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
