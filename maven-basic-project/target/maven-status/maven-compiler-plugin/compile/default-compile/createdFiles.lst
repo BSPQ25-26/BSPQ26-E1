@@ -30,10 +30,12 @@ com\mycompany\app\dto\CategoryCreationDTO.class
 com\mycompany\app\view\TransactionViewController.class
 com\mycompany\app\dto\DeudaCreationDTO.class
 com\mycompany\app\exception\AuthException.class
+com\mycompany\app\repository\SavingGoalsRepository.class
 com\mycompany\app\dto\TransactionDeletionDTO.class
 com\mycompany\app\service\GroupService.class
 com\mycompany\app\dto\RemoveUserFromGroupDTO.class
 com\mycompany\app\dto\GroupCreationDTO.class
+com\mycompany\app\model\SavingGoals.class
 com\mycompany\app\service\UserService.class
 com\mycompany\app\dto\GroupInfoDTO.class
 com\mycompany\app\repository\UsuarioRepository.class

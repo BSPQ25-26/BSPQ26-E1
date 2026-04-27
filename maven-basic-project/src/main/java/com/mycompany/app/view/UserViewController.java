@@ -4,10 +4,13 @@ import com.mycompany.app.dto.UserCreationDTO;
 import com.mycompany.app.model.Deuda;
 import com.mycompany.app.model.EstadoDeuda;
 import com.mycompany.app.model.Usuario;
+import com.mycompany.app.model.SavingGoals;
 import com.mycompany.app.repository.DeudaRepository;
 import com.mycompany.app.repository.UsuarioRepository;
+import com.mycompany.app.repository.SavingGoalsRepository;
 import com.mycompany.app.service.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -15,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,15 +29,18 @@ public class UserViewController {
     private final AuthService authService;
     private final UsuarioRepository usuarioRepository;
     private final DeudaRepository deudaRepository;
+    private final SavingGoalsRepository savingGoalsRepository;
     private final RestTemplate restTemplate;
 
     public UserViewController(AuthService authService,
                                UsuarioRepository usuarioRepository,
                                DeudaRepository deudaRepository,
+                               SavingGoalsRepository savingGoalsRepository,
                                RestTemplate restTemplate) {
         this.authService = authService;
         this.usuarioRepository = usuarioRepository;
         this.deudaRepository = deudaRepository;
+        this.savingGoalsRepository = savingGoalsRepository;
         this.restTemplate = restTemplate;
     }
 
@@ -101,6 +108,41 @@ public class UserViewController {
         model.addAttribute("debtsAsDebtor",   debtsAsDebtor);
         model.addAttribute("debtsAsCreditor", debtsAsCreditor);
 
+        SavingGoals objetivo = savingGoalsRepository.findByUser(user);
+        model.addAttribute("objetivo", objetivo);
+
         return "user-info";
+    }
+    @PostMapping("/objetivo/create")
+    public String createObjetivo(@CookieValue(value = "token", required = false) String token,
+                                 @RequestParam Double amount,
+                                 @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
+        
+        Usuario user = usuarioRepository.findByEmail(authService.getEmailFromToken(token));
+        
+        SavingGoals existente = savingGoalsRepository.findByUser(user);
+        if (existente != null) {
+            savingGoalsRepository.delete(existente);
+        }
+        
+        SavingGoals nuevoObjetivo = new SavingGoals(user, amount, LocalDate.now(), endDate);
+        savingGoalsRepository.save(nuevoObjetivo);
+        
+        return "redirect:/web/user/profile";
+    }
+
+    @PostMapping("/objetivo/delete")
+    public String deleteObjetivo(@CookieValue(value = "token", required = false) String token) {
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
+        
+        Usuario user = usuarioRepository.findByEmail(authService.getEmailFromToken(token));
+        SavingGoals existente = savingGoalsRepository.findByUser(user);
+        
+        if (existente != null) {
+            savingGoalsRepository.delete(existente);
+        }
+        
+        return "redirect:/web/user/profile";
     }
 }
