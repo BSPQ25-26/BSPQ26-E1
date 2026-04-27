@@ -60,6 +60,16 @@ mvn clean test
 
 This runs the unit tests, the integration test, and the performance tests. The test suite checks the service and controller layers, a real HTTP flow against the server, and the ContiPerf performance checks.
 
+To generate the ContiPerf report including both the passing benchmark and the intentionally failing one, run:
+
+```bash
+mvn test "-Dtest=TransactionIntegrationTest" "-Dmaven.test.failure.ignore=true" "-DtrimStackTrace=false"
+```
+
+Then open the report at:
+
+`maven-basic-project/target/contiperf-report/index.html`
+
 ---
 
 ## 4. Accessing the Application
