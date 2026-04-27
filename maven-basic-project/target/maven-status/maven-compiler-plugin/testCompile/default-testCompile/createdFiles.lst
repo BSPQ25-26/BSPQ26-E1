@@ -1,2 +1,12 @@
-com\mycompany\app\facade\GroupControllerTest.class
+com\mycompany\app\facade\TransactionControllerTest.class
+com\mycompany\app\facade\TransactionIntegrationTest.class
+com\mycompany\app\service\AuthServiceTest.class
 com\mycompany\app\AppTest.class
+com\mycompany\app\facade\UserControllerTest.class
+com\mycompany\app\service\CategoryServiceTest.class
+com\mycompany\app\service\UserServiceTest.class
+com\mycompany\app\facade\AuthControllerTest.class
+com\mycompany\app\service\TransactionServiceTest.class
+com\mycompany\app\facade\CategoryControllerTest.class
+com\mycompany\app\facade\GroupControllerTest.class
+com\mycompany\app\service\GroupServiceTest.class

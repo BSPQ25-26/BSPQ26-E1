@@ -16,4 +16,5 @@ public class DeudaCreationDTO {
     public Double getImporte() { return importe; }
     public void setImporte(Double importe) { this.importe = importe; }
     public String getToken() { return this.token; }
+    public void setToken(String token) { this.token = token; }
 }

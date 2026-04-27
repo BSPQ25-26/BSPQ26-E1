@@ -3,6 +3,8 @@ package com.mycompany.app.service;
 import java.util.List;
 import java.util.Optional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import com.mycompany.app.dto.CategoryCreationDTO;
@@ -14,6 +16,8 @@ import com.mycompany.app.repository.UsuarioRepository;
 
 @Service
 public class CategoryService {
+
+    private static final Logger log = LoggerFactory.getLogger(CategoryService.class);
 
     private final CategoryRepository categoryRepository;
     private final UsuarioRepository usuarioRepository;
@@ -39,7 +43,7 @@ public class CategoryService {
             return true;
 
         } catch (Exception e) {
-            System.err.println("Error creating category: " + e.getMessage());
+            log.error("Error creating category", e);
             return false;
         }
     }
@@ -64,7 +68,7 @@ public class CategoryService {
             return true;
 
         } catch (Exception e) {
-            System.err.println("Error deleting category: " + e.getMessage());
+            log.error("Error deleting category", e);
             return false;
         }
     }
