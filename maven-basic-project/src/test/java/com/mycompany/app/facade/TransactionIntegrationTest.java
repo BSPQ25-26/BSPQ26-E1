@@ -111,6 +111,26 @@ public class TransactionIntegrationTest {
         public void createGroupTransactionAndDebt_PersistsInTransaccionesAndDeudasTables() {
         executeTransactionFlow();
     }
+    @Test
+    @PerfTest(invocations = 40, threads = 4)
+    @Required(average = 1000) // El tiempo medio de respuesta debe ser menor a 1000ms
+    public void performanceTest_EditTransaction_ShouldPass() {
+        executeEditTransactionFlow();
+    }
+
+    @Test
+    @PerfTest(invocations = 30, threads = 3)
+    @Required(average = 800)
+    public void performanceTest_DeleteTransaction_ShouldPass() {
+        executeDeleteTransactionFlow();
+    }
+
+    @Test
+    @PerfTest(invocations = 30, threads = 3)
+    @Required(average = 1000)
+    public void performanceTest_PayDebt_ShouldPass() {
+        executePayDebtFlow();
+    }
 
     private void executeTransactionFlow() {
         // 1. Arrange: Setup initial users and group
@@ -182,5 +202,114 @@ public class TransactionIntegrationTest {
                 String.class,
                 createdTransactionId);
         assertEquals("PENDIENTE", deudaEstado);
+    }
+    private void executeEditTransactionFlow() {
+        String uniqueSuffix = java.util.UUID.randomUUID().toString().substring(0, 5);
+        Usuario creator = usuarioRepository.save(new Usuario("UserEdit" + uniqueSuffix, "edit" + uniqueSuffix + "@mail.com", "pwd", 100.0));
+        
+        Group group = new Group("Group Edit " + uniqueSuffix, "Edit tests");
+        group.addMiembro(creator);
+        Group savedGroup = groupRepository.save(group);
+
+        TransactionCreationDTO createReq = new TransactionCreationDTO(
+                "Lunch", 20.0, "GASTO", null, savedGroup.getId(), creator.getId(), "1");
+        
+        restTemplate.postForEntity("/transaction/create", createReq, String.class);
+        
+        Integer transactionId = jdbcTemplate.queryForObject(
+                "SELECT id FROM transacciones WHERE grupo_id = ? ORDER BY id DESC LIMIT 1",
+                Integer.class, savedGroup.getId());
+
+        // 2. Act: Editar la transacción
+        com.mycompany.app.dto.TransactionEditionDTO editReq = new com.mycompany.app.dto.TransactionEditionDTO();
+        editReq.setAccessToken("1");
+        editReq.setConcepto("Lunch Updated");
+        editReq.setImporteTotal(25.0);
+        editReq.setTipoTransaccion("GASTO");
+        editReq.setCreadorId(creator.getId());
+        editReq.setGrupoId(savedGroup.getId());
+
+        ResponseEntity<String> editResponse = restTemplate.postForEntity(
+                "/transaction/edit/" + transactionId,
+                editReq,
+                String.class);
+
+        // 3. Assert
+        assertEquals(HttpStatus.OK, editResponse.getStatusCode());
+        String updatedConcept = jdbcTemplate.queryForObject(
+                "SELECT concepto FROM transacciones WHERE id = ?",
+                String.class, transactionId);
+        assertEquals("Lunch Updated", updatedConcept);
+    }
+
+    private void executeDeleteTransactionFlow() {
+        String uniqueSuffix = java.util.UUID.randomUUID().toString().substring(0, 5);
+        Usuario creator = usuarioRepository.save(new Usuario("UserDel" + uniqueSuffix, "del" + uniqueSuffix + "@mail.com", "pwd", 100.0));
+        
+        TransactionCreationDTO createReq = new TransactionCreationDTO(
+                "Taxi", 15.0, "GASTO", null, null, creator.getId(), "1");
+        
+        restTemplate.postForEntity("/transaction/create", createReq, String.class);
+        
+        Integer transactionId = jdbcTemplate.queryForObject(
+                "SELECT id FROM transacciones WHERE creador_id = ? ORDER BY id DESC LIMIT 1",
+                Integer.class, creator.getId());
+
+        com.mycompany.app.dto.TransactionDeletionDTO deleteReq = new com.mycompany.app.dto.TransactionDeletionDTO();
+        deleteReq.setAccessToken("1");
+        deleteReq.setTransactionId(transactionId);
+
+        ResponseEntity<String> deleteResponse = restTemplate.postForEntity(
+                "/transaction/delete",
+                deleteReq,
+                String.class);
+
+        // 3. Assert
+        assertEquals(HttpStatus.OK, deleteResponse.getStatusCode());
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM transacciones WHERE id = ?",
+                Integer.class, transactionId);
+        assertEquals(0, count.intValue());
+    }
+
+    private void executePayDebtFlow() {
+        String uniqueSuffix = java.util.UUID.randomUUID().toString().substring(0, 5);
+        Usuario creditor = usuarioRepository.save(new Usuario("CreditorPay" + uniqueSuffix, "cpay" + uniqueSuffix + "@mail.com", "pwd", 100.0));
+        Usuario debtor = usuarioRepository.save(new Usuario("DebtorPay" + uniqueSuffix, "dpay" + uniqueSuffix + "@mail.com", "pwd", 50.0));
+
+        TransactionCreationDTO txReq = new TransactionCreationDTO(
+                "Shared Tickets", 50.0, "GASTO", null, null, creditor.getId(), "1");
+        restTemplate.postForEntity("/transaction/create", txReq, String.class);
+        
+        Integer txId = jdbcTemplate.queryForObject(
+                "SELECT id FROM transacciones WHERE creador_id = ? ORDER BY id DESC LIMIT 1",
+                Integer.class, creditor.getId());
+
+        DeudaCreationDTO debtReq = new DeudaCreationDTO();
+        debtReq.setToken("1");
+        debtReq.setTransaccionId(txId);
+        debtReq.setDeudorId(debtor.getId());
+        debtReq.setAcreedorId(creditor.getId());
+        debtReq.setImporte(25.0);
+        
+        restTemplate.postForEntity("/transaction/crear", debtReq, String.class);
+        
+        Integer deudaId = jdbcTemplate.queryForObject(
+                "SELECT id FROM deudas WHERE transaccion_id = ? ORDER BY id DESC LIMIT 1",
+                Integer.class, txId);
+
+        com.mycompany.app.dto.PayDebtDTO payReq = new com.mycompany.app.dto.PayDebtDTO();
+        payReq.setToken("1"); 
+
+        ResponseEntity<String> payResponse = restTemplate.postForEntity(
+                "/transaction/pay/" + deudaId,
+                payReq,
+                String.class);
+
+        assertEquals(HttpStatus.OK, payResponse.getStatusCode());
+        String estado = jdbcTemplate.queryForObject(
+                "SELECT estado FROM deudas WHERE id = ?",
+                String.class, deudaId);
+        assertEquals("PAGADO", estado); 
     }
 }

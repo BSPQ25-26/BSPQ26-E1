@@ -1,12 +1,17 @@
-C:\Users\asier\OneDrive\Escritorio\Uni\Deusto\4\SoftwareProcces&Quality\Project\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\service\TransactionServiceTest.java
-C:\Users\asier\OneDrive\Escritorio\Uni\Deusto\4\SoftwareProcces&Quality\Project\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\facade\GroupControllerTest.java
-C:\Users\asier\OneDrive\Escritorio\Uni\Deusto\4\SoftwareProcces&Quality\Project\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\service\CategoryServiceTest.java
-C:\Users\asier\OneDrive\Escritorio\Uni\Deusto\4\SoftwareProcces&Quality\Project\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\facade\CategoryControllerTest.java
-C:\Users\asier\OneDrive\Escritorio\Uni\Deusto\4\SoftwareProcces&Quality\Project\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\facade\UserControllerTest.java
-C:\Users\asier\OneDrive\Escritorio\Uni\Deusto\4\SoftwareProcces&Quality\Project\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\facade\TransactionControllerTest.java
-C:\Users\asier\OneDrive\Escritorio\Uni\Deusto\4\SoftwareProcces&Quality\Project\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\service\AuthServiceTest.java
-C:\Users\asier\OneDrive\Escritorio\Uni\Deusto\4\SoftwareProcces&Quality\Project\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\facade\AuthControllerTest.java
-C:\Users\asier\OneDrive\Escritorio\Uni\Deusto\4\SoftwareProcces&Quality\Project\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\service\UserServiceTest.java
-C:\Users\asier\OneDrive\Escritorio\Uni\Deusto\4\SoftwareProcces&Quality\Project\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\AppTest.java
-C:\Users\asier\OneDrive\Escritorio\Uni\Deusto\4\SoftwareProcces&Quality\Project\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\facade\TransactionIntegrationTest.java
-C:\Users\asier\OneDrive\Escritorio\Uni\Deusto\4\SoftwareProcces&Quality\Project\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\service\GroupServiceTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\service\CategoryServiceTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\view\CategoryViewControllerTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\facade\AuthControllerTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\AppTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\service\TransactionServiceTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\view\AuthViewControllerTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\facade\TransactionControllerTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\facade\TransactionIntegrationTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\service\GroupServiceTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\facade\CategoryControllerTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\service\UserServiceTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\view\UserViewControllerTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\facade\UserControllerTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\view\GroupViewControllerTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\facade\GroupControllerTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\view\TransactionViewControllerTest.java
+C:\Users\js834\OneDrive\Documentos\INGENIERÍA INFORMÁTICA\4º\2\Software Process and Quality\BSPQ26-E1\maven-basic-project\src\test\java\com\mycompany\app\service\AuthServiceTest.java
