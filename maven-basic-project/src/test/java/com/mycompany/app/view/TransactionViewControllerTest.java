@@ -1,5 +1,8 @@
 package com.mycompany.app.view;
 
+import com.mycompany.app.model.Usuario;
+import com.mycompany.app.repository.UsuarioRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +16,16 @@ class TransactionViewControllerTest {
 
     @Autowired
     private TestRestTemplate restTemplate;
+
+    @Autowired
+    private UsuarioRepository usuarioRepository;
+
+    @BeforeEach
+    void setUp() {
+        if (usuarioRepository.findByEmail("test@test.com") == null) {
+            usuarioRepository.save(new Usuario("Test", "test@test.com", "test", 0.0));
+        }
+    }
 
     @Test
     void listTransactionsNoToken() {
