@@ -55,8 +55,10 @@ Once the database is ready, we can start the application.
 To run all tests, open a terminal in the `maven-basic-project` folder and execute:
 
 ```bash
-mvn clean test
+mvn clean jacoco:prepare-agent test jacoco:report
 ```
+
+The jacoco report can be found in 
 
 This runs the unit tests, the integration test, and the performance tests. The test suite checks the service and controller layers, a real HTTP flow against the server, and the ContiPerf performance checks.
 
@@ -67,7 +69,7 @@ mvn test "-Dtest=TransactionIntegrationTest" "-Dmaven.test.failure.ignore=true" 
 ```
 
 Then open the report at:
-
+BSPQ26-E1/maven-basic-project/target/site/jacoco/index.html
 `maven-basic-project/target/contiperf-report/index.html`
 
 ---
