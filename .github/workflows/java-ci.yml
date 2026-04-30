@@ -1,6 +1,5 @@
 name: Java CI
 
-# Trigger on push or pull request to main
 on:
   push:
     branches: ["main"]
@@ -15,11 +14,9 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2. Setup Java 21 with Maven cache
       - name: Set up Java 21
         uses: actions/setup-java@v4
         with:
@@ -27,16 +24,26 @@ jobs:
           java-version: 21
           cache: maven
 
-      # 3. Build and repackage Spring Boot jar
-      - name: Build Spring Boot jar
-        run: mvn -B clean package spring-boot:repackage -DskipTests
+      # Tests con JaCoCo (antes del build del jar)
+      - name: Run tests with JaCoCo
+        run: mvn -B clean jacoco:prepare-agent test jacoco:report -Dmaven.test.failure.ignore=true
         working-directory: maven-basic-project
 
-      # 4. List build artifacts
+      # Subir reporte de cobertura como artefacto
+      - name: Upload JaCoCo report
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report
+          path: maven-basic-project/target/site/jacoco/
+          retention-days: 7
+
+      - name: Build Spring Boot jar
+        run: mvn -B package spring-boot:repackage -DskipTests
+        working-directory: maven-basic-project
+
       - name: Show build artifacts
         run: ls -l maven-basic-project/target/
 
-      # 5. Upload jar as artifact for CD
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
@@ -44,4 +51,3 @@ jobs:
           path: maven-basic-project/target/*-SNAPSHOT.jar
           if-no-files-found: error
           retention-days: 7
-
