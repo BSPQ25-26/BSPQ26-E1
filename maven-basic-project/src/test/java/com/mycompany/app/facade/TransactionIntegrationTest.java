@@ -3,14 +3,19 @@ package com.mycompany.app.facade;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.databene.contiperf.PerfTest;
-import org.databene.contiperf.Required;
-import org.databene.contiperf.junit.ContiPerfRule;
+import com.github.noconnor.junitperf.JUnitPerfInterceptor;
+import com.github.noconnor.junitperf.JUnitPerfTest;
+import com.github.noconnor.junitperf.JUnitPerfTestRequirement;
+import com.github.noconnor.junitperf.JUnitPerfReportingConfig;
+import com.github.noconnor.junitperf.JUnitPerfTestActiveConfig;
+import com.github.noconnor.junitperf.reporting.providers.HtmlReportGenerator;
+import org.junit.jupiter.api.extension.ExtendWith;
+
 import org.junit.Rule;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Tag;
 //import org.junit.jupiter.api.Test;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -37,7 +42,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 // @Testcontainers // Uncomment this when Docker network issues are resolved
 @AutoConfigureMockMvc(addFilters = false)
 @Tag("Layer1")
-@RunWith(SpringRunner.class)
+@ExtendWith(JUnitPerfInterceptor.class)
 public class TransactionIntegrationTest {
 
     /** * DOCKER CONFIGURATION (Currently disabled due to network issues)
@@ -62,8 +67,10 @@ public class TransactionIntegrationTest {
     }
     */
 
-    @Rule
-    public ContiPerfRule rule = new ContiPerfRule();
+    @JUnitPerfTestActiveConfig
+        private final static JUnitPerfReportingConfig PERF_CONFIG = JUnitPerfReportingConfig.builder()
+        .reportGenerator(new HtmlReportGenerator("target/reports/junitperf_report.html"))
+        .build();
 
     @Autowired
     private TestRestTemplate restTemplate;
@@ -77,32 +84,16 @@ public class TransactionIntegrationTest {
     @Autowired
     private GroupRepository groupRepository;
 
-    @BeforeEach
-    void cleanDatabase() {
-        // Disable referential integrity to allow cleaning tables with foreign keys
-        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
-        
-        jdbcTemplate.execute("TRUNCATE TABLE deudas");
-        jdbcTemplate.execute("TRUNCATE TABLE transacciones");
-        jdbcTemplate.execute("TRUNCATE TABLE usuario_grupo");
-        jdbcTemplate.execute("TRUNCATE TABLE grupo");
-        jdbcTemplate.execute("TRUNCATE TABLE categories");
-        jdbcTemplate.execute("TRUNCATE TABLE usuario");
-        
-        // Re-enable referential integrity
-        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
-    }
-
     @Test
-    @PerfTest(invocations = 50, threads = 5)
-    @Required(average = 400) // Average response time should be under 400ms
+    @JUnitPerfTest(totalExecutions = 50, threads = 5)
+    @JUnitPerfTestRequirement(meanLatency = 400) // Average response time should be under 400ms
     public void performanceTest_CreateTransaction_ShouldPass() {
         executeTransactionFlow();
     }
 
     @Test
-    @PerfTest(invocations = 50, threads = 5)
-    @Required(max = 100) 
+    @JUnitPerfTest(totalExecutions = 50, threads = 5)
+    @JUnitPerfTestRequirement(maxLatency = 100)
     public void performanceTest_CreateTransaction_ShouldFailDeliberately() {
         executeTransactionFlow();
     }
@@ -112,22 +103,22 @@ public class TransactionIntegrationTest {
         executeTransactionFlow();
     }
     @Test
-    @PerfTest(invocations = 40, threads = 4)
-    @Required(average = 1000) // El tiempo medio de respuesta debe ser menor a 1000ms
+    @JUnitPerfTest(totalExecutions = 40, threads = 4)
+    @JUnitPerfTestRequirement(meanLatency = 1000) // El tiempo medio de respuesta debe ser menor a 1000ms
     public void performanceTest_EditTransaction_ShouldPass() {
         executeEditTransactionFlow();
     }
 
     @Test
-    @PerfTest(invocations = 30, threads = 3)
-    @Required(average = 800)
+    @JUnitPerfTest(totalExecutions = 30, threads = 3)
+    @JUnitPerfTestRequirement(meanLatency = 800)
     public void performanceTest_DeleteTransaction_ShouldPass() {
         executeDeleteTransactionFlow();
     }
 
     @Test
-    @PerfTest(invocations = 30, threads = 3)
-    @Required(average = 1000)
+    @JUnitPerfTest(totalExecutions = 30, threads = 3)
+    @JUnitPerfTestRequirement(meanLatency = 1000)
     public void performanceTest_PayDebt_ShouldPass() {
         executePayDebtFlow();
     }
