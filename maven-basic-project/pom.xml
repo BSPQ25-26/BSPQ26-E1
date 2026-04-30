@@ -157,7 +157,7 @@
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.1.2</version>
           <configuration>
-            <argLine>-Dnet.bytebuddy.experimental=true -Dorg.databene.contiperf.reportFormat=csv</argLine>
+            <argLine>@{argLine} -Dnet.bytebuddy.experimental=true -Dorg.databene.contiperf.reportFormat=csv</argLine>
             <systemPropertyVariables>
               <org.databene.contiperf.reportDir>target/contiperf-report</org.databene.contiperf.reportDir>
             </systemPropertyVariables>
