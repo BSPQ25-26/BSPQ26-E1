@@ -25,6 +25,25 @@ jobs:
         run: mvn -B clean jacoco:prepare-agent test jacoco:report -Dmaven.test.failure.ignore=true
         working-directory: maven-basic-project
 
+      - name: Run tests with JaCoCo
+        run: mvn -B clean jacoco:prepare-agent test jacoco:report -Dmaven.test.failure.ignore=true
+        working-directory: maven-basic-project
+
+      - name: Check test results
+        run: |
+          FAILURES=$(grep -h 'failures="[0-9]*"' maven-basic-project/target/surefire-reports/*.xml \
+            | grep -oP 'failures="\K[0-9]+' \
+            | awk '{s+=$1} END {print s+0}')
+          ERRORS=$(grep -h 'errors="[0-9]*"' maven-basic-project/target/surefire-reports/*.xml \
+            | grep -oP 'errors="\K[0-9]+' \
+            | awk '{s+=$1} END {print s+0}')
+          TOTAL=$((FAILURES + ERRORS))
+          echo "Failed tests: $FAILURES, Errors: $ERRORS, Total: $TOTAL"
+          if [ "$TOTAL" -gt 1 ]; then
+            echo "More than 1 failed test ($TOTAL). Cancel pipeline."
+            exit 1
+          fi
+
       - name: Upload JaCoCo report
         uses: actions/upload-artifact@v4
         with:
