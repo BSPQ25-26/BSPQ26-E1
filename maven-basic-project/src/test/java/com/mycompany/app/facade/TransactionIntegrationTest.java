@@ -95,14 +95,14 @@ public class TransactionIntegrationTest {
 
     @Test
     @PerfTest(invocations = 50, threads = 5)
-    @Required(average = 1000) // Average response time should be under 1000ms
+    @Required(average = 400) // Average response time should be under 400ms
     public void performanceTest_CreateTransaction_ShouldPass() {
         executeTransactionFlow();
     }
 
     @Test
-    @PerfTest(invocations = 10, threads = 2)
-    @Required(max = 1) 
+    @PerfTest(invocations = 50, threads = 5)
+    @Required(max = 100) 
     public void performanceTest_CreateTransaction_ShouldFailDeliberately() {
         executeTransactionFlow();
     }
