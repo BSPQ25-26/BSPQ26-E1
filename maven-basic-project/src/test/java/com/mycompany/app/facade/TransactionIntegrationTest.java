@@ -93,32 +93,32 @@ public class TransactionIntegrationTest {
 
     @Test
     @JUnitPerfTest(totalExecutions = 50, threads = 5)
-    @JUnitPerfTestRequirement(maxLatency = 100)
+    @JUnitPerfTestRequirement(maxLatency = 30)
     public void performanceTest_CreateTransaction_ShouldFailDeliberately() {
         executeTransactionFlow();
     }
 
-        @Test
-        public void createGroupTransactionAndDebt_PersistsInTransaccionesAndDeudasTables() {
+    @Test
+    public void createGroupTransactionAndDebt_PersistsInTransaccionesAndDeudasTables() {
         executeTransactionFlow();
     }
     @Test
     @JUnitPerfTest(totalExecutions = 40, threads = 4)
-    @JUnitPerfTestRequirement(meanLatency = 1000) // El tiempo medio de respuesta debe ser menor a 1000ms
+    @JUnitPerfTestRequirement(meanLatency = 400)
     public void performanceTest_EditTransaction_ShouldPass() {
         executeEditTransactionFlow();
     }
 
     @Test
     @JUnitPerfTest(totalExecutions = 30, threads = 3)
-    @JUnitPerfTestRequirement(meanLatency = 800)
+    @JUnitPerfTestRequirement(meanLatency = 400)
     public void performanceTest_DeleteTransaction_ShouldPass() {
         executeDeleteTransactionFlow();
     }
 
     @Test
     @JUnitPerfTest(totalExecutions = 30, threads = 3)
-    @JUnitPerfTestRequirement(meanLatency = 1000)
+    @JUnitPerfTestRequirement(meanLatency = 400)
     public void performanceTest_PayDebt_ShouldPass() {
         executePayDebtFlow();
     }
