@@ -2,10 +2,12 @@ package com.mycompany.app.facade;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.mycompany.app.dto.DeudaCreationDTO;
@@ -44,23 +46,24 @@ public class TransactionController {
                     @ApiResponse(responseCode = "401", description = "Unauthorized. The provided token is invalid or expired.")
             }
     )
+
     @PostMapping("/create")
-    public ResponseEntity<String> createTransaction(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Data transfer object containing the transaction details and authorization token", required = true)
-            @RequestBody TransactionCreationDTO request
-    ){
-        if (!authService.isValidToken(request.getToken())) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
+        public ResponseEntity<String> createTransaction(@RequestBody TransactionCreationDTO request) {
+            if (!authService.isValidToken(request.getToken())) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            }
 
-        Boolean result = transactionService.createTransaction(request);
-        if (result) {
-            return new ResponseEntity<>(HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            try {
+                Boolean result = transactionService.createTransaction(request);
+                if (result) {
+                    return new ResponseEntity<>(HttpStatus.OK);
+                } else {
+                    return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                }
+            } catch (RuntimeException e) {
+                return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
+            }
         }
-
-    }
 
     @Operation(
             summary = "Delete a transaction",
@@ -177,5 +180,40 @@ public class TransactionController {
         Boolean result = transactionService.editTransactionWithDeudas(request, transactionId);
         if (result) { return new ResponseEntity<>(HttpStatus.OK); }
         else { return new ResponseEntity<>(HttpStatus.BAD_REQUEST); }
+    }
+
+    @Operation(summary = "Set category budget limit", description = "Sets a maximum monthly budget limit for a specific category.")
+    @PostMapping("/budget/create")
+    public ResponseEntity<String> createBudget(@RequestBody com.mycompany.app.dto.BudgetCreationDTO request) {
+        if (!authService.isValidToken(request.getToken())) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        boolean result = transactionService.createBudget(request);
+        if (result) {
+            return new ResponseEntity<>("Budget created successfully", HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>("Error creating budget", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Operation(summary = "Get Net Balance", description = "Calculates the net balance (income - expenses) for a user within a specific date range.")
+    @GetMapping("/net-balance")
+    public ResponseEntity<?> getNetBalance(
+            @RequestParam("userId") Integer userId,
+            @RequestParam("startDate") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime startDate,
+            @RequestParam("endDate") @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE_TIME) java.time.LocalDateTime endDate,
+            @RequestParam("token") String token) {
+        
+        if (!authService.isValidToken(token)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        try {
+            Double balance = transactionService.getNetBalance(userId, startDate, endDate);
+            return new ResponseEntity<>(balance, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Error calculating net balance", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }
