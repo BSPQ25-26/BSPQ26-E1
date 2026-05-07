@@ -21,6 +21,7 @@ import com.mycompany.app.dto.RemoveUserFromGroupDTO;
 import com.mycompany.app.dto.UpdateGroupDTO;
 import com.mycompany.app.exception.AuthException;
 import com.mycompany.app.service.GroupService;
+import com.mycompany.app.service.TransactionService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,9 +34,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 public class GroupController {
 
     private final GroupService groupService;
+    private final TransactionService transactionService; // Añadido para gestionar gastos
 
-    public GroupController(GroupService groupService) {
+    public GroupController(GroupService groupService, TransactionService transactionService) {
         this.groupService = groupService;
+        this.transactionService = transactionService;
     }
 
     @Operation(
@@ -238,6 +241,36 @@ public class GroupController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error deleting group: " + e.getMessage());
+        }
+    }
+
+    @Operation(
+            summary = "Clear all expenses in a group", 
+            description = "Deletes all transactions of type 'GASTO' associated with a specific group/project.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Group expenses successfully cleared."),
+                    @ApiResponse(responseCode = "400", description = "Bad Request. Expenses could not be cleared."),
+                    @ApiResponse(responseCode = "500", description = "Internal Server Error.")
+            }
+    )
+    @PostMapping("/{id}/clear-expenses")
+    public ResponseEntity<?> clearGroupExpenses(
+            @PathVariable("id") Integer groupId,
+            @RequestBody DeleteGroupDTO request 
+    ) {
+        try {
+            // Se asume que GroupService o TransactionService validan el token si fuera necesario
+            boolean cleared = transactionService.clearProjectExpenses(groupId);
+            
+            if (cleared) {
+                return ResponseEntity.ok("Project expenses cleared successfully");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body("Could not clear expenses for the specified group");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error clearing expenses: " + e.getMessage());
         }
     }
 }

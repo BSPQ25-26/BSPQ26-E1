@@ -1,5 +1,6 @@
 package com.mycompany.app.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -11,12 +12,14 @@ import com.mycompany.app.dto.TransactionCreationDTO;
 import com.mycompany.app.dto.TransactionDeletionDTO;
 import com.mycompany.app.dto.TransactionEditionDTO;
 import com.mycompany.app.dto.TranscactionDebtEditionDTO;
+import com.mycompany.app.model.Budget;
 import com.mycompany.app.model.Category;
 import com.mycompany.app.model.Deuda;
 import com.mycompany.app.model.EstadoDeuda;
 import com.mycompany.app.model.Group;
 import com.mycompany.app.model.Transaction;
 import com.mycompany.app.model.Usuario;
+import com.mycompany.app.repository.BudgetRepository;
 import com.mycompany.app.repository.CategoryRepository;
 import com.mycompany.app.repository.DeudaRepository;
 import com.mycompany.app.repository.GroupRepository;
@@ -31,17 +34,20 @@ public class TransactionService {
     private final UsuarioRepository usuarioRepository;
     private final GroupRepository groupRepository;
     private final DeudaRepository deudaRepository;
+    private final BudgetRepository budgetRepository;
 
     public TransactionService(TransactionRepository transactionRepository,
                               CategoryRepository categoryRepository,
                               UsuarioRepository usuarioRepository,
                               GroupRepository groupRepository,
-                              DeudaRepository deudaRepository) {
+                              DeudaRepository deudaRepository,
+                              BudgetRepository budgetRepository) {
         this.transactionRepository = transactionRepository;
         this.categoryRepository = categoryRepository;
         this.usuarioRepository = usuarioRepository;
         this.groupRepository = groupRepository;
         this.deudaRepository = deudaRepository;
+        this.budgetRepository = budgetRepository;
     }
 
     @Transactional
@@ -53,6 +59,10 @@ public class TransactionService {
             Category categoria = dto.getCategoriaId() != null
                 ? categoryRepository.findById(dto.getCategoriaId()).orElse(null)
                 : null;
+
+            if ("GASTO".equals(dto.getTipoTransaccion()) && categoria != null) {
+                checkBudgetExceeded(creador, categoria, dto.getImporteTotal());
+            }
 
             Group grupo = dto.getGrupoId() != null
                 ? groupRepository.findById(dto.getGrupoId()).orElse(null)
@@ -71,6 +81,71 @@ public class TransactionService {
 
             applyEffect(dto.getTipoTransaccion(), dto.getImporteTotal(), creador);
 
+            return true;
+        } catch (RuntimeException e) {
+            throw e; 
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    @Transactional
+    public boolean createBudget(com.mycompany.app.dto.BudgetCreationDTO dto) {
+        try {
+            Usuario user = usuarioRepository.findById(dto.getUserId()).orElse(null);
+            Category category = categoryRepository.findById(dto.getCategoryId()).orElse(null);
+
+            if (user == null || category == null) {
+                return false;
+            }
+
+            // Comprobar si ya existe un presupuesto para actualizarlo, o crear uno nuevo
+            Budget budget = budgetRepository.findByCategoryIdAndUserId(category.getId(), user.getId())
+                .orElse(new Budget());
+            
+            budget.setLimitAmount(dto.getLimitAmount());
+            budget.setCategory(category);
+            budget.setUser(user);
+
+            budgetRepository.save(budget);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private void checkBudgetExceeded(Usuario creador, Category categoria, Double nuevoImporte) {
+        Budget budget = budgetRepository.findByCategoryIdAndUserId(categoria.getId(), creador.getId()).orElse(null);
+        
+        if (budget != null) {
+            int currentMonth = LocalDateTime.now().getMonthValue();
+            int currentYear = LocalDateTime.now().getYear();
+
+            // Sumamos todos los gastos de esa categoría en el mes actual
+            double gastoMensualActual = transactionRepository.findByCreadorId(creador.getId()).stream()
+                .filter(t -> "GASTO".equals(t.getTipoTransaccion()))
+                .filter(t -> t.getCategoria() != null && t.getCategoria().getId().equals(categoria.getId()))
+                .filter(t -> t.getFecha() != null && t.getFecha().getMonthValue() == currentMonth && t.getFecha().getYear() == currentYear)
+                .mapToDouble(Transaction::getImporteTotal)
+                .sum();
+
+            if ((gastoMensualActual + nuevoImporte) > budget.getLimitAmount()) {
+                // Lanza una excepción que actuará como "Alerta"
+                throw new RuntimeException("¡Alerta! El gasto supera el presupuesto mensual de " + budget.getLimitAmount() + " para la categoría: " + categoria.getName());
+            }
+        }
+    }
+
+    public Double getNetBalance(Integer userId, LocalDateTime startDate, LocalDateTime endDate) {
+        Double ingresos = transactionRepository.sumImporteByDateRangeAndTipo(userId, startDate, endDate, "INGRESO");
+        Double gastos = transactionRepository.sumImporteByDateRangeAndTipo(userId, startDate, endDate, "GASTO");
+        return ingresos - gastos;
+    }
+
+    @Transactional
+    public boolean clearProjectExpenses(Integer groupId) {
+        try {
+            transactionRepository.deleteGastosByGrupoId(groupId);
             return true;
         } catch (Exception e) {
             return false;
