@@ -646,50 +646,268 @@ td {
 
 .categories-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 15px;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
     margin-top: 20px;
 }
 
 .category-card {
     background: white;
-    padding: 20px;
-    border-radius: 16px;
-    text-align: center;
+    padding: 0;
+    border-radius: 18px;
     border: 1px solid #eee;
     position: relative;
     transition: all 0.3s ease;
+    overflow: hidden;
 }
 
 .category-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-    border-color: #6366f1;
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px -6px rgba(139, 92, 246, 0.15);
+    border-color: rgba(139, 92, 246, 0.3);
+}
+
+/* ── Card header ── */
+.cat-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 16px 10px;
 }
 
 .category-icon {
-    font-size: 32px;
-    margin-bottom: 10px;
-    display: block;
+    font-size: 28px;
     line-height: 1;
+    flex-shrink: 0;
 }
 
-.category-card h3 {
+.cat-title-wrap {
+    flex: 1;
+    min-width: 0;
+}
+
+.cat-title-wrap h3 {
     font-size: 0.95rem;
-    margin: 5px 0;
-    color: #1f2937;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin: 0 0 2px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
-.category-card .btn-mini-delete {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    opacity: 0.3;
+.cat-badge-global {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 1px 7px;
+    border-radius: 8px;
+    background: rgba(139, 92, 246, 0.08);
+    color: #7c3aed;
+    border: 1px solid rgba(139, 92, 246, 0.15);
 }
 
-.category-card:hover .btn-mini-delete {
-    opacity: 1;
-    color: #ef4444;
+.category-card .btn-mini-delete { opacity: 0.25; }
+.category-card:hover .btn-mini-delete { opacity: 1; color: #ef4444; }
+
+/* ── Stats row ── */
+.cat-stats-row {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 12px;
+}
+
+.cat-stat {
+    flex: 1;
+    padding: 8px 10px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.cat-stat.expense {
+    background: rgba(239, 68, 68, 0.06);
+    border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+.cat-stat.income {
+    background: rgba(16, 185, 129, 0.07);
+    border: 1px solid rgba(16, 185, 129, 0.18);
+}
+
+.cat-stat-label {
+    font-size: 0.62rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: #6b7280;
+    display: block;
+    margin-bottom: 2px;
+}
+
+.cat-stat.expense .cat-stat-value { color: #dc2626; font-weight: 700; font-size: 0.88rem; }
+.cat-stat.income  .cat-stat-value { color: #059669; font-weight: 700; font-size: 0.88rem; }
+
+/* ── Budget section ── */
+.cat-budget-section {
+    padding: 0 16px 12px;
+}
+
+.cat-alert-budget {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    border-radius: 8px;
+    font-size: 0.71rem;
+    font-weight: 600;
+    color: #dc2626;
+    margin-bottom: 8px;
+}
+
+.cat-budget-bar-wrap { margin-bottom: 8px; }
+
+.cat-budget-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.cat-budget-amounts {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: var(--text-dark);
+}
+
+.cat-progress-track {
+    height: 6px;
+    background: rgba(139, 92, 246, 0.1);
+    border-radius: 6px;
+    overflow: hidden;
+}
+
+.cat-progress-fill {
+    height: 100%;
+    background: var(--primary-gradient);
+    border-radius: 6px;
+    transition: width 0.4s ease;
+    min-width: 2px;
+}
+
+.cat-progress-fill.over-limit {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.cat-budget-set summary {
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #7c3aed;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+}
+
+.cat-budget-set summary::-webkit-details-marker { display: none; }
+.cat-budget-set summary:hover { opacity: 0.75; }
+
+.cat-budget-form {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+    align-items: center;
+}
+
+.cat-budget-form input {
+    flex: 1;
+    padding: 7px 10px !important;
+    font-size: 0.82rem !important;
+    border-radius: 10px !important;
+}
+
+.btn-budget-save {
+    padding: 7px 14px;
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 0.78rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.2s ease;
+}
+
+.btn-budget-save:hover { opacity: 0.85; }
+
+/* ── Transaction list ── */
+.cat-tx-list {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.cat-tx-list > summary {
+    padding: 9px 16px;
+    font-size: 0.74rem;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s ease;
+}
+
+.cat-tx-list > summary::before {
+    content: '›';
+    font-size: 1rem;
+    transition: transform 0.2s ease;
+    color: #9ca3af;
+}
+
+.cat-tx-list[open] > summary::before { transform: rotate(90deg); }
+.cat-tx-list > summary::-webkit-details-marker { display: none; }
+.cat-tx-list > summary:hover { background: rgba(0, 0, 0, 0.02); }
+
+.cat-tx-items {
+    list-style: none;
+    margin: 0;
+    padding: 0 16px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.cat-tx-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 10px;
+    background: rgba(248, 250, 252, 0.9);
+    border-radius: 8px;
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    font-size: 0.78rem;
+}
+
+.cat-tx-name {
+    color: var(--text-dark);
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+    margin-right: 8px;
+}
+
+.cat-tx-amount {
+    font-weight: 700;
+    white-space: nowrap;
+    font-size: 0.8rem;
 }
 
 /* ===================== GROUPS ===================== */

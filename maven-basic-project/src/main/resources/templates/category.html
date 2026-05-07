@@ -16,7 +16,7 @@
 
     <div class="container-grid" th:classappend="${showForm} ? ' panel-open' : ''">
 
-        <!-- ===== LIST ===== -->
+        <!-- ===== CATEGORIES LIST ===== -->
         <div class="glass-card card-lista">
             <div class="header-inline">
                 <h2 class="card-title">Categories</h2>
@@ -30,17 +30,108 @@
             <div id="categoriesGrid" class="categories-grid">
                 <p th:if="${listaCategorias.empty}"
                    style="grid-column:1/-1; text-align:center; color:#999; padding:20px;">
-                    No categories yet.
+                    No categories yet. Create your first one!
                 </p>
+
                 <div th:each="cat : ${listaCategorias}" class="category-card">
-                    <form th:action="@{/web/categories/delete}" method="post"
-                          style="position:absolute; top:8px; right:8px; margin:0"
-                          onsubmit="return confirm('Delete this category?')">
-                        <input type="hidden" name="categoryId" th:value="${cat.id}">
-                        <button type="submit" class="btn-mini-delete" title="Delete">🗑</button>
-                    </form>
-                    <div class="category-icon">📁</div>
-                    <h3 th:text="${cat.name}">Name</h3>
+
+                    <!-- Header: emoji + name + global badge + delete -->
+                    <div class="cat-header">
+                        <span class="category-icon" th:text="${cat.emoji}">📂</span>
+                        <div class="cat-title-wrap">
+                            <h3 th:text="${cat.category.name}">Category Name</h3>
+                        </div>
+                        <form th:action="@{/web/categories/delete}" method="post"
+                              style="margin:0; flex-shrink:0"
+                              th:if="${cat.category.user != null}"
+                              onsubmit="return confirm('Delete this category?')">
+                            <input type="hidden" name="categoryId" th:value="${cat.category.id}">
+                            <button type="submit" class="btn-mini-delete" title="Delete">🗑</button>
+                        </form>
+                    </div>
+
+                    <!-- Stats: Expenses / Income (only shown when non-zero) -->
+                    <div class="cat-stats-row" th:if="${cat.totalExpenses != 0 or cat.totalIncome != 0}">
+                        <div class="cat-stat expense" th:if="${cat.totalExpenses != 0}">
+                            <span class="cat-stat-label">Expenses</span>
+                            <span class="cat-stat-value"
+                                  th:text="${'-' + #numbers.formatDecimal(cat.totalExpenses, 1, 2) + ' €'}">
+                                -0.00 €
+                            </span>
+                        </div>
+                        <div class="cat-stat income" th:if="${cat.totalIncome != 0}">
+                            <span class="cat-stat-label">Income</span>
+                            <span class="cat-stat-value"
+                                  th:text="${'+' + #numbers.formatDecimal(cat.totalIncome, 1, 2) + ' €'}">
+                                +0.00 €
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Budget section -->
+                    <div class="cat-budget-section">
+
+                        <!-- Over-budget alert -->
+                        <div th:if="${cat.overBudget}" class="cat-alert-budget">
+                            ⚠ Spending limit exceeded!
+                        </div>
+
+                        <!-- Progress bar (only when a limit is set) -->
+                        <div th:if="${cat.budgetLimit != null}" class="cat-budget-bar-wrap">
+                            <div class="cat-budget-header">
+                                <span class="cat-stat-label">Spending Limit</span>
+                                <span class="cat-budget-amounts"
+                                      th:text="${#numbers.formatDecimal(cat.totalExpenses, 1, 2)
+                                               + ' / '
+                                               + #numbers.formatDecimal(cat.budgetLimit, 1, 2)
+                                               + ' €'}">
+                                    0.00 / 0.00 €
+                                </span>
+                            </div>
+                            <div class="cat-progress-track">
+                                <div class="cat-progress-fill"
+                                     th:classappend="${cat.overBudget} ? ' over-limit' : ''"
+                                     th:style="'width:' + ${cat.budgetPercent} + '%'">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inline form to set / update the spending limit -->
+                        <details class="cat-budget-set">
+                            <summary th:text="${cat.budgetLimit != null} ? 'Edit limit' : '+ Set spending limit'">
+                                + Set spending limit
+                            </summary>
+                            <form th:action="@{/web/categories/budget}" method="post" class="cat-budget-form">
+                                <input type="hidden" name="categoryId" th:value="${cat.category.id}">
+                                <input type="number" name="limitAmount" step="0.01" min="0.01"
+                                       th:value="${cat.budgetLimit}"
+                                       placeholder="e.g. 200.00"
+                                       required>
+                                <button type="submit" class="btn-budget-save">Save</button>
+                            </form>
+                        </details>
+                    </div>
+
+                    <!-- Collapsible recent transactions -->
+                    <details class="cat-tx-list" th:if="${!cat.transactions.isEmpty()}">
+                        <summary th:text="|${cat.transactions.size()} ${cat.transactions.size() != 1 ? 'transactions' : 'transaction'}|">
+                            0 transactions
+                        </summary>
+                        <ul class="cat-tx-items">
+                            <li th:each="tx, txStat : ${cat.transactions}"
+                                th:if="${txStat.index < 5}"
+                                class="cat-tx-item">
+                                <span class="cat-tx-name" th:text="${tx.concepto}">Item</span>
+                                <span class="cat-tx-amount"
+                                      th:classappend="${'INGRESO'.equals(tx.tipoTransaccion)} ? ' text-green' : ' text-red'"
+                                      th:text="${('INGRESO'.equals(tx.tipoTransaccion) ? '+' : '-')
+                                               + #numbers.formatDecimal(tx.importeTotal, 1, 2) + ' €'}">
+                                    0.00 €
+                                </span>
+                            </li>
+                        </ul>
+                    </details>
+
                 </div>
             </div>
         </div>
