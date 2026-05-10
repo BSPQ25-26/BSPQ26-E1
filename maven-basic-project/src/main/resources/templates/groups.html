@@ -11,7 +11,13 @@
 
     <div class="nav-header">
         <a th:href="@{/web/user/profile}" class="logo">Expen<span>Sense</span></a>
-        <a th:href="@{/web/user/profile}" class="back-link">← Back to Profile</a>
+        <div class="nav-right">
+            <div class="lang-switcher">
+                <a th:href="@{/web/groups(lang=en)}">EN</a> |
+                <a th:href="@{/web/groups(lang=es)}">ES</a>
+            </div>
+            <a th:href="@{/web/user/profile}" class="back-link" th:text="#{nav.back}">← Back to Profile</a>
+        </div>
     </div>
 
     <div class="container-grid" th:classappend="${showPanel} ? 'panel-open'">
@@ -19,11 +25,11 @@
         <!-- ===== LEFT COLUMN: group list ===== -->
         <div class="glass-card card-lista">
             <div class="header-inline">
-                <h2 class="card-title">My Groups</h2>
+                <h2 class="card-title" th:text="#{group.title}">My Groups</h2>
                 <div class="button-group-top">
-                    <a th:href="@{/web/groups(showPanel=true)}" th:if="${!showPanel}" class="btn-add" title="New group">＋</a>
-                    <a th:href="@{/web/groups}" th:if="${showPanel}" class="btn-add" title="Hide form">✕</a>
-                    <a th:href="@{/web/groups}" class="btn-refresh" title="Refresh">↻</a>
+                    <a th:href="@{/web/groups(showPanel=true)}" th:if="${!showPanel}" class="btn-add" th:title="#{group.new_btn_title}">＋</a>
+                    <a th:href="@{/web/groups}" th:if="${showPanel}" class="btn-add" th:title="#{group.hide_form_title}">✕</a>
+                    <a th:href="@{/web/groups}" class="btn-refresh" th:title="#{group.refresh_title}">↻</a>
                 </div>
             </div>
 
@@ -31,10 +37,13 @@
 
             <div th:if="${listaGrupos.empty}" class="empty-state">
                 <div style="font-size:3rem">👥</div>
-                <p>You are not in any group yet.<br>
-                   <b>Create one to start splitting expenses with friends!</b></p>
+                <p>
+                    <span th:text="#{group.empty}">You are not in any group yet.</span><br>
+                    <b th:text="#{group.empty_cta}">Create one to start splitting expenses with friends!</b>
+                </p>
                 <a th:href="@{/web/groups(showPanel=true)}" class="btn-login"
-                   style="max-width:260px; margin:0 auto;">Create my first group</a>
+                   style="max-width:260px; margin:0 auto;"
+                   th:text="#{group.create_first}">Create my first group</a>
             </div>
 
             <div class="groups-list" th:if="${!listaGrupos.empty}">
@@ -46,7 +55,7 @@
                         <div class="group-header-left">
                             <h3 class="group-name" th:text="${grupo.nombre}">Name</h3>
                             <p class="group-desc"
-                               th:text="${grupo.descripcion != null and !grupo.descripcion.blank} ? ${grupo.descripcion} : 'No description'">
+                               th:text="${grupo.descripcion != null and !grupo.descripcion.blank} ? ${grupo.descripcion} : #{group.no_description}">
                                No description</p>
                         </div>
                         <div class="group-header-badges">
@@ -69,19 +78,19 @@
 
                             <!-- Members + Invite -->
                             <div class="group-members-block">
-                                <p class="members-title">Members</p>
+                                <p class="members-title" th:text="#{group.members}">Members</p>
                                 <div th:each="email : ${grupo.miembrosEmails}" class="member-row">
                                     <span th:text="${email}">email</span>
                                     <form th:action="@{/web/groups/removeMember}" method="post" class="inline-form">
                                         <input type="hidden" name="groupId" th:value="${grupo.id}">
                                         <input type="hidden" name="userEmail" th:value="${email}">
-                                        <button type="submit" class="btn-mini-delete" title="Remove member">✕</button>
+                                        <button type="submit" class="btn-mini-delete" th:title="#{group.remove_member}">✕</button>
                                     </form>
                                 </div>
                                 <form th:action="@{/web/groups/addMember}" method="post" class="invite-form">
                                     <input type="hidden" name="groupId" th:value="${grupo.id}">
-                                    <input type="email" name="userEmail" placeholder="Invite by email..." required>
-                                    <button type="submit" class="btn-invite">Invite</button>
+                                    <input type="email" name="userEmail" th:placeholder="#{group.invite_placeholder}" placeholder="Invite by email..." required>
+                                    <button type="submit" class="btn-invite" th:text="#{group.invite_btn}">Invite</button>
                                 </form>
                             </div>
 
@@ -90,10 +99,11 @@
 
                             <!-- Activity -->
                             <div class="group-activity">
-                                <p class="members-title">Activity</p>
+                                <p class="members-title" th:text="#{group.activity}">Activity</p>
 
                                 <div th:if="${groupTransactions[grupo.id] == null or groupTransactions[grupo.id].empty}"
-                                     class="activity-empty">
+                                     class="activity-empty"
+                                     th:text="#{group.no_activity}">
                                     No group expenses recorded yet
                                 </div>
                                 <th:block th:each="tx : ${groupTransactions[grupo.id]}">
@@ -104,28 +114,33 @@
                                                   th:text="'-' + ${#numbers.formatDecimal(tx.importeTotal,1,'POINT',2,'COMMA')} + ' €'">0 €</span>
                                         </div>
                                         <div class="activity-tx-meta">
-                                            <span th:text="${tx.creador != null ? 'Paid by ' + tx.creador.nombre : ''}"></span>
+                                            <span th:if="${tx.creador != null}"><span th:text="#{group.paid_by}">Paid by</span> <span th:text="${tx.creador.nombre}"></span></span>
                                             <span th:if="${tx.fecha != null}"
                                                   th:text="${#temporals.format(tx.fecha, 'MM/dd')}"></span>
                                         </div>
                                         <div class="activity-debts">
                                             <div th:if="${txDebts[tx.id] == null or txDebts[tx.id].empty}"
-                                                 class="activity-no-split">Not split yet</div>
+                                                 class="activity-no-split"
+                                                 th:text="#{group.not_split}">Not split yet</div>
                                             <div th:each="d : ${txDebts[tx.id]}"
                                                  class="activity-debt"
                                                  th:classappend="${d.deudor.id == currentUserId ? ' debt-highlight-owe' :
                                                                   (d.acreedor.id == currentUserId ? ' debt-highlight-owed' : '')}">
                                                 <span class="debt-parties">
-                                                    <span th:text="${d.deudor.id == currentUserId ? 'Me' : d.deudor.nombre}">Deudor</span>
+                                                    <span th:if="${d.deudor.id == currentUserId}" th:text="#{group.me}">Me</span>
+                                                    <span th:unless="${d.deudor.id == currentUserId}" th:text="${d.deudor.nombre}">Deudor</span>
                                                     <span class="debt-arrow">→</span>
-                                                    <span th:text="${d.acreedor.id == currentUserId ? 'Me' : d.acreedor.nombre}">Acreedor</span>
+                                                    <span th:if="${d.acreedor.id == currentUserId}" th:text="#{group.me}">Me</span>
+                                                    <span th:unless="${d.acreedor.id == currentUserId}" th:text="${d.acreedor.nombre}">Acreedor</span>
                                                 </span>
                                                 <span class="debt-right">
                                                     <span class="debt-amount-small"
                                                           th:text="${#numbers.formatDecimal(d.importe,1,'POINT',2,'COMMA')} + ' €'">0 €</span>
                                                     <span class="debt-chip"
-                                                          th:classappend="${d.estado.name() == 'PENDIENTE' ? ' chip-pending' : ' chip-paid'}"
-                                                          th:text="${d.estado.name() == 'PENDIENTE' ? 'Pending' : 'Paid'}">Status</span>
+                                                          th:classappend="${d.estado.name() == 'PENDIENTE' ? ' chip-pending' : ' chip-paid'}">
+                                                        <span th:if="${d.estado.name() == 'PENDIENTE'}" th:text="#{group.status_pending}">Pending</span>
+                                                        <span th:unless="${d.estado.name() == 'PENDIENTE'}" th:text="#{group.status_paid}">Paid</span>
+                                                    </span>
                                                 </span>
                                             </div>
                                         </div>
@@ -135,14 +150,14 @@
 
                             <!-- Delete + date -->
                             <form th:action="@{/web/groups/delete}" method="post"
-                                  onsubmit="return confirm('Are you sure you want to delete this group? This cannot be undone.')">
+                                  th:onsubmit="|return confirm('#{group.delete_confirm}')|">
                                 <input type="hidden" name="groupId" th:value="${grupo.id}">
-                                <button type="submit" class="btn-delete-group">🗑 Delete Group</button>
+                                <button type="submit" class="btn-delete-group" th:text="#{group.delete_btn}">🗑 Delete Group</button>
                             </form>
 
                             <small class="group-date"
                                    th:if="${grupo.fechaCreacion != null}"
-                                   th:text="'Created on ' + ${#temporals.format(grupo.fechaCreacion, 'MM/dd/yyyy')}">
+                                   th:text="#{group.created_on} + ' ' + ${#temporals.format(grupo.fechaCreacion, 'MM/dd/yyyy')}">
                             </small>
 
                         </div>
@@ -179,25 +194,30 @@
 
         <!-- ===== RIGHT COLUMN: create group form ===== -->
         <div class="glass-card card-principal" th:if="${showPanel}" th:classappend="'panel-visible'">
-            <h2 class="card-title">New Group</h2>
+            <h2 class="card-title" th:text="#{group.form_title}">New Group</h2>
 
             <form th:action="@{/web/groups/create}" method="post">
 
                 <div class="input-group">
-                    <label>Group Name</label>
+                    <label th:text="#{group.name_label}">Group Name</label>
                     <input type="text" name="nombre"
+                           th:placeholder="#{group.name_placeholder}"
                            placeholder="e.g. Home, Rome Trip, Dinners..." required>
                 </div>
 
                 <div class="input-group">
-                    <label>Description <span style="opacity:0.5; font-weight:400">(optional)</span></label>
+                    <label>
+                        <span th:text="#{group.desc_label}">Description</span>
+                        <span style="opacity:0.5; font-weight:400" th:text="#{group.desc_optional}">(optional)</span>
+                    </label>
                     <input type="text" name="descripcion"
+                           th:placeholder="#{group.desc_placeholder}"
                            placeholder="What is this group about?">
                 </div>
 
                 <div class="button-group">
-                    <button type="submit" class="btn-login">Create Group</button>
-                    <a th:href="@{/web/groups}" class="btn-logout">Cancel</a>
+                    <button type="submit" class="btn-login" th:text="#{group.create_btn}">Create Group</button>
+                    <a th:href="@{/web/groups}" class="btn-logout" th:text="#{common.cancel}">Cancel</a>
                 </div>
             </form>
         </div>

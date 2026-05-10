@@ -10,34 +10,40 @@
 <body>
     <div class="login-box">
         <h1 class="logo">Expen<span>Sense</span></h1>
-        <p class="subtitle">Start tracking your finances.</p>
+        <p class="subtitle" th:text="#{register.subtitle}">Start tracking your finances.</p>
 
         <div th:if="${error}"   th:text="${error}"   class="flash-error"></div>
         <div th:if="${message}" th:text="${message}" class="alert-success"></div>
 
         <form th:action="@{/web/user/create}" th:object="${userCreationDTO}" method="post">
             <div class="input-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" th:field="*{username}" placeholder="Your name" required/>
+                <label for="username" th:text="#{register.username}">Username</label>
+                <input type="text" id="username" th:field="*{username}" th:placeholder="#{register.username_placeholder}" placeholder="Your name" required/>
             </div>
             <div class="input-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" th:field="*{email}" placeholder="name@example.com" required/>
+                <label for="email" th:text="#{register.email}">Email</label>
+                <input type="email" id="email" th:field="*{email}" th:placeholder="#{register.email_placeholder}" placeholder="name@example.com" required/>
             </div>
             <div class="input-group">
-                <label for="password">Password</label>
+                <label for="password" th:text="#{register.password}">Password</label>
                 <input type="password" id="password" th:field="*{password}" placeholder="••••••••" required/>
             </div>
             <div class="input-group">
-                <label for="balance">Starting Balance (€)</label>
+                <label for="balance" th:text="#{register.balance}">Starting Balance (€)</label>
                 <input type="number" id="balance" th:field="*{balance}" step="0.01" value="0.00" class="input-balance"/>
             </div>
-            <button type="submit" class="btn-login">Create Account</button>
+            <button type="submit" class="btn-login" th:text="#{register.submit}">Create Account</button>
         </form>
 
         <div class="footer">
-            Already have an account? <a th:href="@{/web/auth/login}">Sign in</a>
+            <span th:text="#{register.already_have}">Already have an account?</span>
+            <a th:href="@{/web/auth/login}" th:text="#{register.sign_in}">Sign in</a>
         </div>
+
     </div>
+    <footer class="lang-footer">
+        <a th:href="@{/web/user/create(lang=en)}">EN</a> |
+        <a th:href="@{/web/user/create(lang=es)}">ES</a>
+    </footer>
 </body>
 </html>

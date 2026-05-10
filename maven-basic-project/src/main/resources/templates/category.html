@@ -11,7 +11,13 @@
 
     <div class="nav-header">
         <a th:href="@{/web/user/profile}" class="logo">Expen<span>Sense</span></a>
-        <a th:href="@{/web/user/profile}" class="back-link">← Back to Profile</a>
+        <div class="nav-right">
+            <div class="lang-switcher">
+                <a th:href="@{/web/categories(lang=en)}">EN</a> |
+                <a th:href="@{/web/categories(lang=es)}">ES</a>
+            </div>
+            <a th:href="@{/web/user/profile}" class="back-link" th:text="#{nav.back}">← Back to Profile</a>
+        </div>
     </div>
 
     <div class="container-grid" th:classappend="${showForm} ? ' panel-open' : ''">
@@ -19,25 +25,26 @@
         <!-- ===== LIST ===== -->
         <div class="glass-card card-lista">
             <div class="header-inline">
-                <h2 class="card-title">Categories</h2>
+                <h2 class="card-title" th:text="#{cat.title}">Categories</h2>
                 <div class="button-group-top">
-                    <a th:href="@{/web/categories(showForm=true)}" th:if="${!showForm}" class="btn-add" title="New category">＋</a>
-                    <a th:href="@{/web/categories}" th:if="${showForm}" class="btn-add" title="Hide form">✕</a>
-                    <a th:href="@{/web/categories}" class="btn-refresh" title="Refresh">↻</a>
+                    <a th:href="@{/web/categories(showForm=true)}" th:if="${!showForm}" class="btn-add" th:title="#{cat.new_btn_title}">＋</a>
+                    <a th:href="@{/web/categories}" th:if="${showForm}" class="btn-add" th:title="#{cat.hide_form_title}">✕</a>
+                    <a th:href="@{/web/categories}" class="btn-refresh" th:title="#{cat.refresh_title}">↻</a>
                 </div>
             </div>
 
             <div id="categoriesGrid" class="categories-grid">
                 <p th:if="${listaCategorias.empty}"
-                   style="grid-column:1/-1; text-align:center; color:#999; padding:20px;">
+                   style="grid-column:1/-1; text-align:center; color:#999; padding:20px;"
+                   th:text="#{cat.empty}">
                     No categories yet.
                 </p>
                 <div th:each="cat : ${listaCategorias}" class="category-card">
                     <form th:action="@{/web/categories/delete}" method="post"
                           style="position:absolute; top:8px; right:8px; margin:0"
-                          onsubmit="return confirm('Delete this category?')">
+                          th:onsubmit="|return confirm('#{cat.delete_confirm}')|">
                         <input type="hidden" name="categoryId" th:value="${cat.id}">
-                        <button type="submit" class="btn-mini-delete" title="Delete">🗑</button>
+                        <button type="submit" class="btn-mini-delete" th:title="#{cat.delete_title}">🗑</button>
                     </form>
                     <div class="category-icon">📁</div>
                     <h3 th:text="${cat.name}">Name</h3>
@@ -47,16 +54,16 @@
 
         <!-- ===== NEW CATEGORY FORM ===== -->
         <div class="glass-card card-principal panel-visible" th:if="${showForm}">
-            <h2 class="card-title">New Category</h2>
+            <h2 class="card-title" th:text="#{cat.form_title}">New Category</h2>
 
             <form th:action="@{/web/categories/create}" method="post">
                 <div class="input-group">
-                    <label>Category Name</label>
-                    <input name="name" placeholder="e.g. Leisure, Health..." required>
+                    <label th:text="#{cat.name_label}">Category Name</label>
+                    <input name="name" th:placeholder="#{cat.name_placeholder}" placeholder="e.g. Leisure, Health..." required>
                 </div>
                 <div class="button-group">
-                    <button type="submit" class="btn-login">Create Category</button>
-                    <a th:href="@{/web/categories}" class="btn-logout">Cancel</a>
+                    <button type="submit" class="btn-login" th:text="#{cat.create_btn}">Create Category</button>
+                    <a th:href="@{/web/categories}" class="btn-logout" th:text="#{common.cancel}">Cancel</a>
                 </div>
             </form>
         </div>

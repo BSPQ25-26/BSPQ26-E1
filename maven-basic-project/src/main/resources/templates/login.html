@@ -10,25 +10,31 @@
 <body>
     <div class="login-box">
         <h1 class="logo">Expen<span>Sense</span></h1>
-        <p class="subtitle">Your finances, with purpose.</p>
+        <p class="subtitle" th:text="#{login.subtitle}">Your finances, with purpose.</p>
 
         <div th:if="${error}" th:text="${error}" class="flash-error"></div>
 
         <form th:action="@{/web/auth/login}" method="post">
             <div class="input-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email" placeholder="name@example.com" required/>
+                <label for="email" th:text="#{login.email}">Email</label>
+                <input type="email" id="email" name="email" th:placeholder="#{login.email.placeholder}" placeholder="name@example.com" required/>
             </div>
             <div class="input-group">
-                <label for="password">Password</label>
+                <label for="password" th:text="#{login.password}">Password</label>
                 <input type="password" id="password" name="password" placeholder="••••••••" required/>
             </div>
-            <button type="submit" class="btn-login">Sign In</button>
+            <button type="submit" class="btn-login" th:text="#{login.submit}">Sign In</button>
         </form>
 
         <div class="footer">
-            New here? <a th:href="@{/web/user/create}">Create an account</a>
+            <span th:text="#{login.new_here}">New here?</span>
+            <a th:href="@{/web/user/create}" th:text="#{login.create_account}">Create an account</a>
         </div>
+
     </div>
+    <footer class="lang-footer">
+        <a th:href="@{/web/auth/login(lang=en)}">EN</a> |
+        <a th:href="@{/web/auth/login(lang=es)}">ES</a>
+    </footer>
 </body>
 </html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="es">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,11 +8,16 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
 </head>
 <body>
-<h1>Error</h1>
+<h1 th:text="#{error.title}">Error</h1>
 
 <p style="color:red" th:text="${error}">There has been an error</p>
 
 <br/>
-<a th:href="@{/web/auth/login}">← Volver al login</a>
+<a th:href="@{/web/auth/login}" th:text="#{error.back}">← Back to login</a>
+
+<footer class="lang-footer">
+    <a th:href="@{/web/auth/login(lang=en)}">EN</a> |
+    <a th:href="@{/web/auth/login(lang=es)}">ES</a>
+</footer>
 </body>
 </html>
