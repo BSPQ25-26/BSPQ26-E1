@@ -42,3 +42,9 @@ hs_err_pid*
 replay_pid* 
 /.idea/
 /maven-basic-project/target/
+
+# Virtual environments
+.venv
+.env
+venv
+env
