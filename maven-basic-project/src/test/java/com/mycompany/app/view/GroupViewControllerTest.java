@@ -34,7 +34,7 @@ class GroupViewControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertTrue(response.getBody().contains("Sign In"));
+        assertTrue(response.getBody().contains("ExpenSense - Login"));
     }
 
     @Test
@@ -71,7 +71,7 @@ class GroupViewControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertTrue(response.getBody().contains("New Group"));
+        assertTrue(response.getBody().contains("My Groups"));
         assertTrue(response.getBody().contains("Group Name"));
     }
 

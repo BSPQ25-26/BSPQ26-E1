@@ -11,7 +11,13 @@
 
     <div class="nav-header">
         <a th:href="@{/web/user/profile}" class="logo">Expen<span>Sense</span></a>
-        <a th:href="@{/web/user/profile}" class="back-link">← Back to Profile</a>
+        <div class="nav-right">
+            <div class="lang-switcher">
+                <a th:href="@{/web/transaction(lang=en)}">EN</a> |
+                <a th:href="@{/web/transaction(lang=es)}">ES</a>
+            </div>
+            <a th:href="@{/web/user/profile}" class="back-link" th:text="#{nav.back}">← Back to Profile</a>
+        </div>
     </div>
 
     <div class="container-grid">
@@ -19,28 +25,28 @@
         <!-- ===== TRANSACTION LIST ===== -->
         <div class="glass-card card-lista">
             <div class="header-inline">
-                <h2 class="card-title">My Transactions</h2>
+                <h2 class="card-title" th:text="#{tx.title}">My Transactions</h2>
                 <div class="button-group-top">
-                    <button id="btn-new-tx" class="btn-add" title="Add new" onclick="showCreateForm()">＋</button>
-                    <a th:href="@{/web/transaction}" class="btn-refresh" title="Refresh">↻</a>
+                    <button id="btn-new-tx" class="btn-add" th:title="#{tx.filter_all}" onclick="showCreateForm()">＋</button>
+                    <a th:href="@{/web/transaction}" class="btn-refresh" th:title="#{cat.refresh_title}">↻</a>
                 </div>
             </div>
 
             <div th:if="${error}" class="flash-error" th:text="${error}"></div>
 
-            <!-- Client-side filter bar — no page reload -->
+            <!-- Client-side filter bar -->
             <div class="filter-bar" id="tx-filter-bar">
-                <button class="filter-btn active" data-filter="ALL"    onclick="filterTx('ALL')">All</button>
-                <button class="filter-btn"         data-filter="GASTO"  onclick="filterTx('GASTO')">Expenses</button>
-                <button class="filter-btn"         data-filter="INGRESO" onclick="filterTx('INGRESO')">Income</button>
+                <button class="filter-btn active" data-filter="ALL"     onclick="filterTx('ALL')"    th:text="#{tx.filter_all}">All</button>
+                <button class="filter-btn"         data-filter="GASTO"  onclick="filterTx('GASTO')"  th:text="#{tx.filter_expense}">Expenses</button>
+                <button class="filter-btn"         data-filter="INGRESO" onclick="filterTx('INGRESO')" th:text="#{tx.filter_income}">Income</button>
             </div>
 
             <div class="table-wrapper">
                 <table>
                     <thead>
                         <tr>
-                            <th>Description</th>
-                            <th>Amount</th>
+                            <th th:text="#{tx.col_description}">Description</th>
+                            <th th:text="#{tx.col_amount}">Amount</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -48,7 +54,10 @@
                         <tr th:if="${transactions.empty}">
                             <td colspan="2" class="empty-state">
                                 <div style="font-size:40px">📂</div>
-                                <p>No transactions yet.<br>Press the <b>+</b> button to get started.</p>
+                                <p>
+                                    <span th:text="#{tx.empty}">No transactions yet.</span><br>
+                                    <span th:text="#{tx.empty_cta}">Press the <b>+</b> button to get started.</span>
+                                </p>
                             </td>
                         </tr>
 
@@ -70,7 +79,8 @@
                                 onclick="selectTransaction(this)">
 
                                 <td>
-                                    <span th:text="${#strings.replace(t.concepto, 'Pago de deuda', 'Debt Payment')}">Description</span>
+                                    <span th:if="${isPago}" th:text="#{tx.debt_payment}">Debt Payment</span>
+                                    <span th:unless="${isPago}" th:text="${t.concepto}">Description</span>
                                     <span th:if="${t.grupo != null}" class="badge-group"
                                           th:text="${t.grupo.nombre}">Group</span>
                                 </td>
@@ -85,7 +95,7 @@
                     </tbody>
                 </table>
                 <div id="filter-empty" class="empty-state" style="display:none">
-                    <p>No transactions match this filter.</p>
+                    <p th:text="#{tx.no_filter_match}">No transactions match this filter.</p>
                 </div>
             </div>
         </div>
@@ -95,27 +105,28 @@
 
             <!-- Form area (hidden until selection) -->
             <div id="panel-form-area" style="display:none">
-                <h2 class="card-title" id="panel-title">Edit Transaction</h2>
+                <h2 class="card-title" id="panel-title" th:text="#{tx.js.edit_title}">Edit Transaction</h2>
 
                 <form id="tx-form" method="post" onsubmit="return validateBeforeSubmit()">
 
                     <div class="input-group">
-                        <label>Description</label>
+                        <label th:text="#{tx.form_description}">Description</label>
                         <input id="f-concepto" name="concepto"
+                               th:placeholder="#{tx.form_desc_placeholder}"
                                placeholder="e.g. Dinner with friends"
                                oninput="checkChanges()" required>
                     </div>
 
                     <div class="form-row">
                         <div class="input-group">
-                            <label>Amount (€)</label>
+                            <label th:text="#{tx.form_amount}">Amount (€)</label>
                             <input id="f-importe" name="importeTotal"
                                    type="number" step="0.01" min="0.01"
                                    placeholder="0.00"
                                    oninput="checkChanges()" required>
                         </div>
                         <div class="input-group">
-                            <label>Type</label>
+                            <label th:text="#{tx.form_type}">Type</label>
                             <!--
                               Select has NO name — value is carried by the hidden input below.
                               When a group is selected, the select is locked to GASTO via JS
@@ -123,9 +134,9 @@
                               so the visual state is clear and the hidden input always submits.
                             -->
                             <select id="f-tipo" onchange="onTipoChange()" required>
-                                <option value="">-- Select --</option>
-                                <option value="GASTO">Expense</option>
-                                <option value="INGRESO">Income</option>
+                                <option value="" th:text="#{tx.form_type_select}">-- Select --</option>
+                                <option value="GASTO" th:text="#{tx.form_type_expense}">Expense</option>
+                                <option value="INGRESO" th:text="#{tx.form_type_income}">Income</option>
                             </select>
                             <input type="hidden" id="f-tipo-val" name="tipoTransaccion">
                         </div>
@@ -133,19 +144,19 @@
 
                     <div class="form-row">
                         <div class="input-group">
-                            <label>Category</label>
+                            <label th:text="#{tx.form_category}">Category</label>
                             <select id="f-cat" name="categoriaId" onchange="checkChanges()">
-                                <option value="">-- No category --</option>
+                                <option value="" th:text="#{tx.form_no_category}">-- No category --</option>
                                 <option th:each="cat : ${categories}"
                                         th:value="${cat.id}"
                                         th:text="${cat.name}"></option>
                             </select>
                         </div>
                         <div class="input-group">
-                            <label>Group</label>
+                            <label th:text="#{tx.form_group}">Group</label>
                             <select id="f-grupo" name="grupoId"
                                     onchange="onGrupoChange(this.value)">
-                                <option value="">-- No group --</option>
+                                <option value="" th:text="#{tx.form_no_group}">-- No group --</option>
                                 <option th:each="g : ${groups}"
                                         th:value="${g.id}"
                                         th:text="${g.nombre}"></option>
@@ -155,9 +166,9 @@
 
                     <!-- Pagador (only for create mode with group selected) -->
                     <div class="input-group" id="pagador-group" style="display:none">
-                        <label>Pagador</label>
+                        <label th:text="#{tx.form_payer}">Payer</label>
                         <select name="pagadorId" id="pagadorSelect">
-                            <option value="">-- Yo (por defecto) --</option>
+                            <option value="" th:text="#{tx.form_payer_me}">-- Me (default) --</option>
                         </select>
                     </div>
 
@@ -165,14 +176,15 @@
                     <div id="split-section" style="display:none">
                         <div class="section-divider" style="margin:14px 0"></div>
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                            <p class="members-title" style="margin:0">Split this expense</p>
+                            <p class="members-title" style="margin:0" th:text="#{tx.split_title}">Split this expense</p>
                             <button type="button" class="btn-repartir-confirm"
                                     style="font-size:12px;padding:4px 12px"
-                                    onclick="splitSectionEqually()">Split Equally</button>
+                                    onclick="splitSectionEqually()"
+                                    th:text="#{tx.split_equally}">Split Equally</button>
                         </div>
                         <div id="split-members-list"></div>
                         <div class="split-summary-row" style="margin-top:8px">
-                            <span class="split-summary-label">Payer:</span>
+                            <span class="split-summary-label" th:text="#{tx.split_payer_label}">Payer:</span>
                             <strong id="side-payer-share" style="font-size:14px">—</strong>
                             <span id="side-split-status" class="split-status-badge" style="margin-left:auto"></span>
                         </div>
@@ -180,8 +192,9 @@
                                 class="btn-repartir-confirm"
                                 style="width:100%;margin-top:8px"
                                 disabled
-                                onclick="guardarDeudasSide(this)">
-                            Guardar Deudas
+                                onclick="guardarDeudasSide(this)"
+                                th:text="#{tx.split_save}">
+                            Save Debts
                         </button>
                     </div>
 
@@ -189,14 +202,15 @@
                     <div id="debts-edit-section" style="display:none">
                         <div class="section-divider" style="margin:14px 0"></div>
                         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-                            <p class="members-title" style="margin:0">Edit debt amounts</p>
+                            <p class="members-title" style="margin:0" th:text="#{tx.debts_edit_title}">Edit debt amounts</p>
                             <button type="button" id="btn-split-equally"
                                     class="btn-repartir-confirm" style="font-size:12px;padding:4px 12px"
-                                    onclick="splitEqually()">Split Equally</button>
+                                    onclick="splitEqually()"
+                                    th:text="#{tx.split_equally}">Split Equally</button>
                         </div>
                         <div id="debts-edit-list"></div>
                         <div class="split-summary-row" style="margin-top:10px">
-                            <span class="split-summary-label">Payer:</span>
+                            <span class="split-summary-label" th:text="#{tx.split_payer_label}">Payer:</span>
                             <strong id="debts-payer-share" style="font-size:14px">—</strong>
                             <span id="debts-edit-status" class="split-status-badge" style="margin-left:auto"></span>
                         </div>
@@ -204,19 +218,23 @@
 
                     <div class="panel-btn-stack">
                         <button type="submit" id="btn-update" class="btn-login"
-                                style="display:none" disabled>
+                                style="display:none" disabled
+                                th:text="#{tx.no_changes}">
                             No changes to save
                         </button>
                         <button type="submit" id="btn-create" class="btn-login"
-                                style="display:none">
+                                style="display:none"
+                                th:text="#{tx.save_btn}">
                             Save Transaction
                         </button>
                         <button type="button" id="btn-delete" class="btn-danger"
                                 th:unless="${editTxHasDebts}"
-                                style="display:none" onclick="deleteTransaction()">
+                                style="display:none" onclick="deleteTransaction()"
+                                th:text="#{tx.delete_btn}">
                             🗑 Delete Transaction
                         </button>
-                        <button type="button" class="btn-logout" onclick="clearSelection()">
+                        <button type="button" class="btn-logout" onclick="clearSelection()"
+                                th:text="#{common.cancel}">
                             Cancel
                         </button>
                     </div>
@@ -225,25 +243,25 @@
 
             <!-- Read-only detail panel: shown for debt payments (LIQUIDACION) and collections -->
             <div id="panel-detail-area" style="display:none">
-                <h2 class="card-title" id="detail-title">Transaction Detail</h2>
+                <h2 class="card-title" id="detail-title" th:text="#{tx.detail_title}">Transaction Detail</h2>
 
                 <div class="detail-field">
-                    <span class="detail-label">Description</span>
+                    <span class="detail-label" th:text="#{tx.detail_description}">Description</span>
                     <p id="detail-concepto" class="detail-value"></p>
                 </div>
 
                 <div class="detail-field">
-                    <span class="detail-label">Amount</span>
+                    <span class="detail-label" th:text="#{tx.detail_amount}">Amount</span>
                     <p id="detail-importe" class="detail-value detail-amount"></p>
                 </div>
 
                 <div class="form-row">
                     <div class="detail-field">
-                        <span class="detail-label">From</span>
+                        <span class="detail-label" th:text="#{tx.detail_from}">From</span>
                         <p id="detail-from" class="detail-value"></p>
                     </div>
                     <div class="detail-field">
-                        <span class="detail-label">To</span>
+                        <span class="detail-label" th:text="#{tx.detail_to}">To</span>
                         <p id="detail-to" class="detail-value"></p>
                     </div>
                 </div>
@@ -251,7 +269,7 @@
                 <p id="detail-note" class="detail-note"></p>
 
                 <div class="panel-btn-stack">
-                    <button type="button" class="btn-logout" onclick="clearSelection()">Close</button>
+                    <button type="button" class="btn-logout" onclick="clearSelection()" th:text="#{tx.detail_close}">Close</button>
                 </div>
             </div>
 
@@ -271,6 +289,28 @@
         var currentUserName = /*[[${currentUserName}]]*/ '';
         var initEditId      = /*[[${editTransaction != null ? editTransaction.id : null}]]*/ null;
         var initShowForm    = /*[[${showForm}]]*/ false;
+
+        var i18n = {
+            editTitle:            /*[[#{tx.js.edit_title}]]*/ 'Edit Transaction',
+            newTitle:             /*[[#{tx.js.new_title}]]*/ 'New Transaction',
+            debtPaymentTitle:     /*[[#{tx.js.debt_payment_title}]]*/ 'Debt Payment',
+            debtCollectionTitle:  /*[[#{tx.js.debt_collection_title}]]*/ 'Debt Collection',
+            payerMe:              /*[[#{tx.js.payer_me}]]*/ '-- Me (default) --',
+            saveDebts:            /*[[#{tx.js.save_debts}]]*/ 'Save Debts',
+            saving:               /*[[#{tx.js.saving}]]*/ 'Saving...',
+            saveDebtsError:       /*[[#{tx.js.save_debts_error}]]*/ 'Error saving debts. Please try again.',
+            saveChanges:          /*[[#{tx.js.save_changes}]]*/ 'Save Changes',
+            noChanges:            /*[[#{tx.js.no_changes}]]*/ 'No changes to save',
+            groupLock:            /*[[#{tx.js.group_lock}]]*/ 'Group transactions must be Expenses',
+            exceedsTotal:         /*[[#{tx.js.exceeds_total}]]*/ '⚠ Exceeds total',
+            enterAmounts:         /*[[#{tx.js.enter_amounts}]]*/ 'Enter amounts',
+            paidIndicator:        /*[[#{tx.js.paid_indicator}]]*/ '✓ Paid',
+            deleteConfirm:        /*[[#{tx.js.delete_confirm}]]*/ 'Delete this transaction?',
+            debtsExceed:          /*[[#{tx.js.debts_exceed}]]*/ 'The debt amounts exceed the transaction total. Please reduce them.',
+            debtSettled:          /*[[#{tx.js.debt_settled}]]*/ 'Generated automatically when a debt was settled.',
+            debtReceived:         /*[[#{tx.js.debt_received}]]*/ 'Generated automatically when a debt payment was received.',
+            debtPayment:          /*[[#{tx.debt_payment}]]*/ 'Debt Payment'
+        };
     </script>
 
     <script>
@@ -356,7 +396,7 @@
                 debtsEditSec.style.display = 'none';
             }
 
-            showPanel('Edit Transaction');
+            showPanel(i18n.editTitle);
             updateNewButton(true);
         }
 
@@ -373,7 +413,7 @@
             setOpt('f-cat',   '');
             setOpt('f-grupo', '');
             document.getElementById('pagadorSelect').innerHTML =
-                '<option value="">-- Yo (por defecto) --</option>';
+                '<option value="">' + i18n.payerMe + '</option>';
             restoreFormInputs();
             document.getElementById('pagador-group').style.display        = 'none';
             document.getElementById('split-section').style.display        = 'none';
@@ -385,7 +425,7 @@
 
             document.getElementById('tx-form').action = '/web/transaction/create';
             setCreateMode();
-            showPanel('New Transaction');
+            showPanel(i18n.newTitle);
             updateNewButton(true);
         }
 
@@ -426,18 +466,18 @@
 
         function showDebtDetail(tipo, concepto, importe, otherParty) {
             var isLiquidacion = tipo === 'LIQUIDACION';
-            var title = isLiquidacion ? 'Debt Payment' : 'Debt Collection';
+            var title = isLiquidacion ? i18n.debtPaymentTitle : i18n.debtCollectionTitle;
             var sign  = isLiquidacion ? '−' : '+';
             var from  = isLiquidacion ? currentUserName : (otherParty || '—');
             var to    = isLiquidacion ? (otherParty || '—') : currentUserName;
 
             document.getElementById('detail-title').textContent    = title;
-            document.getElementById('detail-concepto').textContent = concepto.replace('Pago de deuda', 'Debt Payment');
+            document.getElementById('detail-concepto').textContent = concepto.replace('Pago de deuda', i18n.debtPayment);
             document.getElementById('detail-from').textContent     = from;
             document.getElementById('detail-to').textContent       = to;
             document.getElementById('detail-note').textContent     = isLiquidacion
-                ? 'Generated automatically when a debt was settled.'
-                : 'Generated automatically when a debt payment was received.';
+                ? i18n.debtSettled
+                : i18n.debtReceived;
 
             var amtEl = document.getElementById('detail-importe');
             amtEl.textContent = sign + parseFloat(importe).toFixed(2).replace('.', ',') + ' €';
@@ -463,13 +503,13 @@
                 document.getElementById('f-cat').value     !== originalValues.catId ||
                 document.getElementById('f-grupo').value   !== originalValues.grupoId;
             btn.disabled    = !changed;
-            btn.textContent = changed ? 'Save Changes' : 'No changes to save';
+            btn.textContent = changed ? i18n.saveChanges : i18n.noChanges;
         }
 
         /* ── Delete ── */
         function deleteTransaction() {
             if (!currentTxId) return;
-            if (!confirm('Delete this transaction?')) return;
+            if (!confirm(i18n.deleteConfirm)) return;
             document.getElementById('delete-tx-id').value = currentTxId;
             document.getElementById('delete-form').submit();
         }
@@ -486,7 +526,7 @@
         function updatePagadorSelector(groupId, preselectId) {
             var pagadorGroup  = document.getElementById('pagador-group');
             var pagadorSelect = document.getElementById('pagadorSelect');
-            pagadorSelect.innerHTML = '<option value="">-- Yo (por defecto) --</option>';
+            pagadorSelect.innerHTML = '<option value="">' + i18n.payerMe + '</option>';
 
             if (groupId && groupMembers[groupId]) {
                 groupMembers[groupId].forEach(function(m) {
@@ -519,7 +559,7 @@
             saveBtn.dataset.txId         = txId;
             saveBtn.dataset.pagadorId    = pagadorId;
             saveBtn.dataset.total        = total;
-            saveBtn.textContent          = 'Guardar Deudas';
+            saveBtn.textContent          = i18n.saveDebts;
 
             var members = groupMembers[String(grupoId)] || [];
             members.forEach(function(m) {
@@ -560,7 +600,7 @@
             }
             if (saveBtn) saveBtn.disabled = !valid;
             if (statusEl) {
-                statusEl.textContent = over ? '⚠ Exceeds total' : '';
+                statusEl.textContent = over ? i18n.exceedsTotal : '';
                 statusEl.className   = 'split-status-badge' + (over ? ' split-status-error' : '');
             }
         }
@@ -577,7 +617,7 @@
             if (debts.length === 0) return;
 
             btn.disabled    = true;
-            btn.textContent = 'Guardando…';
+            btn.textContent = i18n.saving;
 
             try {
                 var promises = debts.map(function(debt) {
@@ -596,8 +636,8 @@
                 }
             } catch(e) {
                 btn.disabled    = false;
-                btn.textContent = 'Guardar Deudas';
-                alert('Error al guardar las deudas. Inténtalo de nuevo.');
+                btn.textContent = i18n.saveDebts;
+                alert(i18n.saveDebtsError);
             }
         }
 
@@ -644,7 +684,7 @@
                 sel.value    = 'GASTO';
                 hidden.value = 'GASTO';
                 sel.classList.add('field-locked');
-                sel.title = 'Group transactions must be Expenses';
+                sel.title = i18n.groupLock;
             } else {
                 sel.classList.remove('field-locked');
                 sel.title    = '';
@@ -673,7 +713,7 @@
                         '<input type="hidden" name="debtIds"      value="' + d.id + '">' +
                         '<input type="hidden" name="debtImportes" value="' + d.importe + '">' +
                         '<span class="split-member-name">' + escHtml(d.deudorNombre) + '</span>' +
-                        '<span class="text-green" style="font-size:12px;margin-left:auto">✓ Paid (' +
+                        '<span class="text-green" style="font-size:12px;margin-left:auto">' + i18n.paidIndicator + ' (' +
                             parseFloat(d.importe).toFixed(2).replace('.', ',') + ' €)</span>';
                 } else {
                     row.innerHTML =
@@ -727,14 +767,14 @@
                 payerEl.style.color = over ? '#e74c3c' : '';
             }
             if (statusEl) {
-                statusEl.textContent = over ? '⚠ Exceeds total' : '';
+                statusEl.textContent = over ? i18n.exceedsTotal : '';
                 statusEl.className   = 'split-status-badge' + (over ? ' split-status-error' : '');
             }
 
             var saveBtn = document.getElementById('btn-update');
             if (saveBtn && !inDebtsReadOnly) {
                 saveBtn.disabled    = !valid;
-                saveBtn.textContent = over ? 'Exceeds total' : (valid ? 'Save Changes' : 'Enter amounts');
+                saveBtn.textContent = over ? i18n.exceedsTotal : (valid ? i18n.saveChanges : i18n.enterAmounts);
             }
         }
 
@@ -771,7 +811,7 @@
         function validateBeforeSubmit() {
             if (!inDebtsMode) return true;
             if (!debtsEditValid) {
-                alert('The debt amounts exceed the transaction total. Please reduce them.');
+                alert(i18n.debtsExceed);
                 return false;
             }
             return true;

@@ -47,6 +47,14 @@ Once the database is ready, we can start the application.
    ```bash
    mvn spring-boot:run
    ```
+3. If you wish to use the AI feature:
+   ```bash
+   export SPRING_AI_OPENAI_API_KEY="AIzaSy..."
+   export SPRING_AI_OPENAI_BASE_URL="https://generativelanguage.googleapis.com/v1beta/openai"
+   export SPRING_AI_OPENAI_CHAT_OPTIONS_MODEL="gemini-2.5-flash"
+   mvn spring-boot:run
+   ```
+The exoported variables will be saved if you keep using the same terminal, so you will only need to run the last command.
 
 > If the console gets stuck or the command is not recognized, make sure you are inside the `maven-basic-project` folder and that you have restarted the terminal after installing Java/Maven.
 
@@ -79,7 +87,7 @@ Then open the report at:
 Once both the database and the backend are running, open your browser and navigate to:
 
 ```
-http://localhost:8080/web/auth/login
+http://localhost:8080/web
 ```
 
 This is the main entry point of the application. From here you can log in with your credentials or create a new account.

@@ -42,7 +42,7 @@ class UserViewControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertTrue(response.getBody().contains("Sign In"));
+        assertTrue(response.getBody().contains("ExpenSense - Login"));
         assertFalse(response.getBody().contains("Current Balance"));
     }
 }

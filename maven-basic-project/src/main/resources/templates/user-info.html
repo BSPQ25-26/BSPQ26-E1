@@ -22,7 +22,7 @@
 
             <!-- Balance -->
             <div class="balance-card">
-                <span class="balance-label">Net Balance</span>
+                <span class="balance-label" th:text="#{profile.net_balance}">Net Balance</span>
                 <span class="balance-amount"
                       th:classappend="${balance != null and balance < 0} ? 'amount-owe' : 'amount-owed'"
                       th:text="${(balance != null ? #numbers.formatDecimal(balance,1,'POINT',2,'COMMA') : '0.00') + ' €'}">
@@ -30,54 +30,59 @@
                 </span>
             </div>
 
-            <div class="balance-card" th:if="${objetivo != null}" 
+            <div class="balance-card" th:if="${objetivo != null}"
                  th:with="
                     rawPercent=${balance > 0 ? (balance * 100.0 / objetivo.amount) : 0},
                     percent=${rawPercent > 100 ? 100 : (rawPercent < 0 ? 0 : rawPercent)},
                     hue=${percent * 1.2}
                  "
                  th:style="'background-color: hsl(' + ${hue} + ', 75%, 90%); border: 2px solid hsl(' + ${hue} + ', 75%, 40%);'">
-                
-                <span class="balance-label" style="color: #333;">Saving Goal</span>
-                
+
+                <span class="balance-label" style="color: #333;" th:text="#{profile.saving_goal}">Saving Goal</span>
+
                 <span class="balance-amount" th:style="'color: hsl(' + ${hue} + ', 80%, 25%);'">
                     <span th:text="${#numbers.formatDecimal(objetivo.amount, 1, 'POINT', 2, 'COMMA')}">0.00</span> €
                 </span>
-                
+
                 <div style="width: 100%; margin-top: 15px;">
                     <div style="width: 100%; background-color: rgba(0,0,0,0.1); border-radius: 10px; height: 12px; overflow: hidden;">
                         <div th:style="'height: 100%; transition: width 1s ease-in-out; background-color: hsl(' + ${hue} + ', 75%, 45%); width: ' + ${percent} + '%;'"></div>
                     </div>
-                    
+
                     <div style="display: flex; justify-content: space-between; font-size: 0.85em; margin-top: 5px; color: #444;">
-                        <span th:text="${#numbers.formatDecimal(percent, 1, 1)} + '% completed'">0% completed</span>
+                        <span th:text="${#numbers.formatDecimal(percent, 1, 1)} + #{profile.pct_completed}">0% completed</span>
                         <span th:if="${balance < objetivo.amount}">
-                            Remaining: <span th:text="${#numbers.formatDecimal(objetivo.amount - balance, 1, 'POINT', 2, 'COMMA')}">0</span> €
+                            <span th:text="#{profile.remaining}">Remaining:</span>
+                            <span th:text="${#numbers.formatDecimal(objetivo.amount - balance, 1, 'POINT', 2, 'COMMA')}">0</span> €
                         </span>
                     </div>
                 </div>
 
-                <p th:if="${balance >= objetivo.amount}" style="color: #1b5e20; font-weight: bold; margin-top: 10px; text-align: center;">
-                     Goal Achieved! 
+                <p th:if="${balance >= objetivo.amount}" style="color: #1b5e20; font-weight: bold; margin-top: 10px; text-align: center;"
+                   th:text="#{profile.goal_achieved}">
+                    Goal Achieved!
                 </p>
-                
+
                 <p th:if="${balance < objetivo.amount}" style="color: #444; font-size: 0.8em; margin-top: 10px; text-align: center;">
-                    Deadline: <span th:text="${objetivo.endDate}"></span>
+                    <span th:text="#{profile.deadline}">Deadline:</span>
+                    <span th:text="${objetivo.endDate}"></span>
                 </p>
 
                 <form th:action="@{/web/user/objetivo/delete}" method="post" style="margin-top: 15px;">
-                    <button type="submit" class="btn-secondary" style="padding: 5px 10px; font-size: 0.8rem; width: 100%; background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.1); color: #333;">Delete Goal</button>
+                    <button type="submit" class="btn-secondary" style="padding: 5px 10px; font-size: 0.8rem; width: 100%; background: rgba(255,255,255,0.5); border: 1px solid rgba(0,0,0,0.1); color: #333;"
+                            th:text="#{profile.delete_goal}">Delete Goal</button>
                 </form>
             </div>
 
             <div class="balance-card" th:if="${objetivo == null}">
-                <span class="balance-label">New Saving Goal</span>
+                <span class="balance-label" th:text="#{profile.new_goal}">New Saving Goal</span>
                 <form th:action="@{/web/user/objetivo/create}" method="post" style="margin-top: 10px; display: flex; flex-direction: column; gap: 10px;">
-                    <input type="number" name="amount" step="0.01" required placeholder="Amount to reach (€)" 
+                    <input type="number" name="amount" step="0.01" required th:placeholder="#{profile.goal_amount_placeholder}"
+                           placeholder="Amount to reach (€)"
                            style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
-                    <input type="date" name="endDate" required 
+                    <input type="date" name="endDate" required
                            style="padding: 8px; border-radius: 5px; border: 1px solid #ccc;">
-                    <button type="submit" class="btn-login" style="padding: 10px;">Set Goal</button>
+                    <button type="submit" class="btn-login" style="padding: 10px;" th:text="#{profile.set_goal}">Set Goal</button>
                 </form>
             </div>
 
@@ -85,12 +90,12 @@
             <div class="debt-row"
                  th:if="${(owes != null and owes > 0) or (owed != null and owed > 0)}">
                 <div class="debt-card debt-negative" th:if="${owes != null and owes > 0}">
-                    <span class="debt-label">You owe</span>
+                    <span class="debt-label" th:text="#{profile.you_owe}">You owe</span>
                     <span class="debt-amount"
                           th:text="${#numbers.formatDecimal(owes,1,'POINT',2,'COMMA')} + ' €'">0.00 €</span>
                 </div>
                 <div class="debt-card debt-positive" th:if="${owed != null and owed > 0}">
-                    <span class="debt-label">Owed to you</span>
+                    <span class="debt-label" th:text="#{profile.owed_to_you}">Owed to you</span>
                     <span class="debt-amount"
                           th:text="${#numbers.formatDecimal(owed,1,'POINT',2,'COMMA')} + ' €'">0.00 €</span>
                 </div>
@@ -99,14 +104,15 @@
             <!-- ===== DEBES (user is debtor) ===== -->
             <div class="debt-section"
                  th:if="${debtsAsDebtor != null and !debtsAsDebtor.empty}">
-                <h3 class="debt-section-title">You Owe</h3>
+                <h3 class="debt-section-title" th:text="#{profile.you_owe_title}">You Owe</h3>
 
                 <div th:each="d : ${debtsAsDebtor}" class="debt-item debt-item-owe">
                     <div class="debt-item-info">
                         <p class="debt-item-concepto"
                            th:text="${d.transaccionOriginal.concepto}">Concepto</p>
                         <p class="debt-item-person">
-                            A: <span th:text="${d.acreedor.nombre}">Acreedor</span>
+                            <span th:text="#{profile.to}">To:</span>
+                            <span th:text="${d.acreedor.nombre}">Acreedor</span>
                         </p>
                     </div>
                     <span class="debt-item-amount amount-owe"
@@ -114,7 +120,8 @@
                     <form th:action="@{/web/transaction/pay-debt}" method="post" style="margin:0">
                         <input type="hidden" name="deudaId" th:value="${d.id}">
                         <button type="submit" class="btn-pay"
-                                onclick="return confirm('Pay this debt?')">Pay</button>
+                                th:text="#{profile.pay_btn}"
+                                th:onsubmit="|return confirm('#{profile.pay_confirm}')|">Pay</button>
                     </form>
                 </div>
             </div>
@@ -122,14 +129,15 @@
             <!-- ===== TE DEBEN (user is creditor) ===== -->
             <div class="debt-section"
                  th:if="${debtsAsCreditor != null and !debtsAsCreditor.empty}">
-                <h3 class="debt-section-title">Owed to you</h3>
+                <h3 class="debt-section-title" th:text="#{profile.owed_to_you_title}">Owed to you</h3>
 
                 <div th:each="d : ${debtsAsCreditor}" class="debt-item debt-item-owed">
                     <div class="debt-item-info">
                         <p class="debt-item-concepto"
                            th:text="${d.transaccionOriginal.concepto}">Concepto</p>
                         <p class="debt-item-person">
-                            De: <span th:text="${d.deudor.nombre}">Deudor</span>
+                            <span th:text="#{profile.from}">From:</span>
+                            <span th:text="${d.deudor.nombre}">Deudor</span>
                         </p>
                     </div>
                     <span class="debt-item-amount amount-owed"
@@ -140,22 +148,27 @@
             <!-- No debts at all -->
             <p th:if="${(debtsAsDebtor == null or debtsAsDebtor.empty)
                         and (debtsAsCreditor == null or debtsAsCreditor.empty)}"
-               class="no-debts-msg">
+               class="no-debts-msg"
+               th:text="#{profile.no_debts}">
                 No pending debts 🎉
             </p>
 
             <!-- Action buttons -->
             <div class="actions">
-                <a th:href="@{/web/transaction}" class="btn-login">View Transactions</a>
-                <a th:href="@{/web/categories}" class="btn-secondary">Manage Categories</a>
-                <a th:href="@{/web/groups}" class="btn-secondary">My Groups</a>
+                <a th:href="@{/web/transaction}" class="btn-login" th:text="#{profile.view_tx}">View Transactions</a>
+                <a th:href="@{/web/categories}" class="btn-secondary" th:text="#{profile.manage_cat}">Manage Categories</a>
+                <a th:href="@{/web/groups}" class="btn-secondary" th:text="#{profile.my_groups}">My Groups</a>
                 <form th:action="@{/web/auth/logout}" method="post" style="margin:0">
-                    <button type="submit" class="btn-logout">Sign Out</button>
+                    <button type="submit" class="btn-logout" th:text="#{profile.sign_out}">Sign Out</button>
                 </form>
             </div>
 
         </div>
-    </div>
 
+    </div>
+    <footer class="lang-footer">
+        <a th:href="@{/web/user/profile(lang=en)}">EN</a> |
+        <a th:href="@{/web/user/profile(lang=es)}">ES</a>
+    </footer>
 </body>
 </html>

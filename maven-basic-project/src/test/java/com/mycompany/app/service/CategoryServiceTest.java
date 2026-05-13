@@ -80,9 +80,9 @@ class CategoryServiceTest {
     @Test
     void getCategoriesByUser_MergesGlobalAndUserCategories() {
         List<Category> global = new ArrayList<>();
-        global.add(new Category("Global", null));
+        global.add(new Category("Global", null, null));
         List<Category> userCategories = new ArrayList<>();
-        userCategories.add(new Category("Personal", new Usuario()));
+        userCategories.add(new Category("Personal", new Usuario(), null));
 
         when(categoryRepository.findByUserIdIsNull()).thenReturn(global);
         when(categoryRepository.findByUserId(1)).thenReturn(userCategories);
