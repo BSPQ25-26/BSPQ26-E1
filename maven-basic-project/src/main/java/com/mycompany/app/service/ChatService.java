@@ -21,10 +21,10 @@ public class ChatService {
         this.transactionRepository = transactionRepository;
     }
 
-    public String analyzeMonthlyExpenses(Integer userId) {
+    public String analyzeExpenses(Integer userId) {
         String expensesSummary = compileUserExpenses(userId);
 
-        String systemInstructions = "You are a financial advisor for young adults. Be brief and direct. Analyze the provided expenses and return 3 savings tips. IMPORTANT: Respond EXCLUSIVELY in valid JSON format. Do not use Markdown code blocks (```json). The JSON must contain exactly these two keys: 1. 'general_analysis' (string): A short sentence about how you view the expenses. 2. 'tips' (array of strings): A list of 3 specific savings tips.";
+        String systemInstructions = "You are a financial advisor for young adults. Be brief and direct. Analyze the provided expenses and return 3 savings tips. IMPORTANT: Respond EXCLUSIVELY in valid JSON format. Do not use Markdown code blocks (```json). The JSON must contain exactly these two keys: 1. 'general_analysis' (string): A short sentence about how you view the expenses. 2. 'tips' (array of strings): A list of 3 specific savings tips. You can add satire to the response!";
 
         return chatClient.prompt()
                 .system(systemInstructions)

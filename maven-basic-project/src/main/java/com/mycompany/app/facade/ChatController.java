@@ -1,10 +1,13 @@
 package com.mycompany.app.facade;
 
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mycompany.app.service.AuthService;
 import com.mycompany.app.service.ChatService;
 
 @RestController
@@ -12,14 +15,20 @@ import com.mycompany.app.service.ChatService;
 public class ChatController {
 
     private final ChatService chatService;
+    private final AuthService authService;
 
-    public ChatController(ChatService chatService) {
+    public ChatController(ChatService chatService, AuthService authService) {
         this.chatService = chatService;
+        this.authService = authService;
     }
 
     @GetMapping("/monthly-advice/{userId}")
-    public String getMonthlyAdvice(@PathVariable int userId) {
+    public ResponseEntity<String> getMonthlyAdvice(@PathVariable int userId, String token) {
 
-        return chatService.analyzeMonthlyExpenses(userId);
+        if (!authService.isValidToken(token)) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        return ResponseEntity.ok(chatService.analyzeExpenses(userId));
     }
 }
