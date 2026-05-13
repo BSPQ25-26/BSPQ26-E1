@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 import com.mycompany.app.service.AuthService;
 import com.mycompany.app.service.ChatService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+
 @RestController
 @RequestMapping("/chat")
 public class ChatController {
@@ -32,7 +35,6 @@ public class ChatController {
     )
     @GetMapping("/monthly-advice/{userId}")
     public ResponseEntity<String> getMonthlyAdvice(@PathVariable int userId, String token) {
-
         if (!authService.isValidToken(token)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
