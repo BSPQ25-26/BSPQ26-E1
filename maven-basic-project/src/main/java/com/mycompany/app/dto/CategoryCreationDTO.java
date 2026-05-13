@@ -4,6 +4,7 @@ public class CategoryCreationDTO {
     private String name;
     private Integer userId;
     private String token;
+    private String icon;
 
     // Constructores
     public CategoryCreationDTO() {}
@@ -17,4 +18,7 @@ public class CategoryCreationDTO {
 
     public String getToken() { return token; }
     public void setToken(String token) { this.token = token; }
+
+    public String getIcon() { return icon; }
+    public void setIcon(String icon) { this.icon = icon; }
 }

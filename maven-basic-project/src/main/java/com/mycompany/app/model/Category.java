@@ -24,11 +24,15 @@ public class Category {
     @JoinColumn(name = "user_id") 
     private Usuario user; 
 
+    @Column(name = "Icon")
+    private String icon;
+
     public Category() {}
 
-    public Category(String name, Usuario user) {
+    public Category(String name, Usuario user, String icon) {
         this.name = name;
         this.user = user;
+        this.icon = icon;
     }
 
     public Integer getId() { return id; }
@@ -39,4 +43,7 @@ public class Category {
     
     public Usuario getUser() { return user; }
     public void setUser(Usuario user) { this.user = user; }
+
+    public String getIcon() { return icon; }
+    public void setIcon(String icon) { this.icon = icon; }
 }
