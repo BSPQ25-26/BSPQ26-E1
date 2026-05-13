@@ -22,6 +22,14 @@ public class ChatController {
         this.authService = authService;
     }
 
+    @Operation(
+        summary = "Use AI to analyze the expenses of a user",
+        description = "Uses the gemini API to analyze the expenses of the user, along with the categories",
+        responses = {
+            @ApiResponse(responseCode = "200", description = "Successful. Returns the string with the response."),
+            @ApiResponse(responseCode = "401", description = "Unauthorized")
+        }
+    )
     @GetMapping("/monthly-advice/{userId}")
     public ResponseEntity<String> getMonthlyAdvice(@PathVariable int userId, String token) {
 
