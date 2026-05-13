@@ -48,7 +48,9 @@ public class SecurityConfig {
                 "/categories/create",          
                 "/categories/user/{usuarioId}",
                 "/categories/{id}",
-                "/categories/**"             
+                "/categories/**",
+                "/chat/",
+                "chat/monthly-advice/{userId}"             
             ).permitAll()
                 .requestMatchers(
                     "/v3/api-docs/**",
