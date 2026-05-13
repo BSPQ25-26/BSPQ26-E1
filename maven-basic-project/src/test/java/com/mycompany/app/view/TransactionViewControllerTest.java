@@ -34,7 +34,7 @@ class TransactionViewControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertTrue(response.getBody().contains("Sign In"));
+        assertTrue(response.getBody().contains("ExpenSense - Login"));
     }
 
     @Test
@@ -52,7 +52,7 @@ class TransactionViewControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertFalse(response.getBody().contains("Sign In"));
+        assertFalse(response.getBody().contains("ExpenSense - Login"));
         assertTrue(response.getBody().contains("My Transactions"));
     }
 

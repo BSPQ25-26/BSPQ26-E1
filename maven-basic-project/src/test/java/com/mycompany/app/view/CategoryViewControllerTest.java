@@ -34,7 +34,7 @@ class CategoryViewControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertTrue(response.getBody().contains("Sign In"));
+        assertTrue(response.getBody().contains("ExpenSense - Login"));
     }
 
     @Test
@@ -52,7 +52,7 @@ class CategoryViewControllerTest {
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
-        assertTrue(response.getBody().contains("New Category"));
+        assertTrue(response.getBody().contains("Categories"));
         assertTrue(response.getBody().contains("Category Name"));
     }
 

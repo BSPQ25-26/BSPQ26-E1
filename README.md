@@ -87,7 +87,7 @@ Then open the report at:
 Once both the database and the backend are running, open your browser and navigate to:
 
 ```
-http://localhost:8080/web/auth/login
+http://localhost:8080/web
 ```
 
 This is the main entry point of the application. From here you can log in with your credentials or create a new account.
