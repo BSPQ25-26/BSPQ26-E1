@@ -29,7 +29,7 @@ public class CategoryViewController {
     private final UsuarioRepository usuarioRepository;
     private final AuthService authService;
 
-    // Keyword → emoji mapping (checked via String.contains, order matters)
+    // Keyword → emoji fallback map (used when no icon is stored in the DB)
     private static final Map<String, String> EMOJI_MAP = new LinkedHashMap<>();
     static {
         EMOJI_MAP.put("food", "🍔");       EMOJI_MAP.put("comida", "🍔");
@@ -99,13 +99,15 @@ public class CategoryViewController {
         this.authService = authService;
     }
 
-    private String getEmoji(String name) {
-        if (name == null) return "📂";
-        String lower = name.toLowerCase();
-        for (Map.Entry<String, String> entry : EMOJI_MAP.entrySet()) {
-            if (lower.contains(entry.getKey())) return entry.getValue();
+    // Keyword-based icon resolution with 📌 fallback
+    private String resolveIcon(Category cat) {
+        if (cat.getName() != null) {
+            String lower = cat.getName().toLowerCase();
+            for (Map.Entry<String, String> e : EMOJI_MAP.entrySet()) {
+                if (lower.contains(e.getKey())) return e.getValue();
+            }
         }
-        return "📂";
+        return "📌";
     }
 
     // ── View model ────────────────────────────────────────────────────────────
@@ -130,6 +132,7 @@ public class CategoryViewController {
 
         public Category getCategory()             { return category; }
         public String getEmoji()                   { return emoji; }
+        public String getDisplayName()             { return category.getName() != null ? category.getName() : ""; }
         public List<Transaction> getTransactions() { return transactions; }
         public double getTotalExpenses()           { return totalExpenses; }
         public double getTotalIncome()             { return totalIncome; }
@@ -182,12 +185,9 @@ public class CategoryViewController {
                 Budget budget = budgetRepository
                     .findByCategoryIdAndUserId(cat.getId(), user.getId()).orElse(null);
                 if (budget != null) limitAmount = budget.getLimitAmount();
-            } catch (Exception ignored) {
-                // budgets table not yet created in this environment
-            }
+            } catch (Exception ignored) {}
 
-            return new CategorySummary(cat, getEmoji(cat.getName()), catTx,
-                expenses, income, limitAmount);
+            return new CategorySummary(cat, resolveIcon(cat), catTx, expenses, income, limitAmount);
         }).collect(Collectors.toList());
 
         model.addAttribute("listaCategorias", summaries);
@@ -216,7 +216,6 @@ public class CategoryViewController {
         return "redirect:/web/categories";
     }
 
-    // HTML forms do not support DELETE, so this has to be a POST
     @PostMapping("/delete")
     public String deleteCategory(
             @CookieValue(value = "token", required = false) String token,
@@ -251,9 +250,7 @@ public class CategoryViewController {
             dto.setLimitAmount(limitAmount);
             dto.setToken(token);
             transactionService.createBudget(dto);
-        } catch (Exception ignored) {
-            // budgets table not yet created in this environment
-        }
+        } catch (Exception ignored) {}
 
         return "redirect:/web/categories";
     }
