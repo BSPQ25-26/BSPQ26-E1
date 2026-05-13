@@ -38,6 +38,7 @@ public class CategoryService {
             Category newCategory = new Category();
             newCategory.setName(request.getName());
             newCategory.setUser(userOpt.get());
+            newCategory.setIcon(request.getIcon());
 
             categoryRepository.save(newCategory);
             return true;
