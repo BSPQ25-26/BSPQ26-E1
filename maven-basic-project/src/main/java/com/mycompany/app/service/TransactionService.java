@@ -141,44 +141,29 @@ public class TransactionService {
     }
 
     @Transactional
-    public boolean clearProjectExpenses(Integer groupId) {
+    public int clearProjectExpenses(Integer groupId) {
         try {
-            // 1. Obtenemos TODAS las transacciones de ese grupo
             List<Transaction> transaccionesGrupo = transactionRepository.findByGrupoId(groupId);
-            
+            int skipped = 0;
+
             for (Transaction t : transaccionesGrupo) {
-                // 2. Filtramos solo los "GASTOS"
                 if ("GASTO".equals(t.getTipoTransaccion())) {
-                    
-                    // 3. Buscamos todas las deudas asociadas a este gasto en concreto
                     List<Deuda> deudas = deudaRepository.findByTransaccionOriginalId(t.getId());
-                    
-                    // 4. Comprobamos si tiene alguna deuda PENDIENTE
-                    boolean tieneDeudasPendientes = false;
-                    for (Deuda d : deudas) {
-                        if (d.getEstado() == EstadoDeuda.PENDIENTE) {
-                            tieneDeudasPendientes = true;
-                            break; // Si encontramos una pendiente, paramos de buscar
-                        }
-                    }
-                    
-                    // 5. Si NO tiene deudas pendientes (todas PAGADAS o no tiene deudas), lo borramos
-                    if (!tieneDeudasPendientes) {
-                        // OBLIGATORIO: Borramos primero las deudas pagadas de la BD 
-                        // para que PostgreSQL no nos dé error de Foreign Key al borrar el Gasto original.
-                        if (!deudas.isEmpty()) {
-                            deudaRepository.deleteAll(deudas);
-                        }
-                        
-                        // Finalmente, borramos el gasto original
+
+                    boolean tieneDeudasPendientes = deudas.stream()
+                            .anyMatch(d -> d.getEstado() == EstadoDeuda.PENDIENTE);
+
+                    if (tieneDeudasPendientes) {
+                        skipped++;
+                    } else {
+                        if (!deudas.isEmpty()) deudaRepository.deleteAll(deudas);
                         transactionRepository.delete(t);
                     }
                 }
             }
-            return true;
+            return skipped;
         } catch (Exception e) {
-            System.err.println("Error limpiando gastos del grupo: " + e.getMessage());
-            return false;
+            return -1;
         }
     }
 

@@ -178,6 +178,16 @@ select:focus {
     font-size: 0.85rem;
 }
 
+.flash-warning {
+    color: #856404;
+    background-color: #fff3cd;
+    border: 1px solid #ffeeba;
+    padding: 10px 15px;
+    border-radius: 10px;
+    margin-bottom: 15px;
+    font-size: 0.85rem;
+}
+
 .alert-success {
     background: rgba(16, 185, 129, 0.1);
     color: #059669;

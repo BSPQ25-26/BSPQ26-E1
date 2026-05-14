@@ -35,6 +35,8 @@
             </div>
 
             <div th:if="${error}" class="flash-error" th:text="${error}"></div>
+            <div th:if="${warning}" class="flash-warning" th:text="${warning}"></div>
+            <div th:if="${success}" class="alert-success" th:text="${success}"></div>
 
             <div th:if="${listaGrupos.empty}" class="empty-state">
                 <div style="font-size:3rem">👥</div>
@@ -102,11 +104,11 @@
                             <div class="group-activity">
                                 <div class="activity-header">
                                     <p class="members-title" th:text="#{group.activity}">Activity</p>
-                                    <button type="button" class="btn-clear-expenses"
-                                            th:attr="data-group-id=${grupo.id}"
-                                            onclick="clearGroupExpenses(this.dataset.groupId)">
-                                        Clear Expenses
-                                    </button>
+                                    <form th:action="@{/web/groups/clearExpenses}" method="post"
+                                          onsubmit="return confirm('Delete all settled expenses for this group? This cannot be undone.')">
+                                        <input type="hidden" name="groupId" th:value="${grupo.id}">
+                                        <button type="submit" class="btn-clear-expenses">Clear Expenses</button>
+                                    </form>
                                 </div>
 
                                 <div th:if="${groupTransactions[grupo.id] == null or groupTransactions[grupo.id].empty}"
@@ -197,28 +199,6 @@
                     }
                 }
 
-                function getCookie(name) {
-                    var m = document.cookie.match('(?:^|; )' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=([^;]*)');
-                    return m ? decodeURIComponent(m[1]) : '';
-                }
-
-                async function clearGroupExpenses(groupId) {
-                    if (!confirm('Delete all expenses for this group? This cannot be undone.')) return;
-                    try {
-                        var res = await fetch('/web/groups/clearExpenses', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                            body: 'groupId=' + encodeURIComponent(groupId)
-                        });
-                        if (res.ok) {
-                            window.location.reload();
-                        } else {
-                            alert('Could not clear expenses. Please try again.');
-                        }
-                    } catch (e) {
-                        alert('Network error. Please try again.');
-                    }
-                }
             </script>
         </div>
 

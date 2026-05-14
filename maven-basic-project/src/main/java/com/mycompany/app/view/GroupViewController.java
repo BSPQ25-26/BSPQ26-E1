@@ -21,6 +21,7 @@ import com.mycompany.app.repository.TransactionRepository;
 import com.mycompany.app.repository.UsuarioRepository;
 import com.mycompany.app.service.AuthService;
 import com.mycompany.app.service.GroupService;
+import com.mycompany.app.service.TransactionService;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -36,17 +37,20 @@ public class GroupViewController {
     private final AuthService authService;
     private final TransactionRepository transactionRepository;
     private final DeudaRepository deudaRepository;
+    private final TransactionService transactionService;
 
     public GroupViewController(GroupService groupService,
                                 UsuarioRepository usuarioRepository,
                                 AuthService authService,
                                 TransactionRepository transactionRepository,
-                                DeudaRepository deudaRepository) {
+                                DeudaRepository deudaRepository,
+                                TransactionService transactionService) {
         this.groupService = groupService;
         this.usuarioRepository = usuarioRepository;
         this.authService = authService;
         this.transactionRepository = transactionRepository;
         this.deudaRepository = deudaRepository;
+        this.transactionService = transactionService;
     }
 
     @GetMapping
@@ -166,29 +170,24 @@ public class GroupViewController {
         return "redirect:/web/groups";
     }
 
-    @SuppressWarnings("null")
     @PostMapping("/clearExpenses")
-    @ResponseBody
-    public org.springframework.http.ResponseEntity<String> clearGroupExpenses(
+    public String clearGroupExpenses(
             @CookieValue(value = "token", required = false) String token,
-            @RequestParam Integer groupId
+            @RequestParam Integer groupId,
+            RedirectAttributes redirectAttributes
     ) {
-        if (token == null || !authService.isValidToken(token)) {
-            return org.springframework.http.ResponseEntity.status(401).body("Unauthorized");
+        if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
+
+        int skipped = transactionService.clearProjectExpenses(groupId);
+        if (skipped < 0) {
+            redirectAttributes.addFlashAttribute("error", "Could not clear expenses. Please try again.");
+        } else if (skipped == 0) {
+            redirectAttributes.addFlashAttribute("success", "All group expenses cleared successfully.");
+        } else {
+            redirectAttributes.addFlashAttribute("warning",
+                skipped + " expense(s) could not be cleared because you still have pending debts.");
         }
-        try {
-            List<Transaction> txs = transactionRepository.findByGrupoId(groupId).stream()
-                    .filter(t -> "GASTO".equals(t.getTipoTransaccion()))
-                    .collect(Collectors.toList());
-            for (Transaction tx : txs) {
-                deudaRepository.findByTransaccionOriginalId(tx.getId())
-                        .forEach(deudaRepository::delete);
-            }
-            transactionRepository.deleteAll(List.copyOf(txs));
-            return org.springframework.http.ResponseEntity.ok("Cleared");
-        } catch (Exception e) {
-            return org.springframework.http.ResponseEntity.status(500).body(e.getMessage());
-        }
+        return "redirect:/web/groups";
     }
 
     //HTML forms do not support DELETE functions, so this has to be a POST
