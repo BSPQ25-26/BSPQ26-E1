@@ -6,9 +6,11 @@
     <title>ExpenSense - Transactions</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
 
+    <!-- ===== NAVBAR ===== -->
     <div class="nav-header">
         <a th:href="@{/web/user/profile}" class="logo">Expen<span>Sense</span></a>
         <div class="nav-right">
@@ -41,6 +43,20 @@
                 <button class="filter-btn"         data-filter="INGRESO" onclick="filterTx('INGRESO')" th:text="#{tx.filter_income}">Income</button>
             </div>
 
+            <!-- Date range filter (single compact row) -->
+            <div class="date-filter-bar">
+                <input type="date" id="txFilterStart" class="date-input-tx">
+                <span class="filter-sep">→</span>
+                <input type="date" id="txFilterEnd" class="date-input-tx">
+                <button type="button" class="btn-filter-tx" onclick="applyDateFilter()">Filter</button>
+                <button type="button" id="btn-clear-date-filter" class="btn-clear-filter-tx"
+                        onclick="clearDateFilter()" style="display:none">✕</button>
+                <div class="period-balance-chip" id="periodBalanceBox" style="display:none">
+                    <span class="period-balance-label">Balance:</span>
+                    <span class="period-balance-amount" id="periodBalanceAmt"></span>
+                </div>
+            </div>
+
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -70,6 +86,7 @@
                                          data-concepto=${t.concepto},
                                          data-importe=${t.importeTotal},
                                          data-tipo=${t.tipoTransaccion},
+                                         data-fecha=${t.fecha != null ? t.fecha : ''},
                                          data-cat-id=${t.categoria != null ? t.categoria.id : ''},
                                          data-grupo-id=${t.grupo != null ? t.grupo.id : ''},
                                          data-pagador-id=${t.creador != null ? t.creador.id : ''},
@@ -127,12 +144,7 @@
                         </div>
                         <div class="input-group">
                             <label th:text="#{tx.form_type}">Type</label>
-                            <!--
-                              Select has NO name — value is carried by the hidden input below.
-                              When a group is selected, the select is locked to GASTO via JS
-                              (.field-locked CSS + pointer-events:none) without using disabled,
-                              so the visual state is clear and the hidden input always submits.
-                            -->
+                            <!-- No name attr: value always submitted via the hidden input below -->
                             <select id="f-tipo" onchange="onTipoChange()" required>
                                 <option value="" th:text="#{tx.form_type_select}">-- Select --</option>
                                 <option value="GASTO" th:text="#{tx.form_type_expense}">Expense</option>
@@ -808,34 +820,153 @@
             inDebtsReadOnly = false;
         }
 
+        function getCookie(name) {
+            var m = document.cookie.match('(?:^|; )' + name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '=([^;]*)');
+            return m ? decodeURIComponent(m[1]) : '';
+        }
+
         function validateBeforeSubmit() {
-            if (!inDebtsMode) return true;
-            if (!debtsEditValid) {
-                alert(i18n.debtsExceed);
+            if (inDebtsMode) {
+                if (!debtsEditValid) { alert(i18n.debtsExceed); return false; }
+                return true;
+            }
+            if (!currentTxId) {
+                submitCreateWithBudgetCheck();
                 return false;
             }
             return true;
         }
 
-        /* ── Client-side filter ── */
+        async function submitCreateWithBudgetCheck() {
+            var btn = document.getElementById('btn-create');
+            if (btn) btn.disabled = true;
+
+            // Always sync hidden tipo field from the visible select
+            var tipoSel = document.getElementById('f-tipo');
+            var tipoHid = document.getElementById('f-tipo-val');
+            tipoHid.value = tipoSel.value;
+
+            var catVal   = document.getElementById('f-cat').value;
+            var grupoVal = document.getElementById('f-grupo').value;
+            var pagVal   = document.getElementById('pagadorSelect').value;
+
+            var payload = {
+                concepto:        document.getElementById('f-concepto').value,
+                importeTotal:    parseFloat(document.getElementById('f-importe').value),
+                tipoTransaccion: tipoHid.value,
+                categoriaId:     catVal   ? parseInt(catVal)   : null,
+                grupoId:         grupoVal ? parseInt(grupoVal) : null,
+                creadorId:       pagVal   ? parseInt(pagVal)   : currentUserId,
+                token:           getCookie('token')
+            };
+
+            try {
+                var res = await fetch('/transaction/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                var errBody = await res.text();
+
+                if (res.status === 409) {
+                    if (btn) btn.disabled = false;
+                    var alertMsg = errBody || 'This expense exceeds the budget limit for the selected category.';
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Budget Alert',
+                        text: alertMsg,
+                        confirmButtonColor: '#8b5cf6',
+                        confirmButtonText: 'OK'
+                    });
+                } else if (res.ok) {
+                    window.location.href = '/web/transaction';
+                } else {
+                    if (btn) btn.disabled = false;
+                    var errMsg = errBody || 'Could not save the transaction. Please try again.';
+                    Swal.fire({ icon: 'error', title: 'Error', text: errMsg, confirmButtonColor: '#8b5cf6' });
+                }
+            } catch (e) {
+                if (btn) btn.disabled = false;
+                Swal.fire({ icon: 'error', title: 'Network Error', text: 'Check your connection and try again.', confirmButtonColor: '#8b5cf6' });
+            }
+        }
+
+        /* ── Combined filter state ── */
+        var activeTypeFilter = 'ALL';
+        var activeDateRange  = null; // { start: Date, end: Date } | null
+
+        function applyFilters() {
+            var count = 0;
+            document.querySelectorAll('.tx-row').forEach(function(row) {
+                var typeOk = activeTypeFilter === 'ALL'
+                    || row.dataset.tipo === activeTypeFilter
+                    || (activeTypeFilter === 'GASTO' && row.dataset.tipo === 'LIQUIDACION');
+                var dateOk = true;
+                if (activeDateRange) {
+                    var f = row.dataset.fecha;
+                    if (!f) {
+                        dateOk = false;
+                    } else {
+                        var d = new Date(f);
+                        dateOk = d >= activeDateRange.start && d <= activeDateRange.end;
+                    }
+                }
+                var visible = typeOk && dateOk;
+                row.style.display = visible ? '' : 'none';
+                if (visible) count++;
+            });
+            var sel = document.querySelector('.tx-row.selected-row');
+            if (sel && sel.style.display === 'none') clearSelection();
+            var hint = document.getElementById('filter-empty');
+            if (hint) hint.style.display = count === 0 ? '' : 'none';
+        }
+
         function filterTx(tipo) {
             document.querySelectorAll('.filter-btn').forEach(function(b) {
                 b.classList.toggle('active', b.dataset.filter === tipo);
             });
-            var count = 0;
-            document.querySelectorAll('.tx-row').forEach(function(row) {
-                var visible = tipo === 'ALL'
-                    || row.dataset.tipo === tipo
-                    || (tipo === 'GASTO' && row.dataset.tipo === 'LIQUIDACION');
-                row.style.display = visible ? '' : 'none';
-                if (visible) count++;
-            });
-            // If the selected row became hidden, close the panel
-            var sel = document.querySelector('.tx-row.selected-row');
-            if (sel && sel.style.display === 'none') clearSelection();
-            // Show empty-state hint when filter yields zero results
-            var hint = document.getElementById('filter-empty');
-            if (hint) hint.style.display = count === 0 ? '' : 'none';
+            activeTypeFilter = tipo;
+            applyFilters();
+        }
+
+        async function applyDateFilter() {
+            var start = document.getElementById('txFilterStart').value;
+            var end   = document.getElementById('txFilterEnd').value;
+            if (!start || !end) { alert('Please select both dates.'); return; }
+
+            activeDateRange = {
+                start: new Date(start + 'T00:00:00'),
+                end:   new Date(end   + 'T23:59:59')
+            };
+            applyFilters();
+            document.getElementById('btn-clear-date-filter').style.display = '';
+
+            try {
+                var url = '/transaction/net-balance'
+                        + '?userId='    + currentUserId
+                        + '&startDate=' + encodeURIComponent(start + 'T00:00:00')
+                        + '&endDate='   + encodeURIComponent(end   + 'T23:59:59')
+                        + '&token='     + encodeURIComponent(getCookie('token'));
+                var res = await fetch(url);
+                if (res.ok) {
+                    var amount = await res.json();
+                    var sign   = amount >= 0 ? '+' : '';
+                    var amtEl  = document.getElementById('periodBalanceAmt');
+                    amtEl.textContent = sign + amount.toFixed(2).replace('.', ',') + ' €';
+                    amtEl.className   = 'period-balance-amount ' + (amount < 0 ? 'pba-neg' : (amount > 0 ? 'pba-pos' : 'pba-zero'));
+                    document.getElementById('periodBalanceBox').style.display = '';
+                }
+            } catch(e) { /* non-critical */ }
+        }
+
+        function clearDateFilter() {
+            activeDateRange = null;
+            applyFilters();
+            document.getElementById('txFilterStart').value            = '';
+            document.getElementById('txFilterEnd').value              = '';
+            document.getElementById('btn-clear-date-filter').style.display = 'none';
+            document.getElementById('periodBalanceBox').style.display       = 'none';
         }
 
         /* ── Init: handle ?editId or ?showForm from server ── */

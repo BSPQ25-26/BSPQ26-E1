@@ -657,6 +657,40 @@ td {
     grid-template-columns: repeat(2, 1fr);
 }
 
+.month-nav {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 4px 0 16px;
+}
+.month-nav-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #6d28d9;
+    min-width: 120px;
+    text-align: center;
+}
+.month-nav-arrow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: rgba(139,92,246,0.1);
+    color: #7c3aed;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: background 0.15s;
+}
+.month-nav-arrow:hover { background: rgba(139,92,246,0.22); }
+.month-nav-arrow--disabled {
+    opacity: 0.3;
+    pointer-events: none;
+}
+
 .category-card {
     background: white;
     padding: 0;
@@ -1566,4 +1600,204 @@ td {
     background: #8b5cf6;
     color: white;
     border-color: #8b5cf6;
+}
+
+/* ── Emoji Picker (Emoji Mart) ── */
+.emoji-picker-wrap {
+    position: relative;
+}
+
+.emoji-trigger-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.emoji-preview {
+    font-size: 2rem;
+    line-height: 1;
+    user-select: none;
+}
+
+.btn-pick-emoji {
+    background: rgba(224, 231, 255, 0.4);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 12px;
+    padding: 8px 16px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6d28d9;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-pick-emoji:hover {
+    background: white;
+    border-color: #8b5cf6;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.15);
+    transform: translateY(-1px);
+}
+
+.emoji-popover {
+    display: none;
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 200;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 12px 32px rgba(109, 40, 217, 0.18);
+}
+
+.emoji-popover.open {
+    display: block;
+    animation: emojiPopIn 0.15s ease;
+}
+
+@keyframes emojiPopIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+em-emoji-picker {
+    --rgb-accent: 109, 40, 217;
+    --border-radius: 16px;
+    --font-family: 'Poppins', sans-serif;
+    --shadow: none;
+}
+
+/* ── Date filter bar (transactions page) ── */
+.date-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 0 4px;
+    flex-wrap: nowrap;
+}
+
+.date-input-tx {
+    width: 120px;
+    flex-shrink: 0;
+    padding: 5px 8px;
+    border-radius: 10px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    background: rgba(224, 231, 255, 0.3);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.73rem;
+    color: var(--text-dark);
+    cursor: pointer;
+}
+
+.date-input-tx:focus {
+    outline: none;
+    border-color: #8b5cf6;
+    background: white;
+}
+
+.filter-sep {
+    color: #9ca3af;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+}
+
+.btn-filter-tx {
+    background: var(--primary-gradient);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    padding: 5px 12px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.73rem;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-filter-tx:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 10px rgba(109, 40, 217, 0.25);
+}
+
+.btn-clear-filter-tx {
+    background: none;
+    color: #9ca3af;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    padding: 5px 9px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.72rem;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.btn-clear-filter-tx:hover {
+    color: #e03131;
+    border-color: #fca5a5;
+}
+
+.period-balance-chip {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 20px;
+    padding: 3px 10px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.period-balance-label {
+    font-size: 0.68rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.4px;
+    color: #9ca3af;
+}
+
+.period-balance-amount {
+    font-size: 0.82rem;
+    font-weight: 800;
+}
+
+.pba-pos  { color: #059669; }
+.pba-neg  { color: #dc2626; }
+.pba-zero { color: #9ca3af; }
+
+/* ── Clear Expenses button (groups) ── */
+.activity-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.activity-header .members-title {
+    margin: 0;
+}
+
+.btn-clear-expenses {
+    background: #fff5f5;
+    color: #e03131;
+    border: 1px solid #ffc9c9;
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.btn-clear-expenses:hover {
+    background: #fae5e5;
+    border-color: #ffa8a8;
+    transform: translateY(-1px);
 }

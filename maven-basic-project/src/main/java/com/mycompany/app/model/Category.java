@@ -24,7 +24,7 @@ public class Category {
     @JoinColumn(name = "user_id") 
     private Usuario user; 
 
-    @Column(name = "Icon")
+    @Column(name = "icon")
     private String icon;
 
     public Category() {}

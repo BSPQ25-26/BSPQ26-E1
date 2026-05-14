@@ -16,6 +16,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.format.TextStyle;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -29,62 +31,16 @@ public class CategoryViewController {
     private final UsuarioRepository usuarioRepository;
     private final AuthService authService;
 
-    // Keyword → emoji fallback map (used when no icon is stored in the DB)
+    // Fallback icons for the 7 default categories (only used when icon is null in DB)
     private static final Map<String, String> EMOJI_MAP = new LinkedHashMap<>();
     static {
-        EMOJI_MAP.put("food", "🍔");       EMOJI_MAP.put("comida", "🍔");
-        EMOJI_MAP.put("restaurant", "🍽️"); EMOJI_MAP.put("restaurante", "🍽️");
-        EMOJI_MAP.put("cafe", "☕");        EMOJI_MAP.put("coffee", "☕");
-        EMOJI_MAP.put("groceries", "🛒");  EMOJI_MAP.put("supermercado", "🛒");
-        EMOJI_MAP.put("market", "🛒");     EMOJI_MAP.put("mercado", "🛒");
-        EMOJI_MAP.put("transport", "🚗");  EMOJI_MAP.put("transporte", "🚗");
-        EMOJI_MAP.put("car", "🚗");        EMOJI_MAP.put("coche", "🚗");
-        EMOJI_MAP.put("taxi", "🚕");       EMOJI_MAP.put("bus", "🚌");
-        EMOJI_MAP.put("train", "🚆");      EMOJI_MAP.put("tren", "🚆");
-        EMOJI_MAP.put("flight", "✈️");     EMOJI_MAP.put("vuelo", "✈️");
-        EMOJI_MAP.put("health", "💊");     EMOJI_MAP.put("salud", "💊");
-        EMOJI_MAP.put("medic", "🏥");      EMOJI_MAP.put("doctor", "🏥");
-        EMOJI_MAP.put("farmacia", "💊");   EMOJI_MAP.put("pharmacy", "💊");
-        EMOJI_MAP.put("housing", "🏠");    EMOJI_MAP.put("vivienda", "🏠");
-        EMOJI_MAP.put("rent", "🏠");       EMOJI_MAP.put("alquiler", "🏠");
-        EMOJI_MAP.put("home", "🏠");       EMOJI_MAP.put("hogar", "🏠");
-        EMOJI_MAP.put("leisure", "🎮");    EMOJI_MAP.put("ocio", "🎮");
-        EMOJI_MAP.put("entertainment", "🎬"); EMOJI_MAP.put("game", "🎮");
-        EMOJI_MAP.put("movie", "🎬");      EMOJI_MAP.put("cine", "🎬");
-        EMOJI_MAP.put("sport", "⚽");      EMOJI_MAP.put("deporte", "⚽");
-        EMOJI_MAP.put("gym", "💪");        EMOJI_MAP.put("gimnasio", "💪");
-        EMOJI_MAP.put("fitness", "💪");
-        EMOJI_MAP.put("shopping", "🛍️");  EMOJI_MAP.put("compra", "🛍️");
-        EMOJI_MAP.put("clothes", "👗");    EMOJI_MAP.put("ropa", "👗");
-        EMOJI_MAP.put("tech", "💻");       EMOJI_MAP.put("tecnolog", "💻");
-        EMOJI_MAP.put("education", "📚");  EMOJI_MAP.put("educaci", "📚");
-        EMOJI_MAP.put("school", "🏫");     EMOJI_MAP.put("estudios", "📚");
-        EMOJI_MAP.put("universidad", "🎓"); EMOJI_MAP.put("university", "🎓");
-        EMOJI_MAP.put("travel", "✈️");     EMOJI_MAP.put("viaje", "✈️");
-        EMOJI_MAP.put("hotel", "🏨");      EMOJI_MAP.put("vacation", "🌴");
-        EMOJI_MAP.put("vacaciones", "🌴");
-        EMOJI_MAP.put("salary", "💰");     EMOJI_MAP.put("salario", "💰");
-        EMOJI_MAP.put("income", "💰");     EMOJI_MAP.put("ingreso", "💰");
-        EMOJI_MAP.put("work", "💼");       EMOJI_MAP.put("trabajo", "💼");
-        EMOJI_MAP.put("freelance", "💼");
-        EMOJI_MAP.put("savings", "🏦");    EMOJI_MAP.put("ahorros", "🏦");
-        EMOJI_MAP.put("bank", "🏦");       EMOJI_MAP.put("banco", "🏦");
-        EMOJI_MAP.put("insurance", "🛡️"); EMOJI_MAP.put("seguro", "🛡️");
-        EMOJI_MAP.put("subscription", "🔄"); EMOJI_MAP.put("suscripci", "🔄");
-        EMOJI_MAP.put("streaming", "📺");  EMOJI_MAP.put("netflix", "📺");
-        EMOJI_MAP.put("music", "🎵");      EMOJI_MAP.put("musica", "🎵");
-        EMOJI_MAP.put("book", "📖");       EMOJI_MAP.put("libro", "📖");
-        EMOJI_MAP.put("pet", "🐾");        EMOJI_MAP.put("mascota", "🐾");
-        EMOJI_MAP.put("utilities", "💡");  EMOJI_MAP.put("servicios", "💡");
-        EMOJI_MAP.put("electricity", "⚡"); EMOJI_MAP.put("electricidad", "⚡");
-        EMOJI_MAP.put("internet", "📶");
-        EMOJI_MAP.put("phone", "📱");      EMOJI_MAP.put("telef", "📱");
-        EMOJI_MAP.put("gift", "🎁");       EMOJI_MAP.put("regalo", "🎁");
-        EMOJI_MAP.put("personal", "👤");
-        EMOJI_MAP.put("beauty", "💅");     EMOJI_MAP.put("belleza", "💅");
-        EMOJI_MAP.put("tax", "📄");        EMOJI_MAP.put("impuesto", "📄");
-        EMOJI_MAP.put("other", "📌");      EMOJI_MAP.put("otro", "📌");
-        EMOJI_MAP.put("general", "📋");    EMOJI_MAP.put("varios", "📌");
+        EMOJI_MAP.put("salary",        "💰"); EMOJI_MAP.put("salario",       "💰");
+        EMOJI_MAP.put("food",          "🍔"); EMOJI_MAP.put("comida",        "🍔");
+        EMOJI_MAP.put("housing",       "🏠"); EMOJI_MAP.put("vivienda",      "🏠");
+        EMOJI_MAP.put("health",        "💊"); EMOJI_MAP.put("salud",         "💊");
+        EMOJI_MAP.put("transport",     "🚗"); EMOJI_MAP.put("transporte",    "🚗");
+        EMOJI_MAP.put("entertainment", "🎬"); EMOJI_MAP.put("entretenimiento","🎬");
+        EMOJI_MAP.put("school",        "🏫"); EMOJI_MAP.put("colegio",       "🏫");
     }
 
     public CategoryViewController(CategoryService categoryService,
@@ -99,8 +55,11 @@ public class CategoryViewController {
         this.authService = authService;
     }
 
-    // Keyword-based icon resolution with 📌 fallback
+    // DB icon takes priority; keyword-based fallback if none stored
     private String resolveIcon(Category cat) {
+        if (cat.getIcon() != null && !cat.getIcon().isBlank()) {
+            return cat.getIcon();
+        }
         if (cat.getName() != null) {
             String lower = cat.getName().toLowerCase();
             for (Map.Entry<String, String> e : EMOJI_MAP.entrySet()) {
@@ -154,6 +113,8 @@ public class CategoryViewController {
     public String category(
             @CookieValue(value = "token", required = false) String token,
             @RequestParam(required = false) Boolean showForm,
+            @RequestParam(required = false) Integer month,
+            @RequestParam(required = false) Integer year,
             Model model
     ) {
         if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
@@ -162,12 +123,25 @@ public class CategoryViewController {
         Usuario user = usuarioRepository.findByEmail(email);
         if (user == null) return "redirect:/web/auth/login";
 
+        LocalDate today    = LocalDate.now();
+        int selectedMonth  = (month != null) ? month : today.getMonthValue();
+        int selectedYear   = (year  != null) ? year  : today.getYear();
+
+        LocalDate selected = LocalDate.of(selectedYear, selectedMonth, 1);
+        LocalDate prev     = selected.minusMonths(1);
+        LocalDate next     = selected.plusMonths(1);
+        boolean isCurrentMonth = selected.getYear() == today.getYear()
+                              && selected.getMonthValue() == today.getMonthValue();
+
         List<Category> categories = categoryService.getCategoriesByUser(user.getId());
         List<Transaction> allTx = transactionService.getTransactionsByUserId(user.getId());
 
         List<CategorySummary> summaries = categories.stream().map(cat -> {
             List<Transaction> catTx = allTx.stream()
                 .filter(t -> t.getCategoria() != null && t.getCategoria().getId().equals(cat.getId()))
+                .filter(t -> t.getFecha() != null
+                          && t.getFecha().getMonthValue() == selectedMonth
+                          && t.getFecha().getYear() == selectedYear)
                 .sorted(Comparator.comparing(Transaction::getFecha,
                     Comparator.nullsLast(Comparator.reverseOrder())))
                 .collect(Collectors.toList());
@@ -192,6 +166,12 @@ public class CategoryViewController {
 
         model.addAttribute("listaCategorias", summaries);
         model.addAttribute("showForm", Boolean.TRUE.equals(showForm));
+        model.addAttribute("monthLabel",  selected.getMonth().getDisplayName(TextStyle.FULL, java.util.Locale.ENGLISH) + " " + selectedYear);
+        model.addAttribute("prevMonth",   prev.getMonthValue());
+        model.addAttribute("prevYear",    prev.getYear());
+        model.addAttribute("nextMonth",   next.getMonthValue());
+        model.addAttribute("nextYear",    next.getYear());
+        model.addAttribute("isCurrentMonth", isCurrentMonth);
 
         return "category";
     }
@@ -199,7 +179,8 @@ public class CategoryViewController {
     @PostMapping("/create")
     public String createCategory(
             @CookieValue(value = "token", required = false) String token,
-            @RequestParam String name
+            @RequestParam String name,
+            @RequestParam(required = false, defaultValue = "") String icon
     ) {
         if (token == null || !authService.isValidToken(token)) return "redirect:/web/auth/login";
 
@@ -211,6 +192,7 @@ public class CategoryViewController {
         dto.setName(name);
         dto.setUserId(user.getId());
         dto.setToken(token);
+        dto.setIcon(icon.isBlank() ? null : icon);
         categoryService.createCategory(dto);
 
         return "redirect:/web/categories";

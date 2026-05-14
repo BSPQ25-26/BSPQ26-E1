@@ -9,6 +9,7 @@
 </head>
 <body class="transaction-body">
 
+    <!-- ===== NAVBAR ===== -->
     <div class="nav-header">
         <a th:href="@{/web/user/profile}" class="logo">Expen<span>Sense</span></a>
         <div class="nav-right">
@@ -31,6 +32,15 @@
                     <a th:href="@{/web/categories}" th:if="${showForm}" class="btn-add" th:title="#{cat.hide_form_title}">✕</a>
                     <a th:href="@{/web/categories}" class="btn-refresh" th:title="#{cat.refresh_title}">↻</a>
                 </div>
+            </div>
+
+            <div class="month-nav">
+                <a class="month-nav-arrow"
+                   th:href="@{/web/categories(month=${prevMonth}, year=${prevYear})}">&#8249;</a>
+                <span class="month-nav-label" th:text="${monthLabel}">May 2026</span>
+                <a class="month-nav-arrow"
+                   th:classappend="${isCurrentMonth} ? ' month-nav-arrow--disabled'"
+                   th:href="${isCurrentMonth} ? '#' : @{/web/categories(month=${nextMonth}, year=${nextYear})}">&#8250;</a>
             </div>
 
             <div class="categories-grid">
@@ -101,9 +111,9 @@
                         </details>
                     </div>
 
-                    <!-- Recent transactions -->
+                    <!-- This month's transactions -->
                     <details class="cat-tx-list" th:if="${!cat.transactions.isEmpty()}">
-                        <summary th:text="|${cat.transactions.size()} ${cat.transactions.size() != 1 ? 'transactions' : 'transaction'}|">
+                        <summary th:text="|${cat.transactions.size()} ${cat.transactions.size() != 1 ? 'transactions' : 'transaction'} this month|">
                         </summary>
                         <ul class="cat-tx-items">
                             <li th:each="tx, s : ${cat.transactions}" th:if="${s.index < 5}" class="cat-tx-item">
@@ -124,12 +134,24 @@
         <!-- ===== NEW CATEGORY FORM ===== -->
         <div class="glass-card card-principal panel-visible" th:if="${showForm}">
             <h2 class="card-title">New Category</h2>
-            <p class="form-subtitle">The icon is assigned automatically based on the name.</p>
+            <p class="form-subtitle">Choose a name and pick an emoji icon.</p>
 
             <form th:action="@{/web/categories/create}" method="post">
                 <div class="input-group">
                     <label>Category Name</label>
-                    <input name="name" placeholder="e.g. Food, Transport, Leisure…" required autofocus>
+                    <input type="text" name="name" placeholder="e.g. Food, Transport, Leisure…" required autofocus>
+                </div>
+
+                <div class="input-group">
+                    <label>Icon</label>
+                    <div class="emoji-picker-wrap" id="emojiPickerWrap">
+                        <div class="emoji-trigger-row">
+                            <span class="emoji-preview" id="emojiPreview">📌</span>
+                            <button type="button" class="btn-pick-emoji" onclick="toggleEmojiPicker()">Select Emoji</button>
+                        </div>
+                        <input type="hidden" name="icon" id="iconInput" value="">
+                        <div class="emoji-popover" id="emojiPopover"></div>
+                    </div>
                 </div>
 
                 <div class="button-group">
@@ -140,5 +162,40 @@
         </div>
 
     </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <script src="https://cdn.jsdelivr.net/npm/emoji-mart@5/dist/browser.js"></script>
+    <script>
+        let picker = null;
+
+        function toggleEmojiPicker() {
+            const popover = document.getElementById('emojiPopover');
+            if (popover.classList.contains('open')) {
+                popover.classList.remove('open');
+                return;
+            }
+            if (!picker) {
+                picker = new EmojiMart.Picker({
+                    onEmojiSelect(emoji) {
+                        document.getElementById('emojiPreview').textContent = emoji.native;
+                        document.getElementById('iconInput').value = emoji.native;
+                        document.getElementById('emojiPopover').classList.remove('open');
+                    },
+                    theme: 'light',
+                    locale: 'en',
+                });
+                popover.appendChild(picker);
+            }
+            popover.classList.add('open');
+        }
+
+        document.addEventListener('click', function (e) {
+            const wrap = document.getElementById('emojiPickerWrap');
+            const popover = document.getElementById('emojiPopover');
+            if (wrap && popover && !wrap.contains(e.target)) {
+                popover.classList.remove('open');
+            }
+        });
+    </script>
 </body>
 </html>

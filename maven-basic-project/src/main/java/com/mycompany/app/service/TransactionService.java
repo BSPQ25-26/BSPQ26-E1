@@ -121,7 +121,6 @@ public class TransactionService {
             int currentMonth = LocalDateTime.now().getMonthValue();
             int currentYear = LocalDateTime.now().getYear();
 
-            // Sumamos todos los gastos de esa categoría en el mes actual
             double gastoMensualActual = transactionRepository.findByCreadorId(creador.getId()).stream()
                 .filter(t -> "GASTO".equals(t.getTipoTransaccion()))
                 .filter(t -> t.getCategoria() != null && t.getCategoria().getId().equals(categoria.getId()))
@@ -130,8 +129,7 @@ public class TransactionService {
                 .sum();
 
             if ((gastoMensualActual + nuevoImporte) > budget.getLimitAmount()) {
-                // Lanza una excepción que actuará como "Alerta"
-                throw new RuntimeException("¡Alerta! El gasto supera el presupuesto mensual de " + budget.getLimitAmount() + " para la categoría: " + categoria.getName());
+                throw new RuntimeException("Warning! The expense exceeds the monthly budget of " + budget.getLimitAmount() + " € for category: " + categoria.getName());
             }
         }
     }

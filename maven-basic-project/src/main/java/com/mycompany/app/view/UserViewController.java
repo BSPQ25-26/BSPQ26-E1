@@ -100,6 +100,7 @@ public class UserViewController {
         double owes  = debtsAsDebtor.stream().mapToDouble(Deuda::getImporte).sum();
         double owed  = debtsAsCreditor.stream().mapToDouble(Deuda::getImporte).sum();
 
+        model.addAttribute("userId",   user.getId());
         model.addAttribute("username", user.getNombre());
         model.addAttribute("email", user.getEmail());
         model.addAttribute("balance", Math.round(balance * 100.0) / 100.0);

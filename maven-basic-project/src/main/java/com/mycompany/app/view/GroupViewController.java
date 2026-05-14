@@ -166,6 +166,31 @@ public class GroupViewController {
         return "redirect:/web/groups";
     }
 
+    @SuppressWarnings("null")
+    @PostMapping("/clearExpenses")
+    @ResponseBody
+    public org.springframework.http.ResponseEntity<String> clearGroupExpenses(
+            @CookieValue(value = "token", required = false) String token,
+            @RequestParam Integer groupId
+    ) {
+        if (token == null || !authService.isValidToken(token)) {
+            return org.springframework.http.ResponseEntity.status(401).body("Unauthorized");
+        }
+        try {
+            List<Transaction> txs = transactionRepository.findByGrupoId(groupId).stream()
+                    .filter(t -> "GASTO".equals(t.getTipoTransaccion()))
+                    .collect(Collectors.toList());
+            for (Transaction tx : txs) {
+                deudaRepository.findByTransaccionOriginalId(tx.getId())
+                        .forEach(deudaRepository::delete);
+            }
+            transactionRepository.deleteAll(List.copyOf(txs));
+            return org.springframework.http.ResponseEntity.ok("Cleared");
+        } catch (Exception e) {
+            return org.springframework.http.ResponseEntity.status(500).body(e.getMessage());
+        }
+    }
+
     //HTML forms do not support DELETE functions, so this has to be a POST
     @PostMapping("/delete")
     public String deleteGroup(
