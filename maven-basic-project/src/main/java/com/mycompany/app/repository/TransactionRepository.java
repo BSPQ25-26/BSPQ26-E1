@@ -26,10 +26,5 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
         @Param("endDate") LocalDateTime endDate, 
         @Param("tipo") String tipo
     );
-
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM Transaction t WHERE t.grupo.id = :grupoId AND t.tipoTransaccion = 'GASTO'")
-    void deleteGastosByGrupoId(@Param("grupoId") Integer grupoId);
     
 }
