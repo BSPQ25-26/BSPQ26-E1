@@ -1811,3 +1811,16 @@ em-emoji-picker {
     border-color: #ffa8a8;
     transform: translateY(-1px);
 }
+
+.btn-ai-advice {
+    background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+.btn-ai-advice:hover { opacity: 0.85; }
