@@ -259,14 +259,14 @@ public class GroupController {
             @RequestBody DeleteGroupDTO request 
     ) {
         try {
-            // Se asume que GroupService o TransactionService validan el token si fuera necesario
-            boolean cleared = transactionService.clearProjectExpenses(groupId);
+            // TransactionService returns the number of skipped expenses, or -1 on error
+            int skipped = transactionService.clearProjectExpenses(groupId);
             
-            if (cleared) {
-                return ResponseEntity.ok("Project expenses cleared successfully");
+            if (skipped >= 0) {
+                return ResponseEntity.ok("Project expenses cleared successfully. Skipped " + skipped + " expenses with pending debts.");
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body("Could not clear expenses for the specified group");
+                        .body("Could not clear expenses for the specified group.");
             }
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
