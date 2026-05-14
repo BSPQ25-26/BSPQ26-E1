@@ -31,6 +31,7 @@
                 <div class="button-group-top">
                     <button id="btn-new-tx" class="btn-add" th:title="#{tx.filter_all}" onclick="showCreateForm()">＋</button>
                     <a th:href="@{/web/transaction}" class="btn-refresh" th:title="#{cat.refresh_title}">↻</a>
+                    <button class="btn-ai-advice" onclick="getAiAdvice()" title="Analyze expenses with AI">✦AI</button>
                 </div>
             </div>
 
@@ -499,6 +500,54 @@
             document.getElementById('side-panel').classList.add('panel-visible');
             document.getElementById('panel-form-area').style.display   = 'none';
             document.getElementById('panel-detail-area').style.display = '';
+        }
+
+        // Function for getting the AI advice
+        async function getAiAdvice() {
+            Swal.fire({
+                title: 'Analyzing your expenses…',
+                text: 'This may take a few seconds.',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
+
+            try {
+                var res = await fetch('/chat/monthly-advice/' + currentUserId
+                    + '?token=' + encodeURIComponent(getCookie('token')));
+
+                if (res.status === 401) {
+                    Swal.fire({ icon: 'error', title: 'Unauthorized', text: 'Your session may have expired.', confirmButtonColor: '#8b5cf6' });
+                    return;
+                }
+                if (!res.ok) throw new Error('server');
+
+                var raw    = await res.text();
+                var parsed = JSON.parse(raw);
+
+                var tipsHtml = parsed.tips
+                    .map(function(tip) {
+                        return '<li style="margin-bottom:10px">' + tip + '</li>';
+                    })
+                    .join('');
+
+                var html =
+                    '<div style="text-align:left;font-size:14px;line-height:1.6">' +
+                        '<p style="margin-bottom:14px;font-style:italic;color:#6b7280">' + parsed.general_analysis + '</p>' +
+                        '<p style="font-weight:600;margin-bottom:8px">💡 Savings Tips</p>' +
+                        '<ol style="padding-left:18px;margin:0">' + tipsHtml + '</ol>' +
+                    '</div>';
+
+                Swal.fire({
+                    title: '✦ AI Expense Analysis',
+                    html: html,
+                    confirmButtonColor: '#8b5cf6',
+                    confirmButtonText: 'Got it',
+                    width: '580px'
+                });
+
+            } catch (e) {
+                Swal.fire({ icon: 'error', title: 'Error', text: 'Could not get AI advice. Please try again.', confirmButtonColor: '#8b5cf6' });
+            }
         }
 
         /* ── Change detection ── */
