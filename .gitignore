@@ -48,3 +48,5 @@ replay_pid*
 .env
 venv
 env
+
+maven-basic-project/src/main/resources/application.properties
