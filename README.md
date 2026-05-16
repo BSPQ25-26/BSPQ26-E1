@@ -96,8 +96,29 @@ This is the main entry point of the application. From here you can log in with y
 
 ### 5. Generate the documentation
 
+For the generation of the documentation site using Doxygen run the following command:
+```bash
 mvn exec:exec@doxygen-docs 
+```
 
+The documentation site HTML file can be found at:
+`BSPQ26-E1/maven-basic-project/target/site/doxygen/html/index.html`
+
+For the compilation of the latex documentation move to the latex folder inside oxygen and run the creation command:
+
+```bash
 cd target/site/doxygen/latex
-
 make
+```
+
+The documentation latex pdf file can be found at:
+`BSPQ26-E1/maven-basic-project/target/site/doxygen/latex/refman.pdf`
+
+For the generation of the complete site of the project integrating all the reports by means of Maven run the follwoing command:
+
+```bash
+mvn test site -Dmaven.test.failure.ignore=true
+```
+
+The full reports site can be found at:
+`BSPQ26-E1/maven-basic-project/target/site/index.html`

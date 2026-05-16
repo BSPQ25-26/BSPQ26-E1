@@ -35,5 +35,5 @@ EXTRACT_STATIC         = YES
 HAVE_DOT               = YES
 CLASS_GRAPH            = YES
 COLLABORATION_GRAPH    = YES
-CALL_GRAPH             = YES
-CALLER_GRAPH           = YES
+CALL_GRAPH             = NO
+CALLER_GRAPH           = NO
