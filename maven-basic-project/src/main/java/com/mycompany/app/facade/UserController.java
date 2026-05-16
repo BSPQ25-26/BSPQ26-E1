@@ -195,9 +195,9 @@ public class UserController {
      * JWT token as a query parameter.
      *
      * <b>Example request URL:</b>
-     * <pre>{@code
+     * <code>
      * GET /user/john.doe@example.com?token=eyJhbGciOiJIUzI1NiIs...
-     * }</pre>
+     * </code>
      *
      * <b>JSON response body example (HTTP 200):</b>
      * <pre>{@code

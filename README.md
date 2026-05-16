@@ -93,3 +93,11 @@ http://localhost:8080/web
 This is the main entry point of the application. From here you can log in with your credentials or create a new account.
 
 > If the page does not load, verify that the Spring Boot application started correctly — look for a line like `Started App in X seconds` in the terminal output.
+
+### 5. Generate the documentation
+
+mvn exec:exec@doxygen-docs 
+
+cd target/site/doxygen/latex
+
+make
