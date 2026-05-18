@@ -47,12 +47,9 @@ Once the database is ready, we can start the application.
    ```bash
    mvn spring-boot:run
    ```
-3. If you wish to use the AI feature:
+3. If you wish to use the AI feature, you will need to create next to the pom.xml a .env file that has the following line:
    ```bash
-   export SPRING_AI_OPENAI_API_KEY="AIzaSy..."
-   export SPRING_AI_OPENAI_BASE_URL="https://generativelanguage.googleapis.com/v1beta/openai"
-   export SPRING_AI_OPENAI_CHAT_OPTIONS_MODEL="gemini-2.5-flash"
-   mvn spring-boot:run
+   SPRING_AI_OPENAI_API_KEY="AIzaSy..."
    ```
 The exoported variables will be saved if you keep using the same terminal, so you will only need to run the last command.
 
