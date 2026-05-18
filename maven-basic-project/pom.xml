@@ -3,12 +3,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-
   <groupId>com.mycompany.app</groupId>
   <artifactId>maven-basic-project</artifactId>
-  <version>1.0-SNAPSHOT</version>
+  <version>Sprint3</version>
 
-
+  <!-- Default dependencies from Spring Boot -->
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
@@ -18,91 +17,108 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <!-- Java version used to compile -->
     <maven.compiler.source>21</maven.compiler.source>
     <maven.compiler.target>21</maven.compiler.target>
+    <!-- Empty variable for arguments during tests -->
     <argLine></argLine>
   </properties>
 
   <dependencies>
+    <!-- Spring support for REST APIs -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
     </dependency>
 
+    <!-- Database connection and data persistence using Hibernate and JPA -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-data-jpa</artifactId>
     </dependency>
 
+    <!-- Automatic generation of the Swagger/OpenAPI GUI API documentation -->
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
       <version>2.3.0</version>
-  </dependency>
+    </dependency>
 
+    <!-- Connect the application to PostgreSQL databases -->
     <dependency>
       <groupId>org.postgresql</groupId>
       <artifactId>postgresql</artifactId>
       <scope>runtime</scope>
     </dependency>
 
+    <!-- Security, authentication, and access control to protect the application -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-security</artifactId>
     </dependency>
 
+    <!-- Configures the project as an OAuth2 resource server to validate JWT tokens -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
     </dependency>
 
+    <!-- Thymeleaf dependency -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-thymeleaf</artifactId>
     </dependency>
 
+    <!-- Unit tests with JUnit 5 -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
 
+    <!-- Official Spring Boot tools and libraries for running technical tests -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-test</artifactId>
       <scope>test</scope>
     </dependency>
 
+    <!-- Specific utilities to simulate users and test Spring Security configurations -->
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
 
+    <!-- H2 database -->
     <dependency>
       <groupId>com.h2database</groupId>
       <artifactId>h2</artifactId>
       <scope>test</scope>
     </dependency>
 
+    <!-- Library for manipulating and generating Java bytecode at runtime, used by testing tools -->
     <dependency>
       <groupId>net.bytebuddy</groupId>
       <artifactId>byte-buddy</artifactId>
       <version>1.14.11</version>
     </dependency>
 
+    <!-- Integration of Testcontainers with JUnit 5 to use Docker containers in tests -->
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>junit-jupiter</artifactId>
       <scope>test</scope>
     </dependency>
 
+    <!-- Testcontainers module to spin up a real PostgreSQL database in Docker for testing -->
     <dependency>
       <groupId>org.testcontainers</groupId>
       <artifactId>postgresql</artifactId>
       <scope>test</scope>
     </dependency>
 
+    <!-- junitperf dependency -->
     <dependency>
         <groupId>com.github.noconnor</groupId>
         <artifactId>junitperf-junit5</artifactId>
@@ -110,18 +126,21 @@
         <scope>test</scope>
     </dependency>
     
+    <!-- Dependency for legacy tests -->
     <dependency>
       <groupId>org.junit.vintage</groupId>
       <artifactId>junit-vintage-engine</artifactId>
       <scope>test</scope>
     </dependency>
     
+    <!-- Official Spring AI connector -->
     <dependency>
         <groupId>org.springframework.ai</groupId>
         <artifactId>spring-ai-openai-spring-boot-starter</artifactId>
         <version>1.0.0-M1</version>
     </dependency>
 
+    <!-- Library to automatically load environment variables from a local .env file -->
     <dependency>
       <groupId>me.paulschwarz</groupId>
       <artifactId>spring-dotenv</artifactId>  
@@ -129,8 +148,10 @@
     </dependency>
  </dependencies>
 
+  <!-- Section to centralize and unify versions for complex dependencies -->
   <dependencyManagement>
     <dependencies>
+      <!-- Unified version control for all Testcontainers modules -->
       <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers-bom</artifactId>
@@ -139,7 +160,7 @@
         <scope>import</scope>
       </dependency>
       
-
+      <!-- Unified version control for all Spring AI modules -->
       <dependency>
             <groupId>org.springframework.ai</groupId>
             <artifactId>spring-ai-bom</artifactId>
@@ -147,28 +168,32 @@
             <type>pom</type>
             <scope>import</scope>
         </dependency>
-
     </dependencies>
   </dependencyManagement>
 
+  <!-- Configuration for the Maven build process, packaging, and plugins -->
   <build>
-    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+    <pluginManagement>
       <plugins>
-        <!-- clean lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#clean_Lifecycle -->
+        <!-- Plugin to delete the 'target' directory and clean up old builds -->
         <plugin>
           <artifactId>maven-clean-plugin</artifactId>
           <version>3.1.0</version>
         </plugin>
-        <!-- default lifecycle, jar packaging: see https://maven.apache.org/ref/current/maven-core/default-bindings.html#Plugin_bindings_for_jar_packaging -->
+
+        <!-- Plugin to copy configuration files and resources to the final project -->
         <plugin>
           <artifactId>maven-resources-plugin</artifactId>
           <version>3.0.2</version>
         </plugin>
+
+        <!-- Plugin responsible for compiling .java source files into .class bytecode -->
         <plugin>
           <artifactId>maven-compiler-plugin</artifactId>
           <version>3.8.0</version>
         </plugin>
         
+        <!-- Spring Boot plugin to package the application into an executable JAR file -->
         <plugin>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
@@ -176,6 +201,8 @@
             <jvmArguments>-Xverify:none</jvmArguments>
           </configuration>
         </plugin>
+
+        <!-- Plugin responsible for executing automated unit tests -->
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>3.1.2</version>
@@ -186,6 +213,8 @@
             </systemPropertyVariables>
           </configuration>
         </plugin>
+
+        <!-- Plugin to measure and generate reports on code coverage by tests -->
         <plugin>
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
@@ -205,23 +234,32 @@
             </execution>
           </executions>
         </plugin>
+
+        <!-- Plugin to package the project code into a compressed .jar file -->
         <plugin>
           <artifactId>maven-jar-plugin</artifactId>
           <version>3.0.2</version>
         </plugin>
+
+        <!-- Plugin to save the generated JAR into your local computer's Maven repository -->
         <plugin>
           <artifactId>maven-install-plugin</artifactId>
           <version>2.5.2</version>
         </plugin>
+
+        <!-- Plugin to upload the final JAR to a repository -->
         <plugin>
           <artifactId>maven-deploy-plugin</artifactId>
           <version>2.8.2</version>
         </plugin>
-        <!-- site lifecycle, see https://maven.apache.org/ref/current/maven-core/lifecycles.html#site_Lifecycle -->
+
+        <!-- Plugin to generate a documentation website for the project -->
         <plugin>
           <artifactId>maven-site-plugin</artifactId>
           <version>3.7.1</version>
         </plugin>
+
+        <!-- Plugin to include detailed reports on the project documentation website -->
         <plugin>
           <artifactId>maven-project-info-reports-plugin</artifactId>
           <version>3.0.0</version>
@@ -229,7 +267,10 @@
       </plugins>
     </pluginManagement>
   </build>
+
+  <!-- External repositories where Maven looks for libraries not found in the central repository -->
   <repositories>
+    <!-- Official Spring repository to download milestone releases for Spring AI -->
     <repository>
         <id>spring-milestones</id>
         <name>Spring Milestones</name>
