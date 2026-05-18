@@ -50,6 +50,7 @@ public class SecurityConfig {
                 "/categories/{id}",
                 "/categories/**",
                 "/chat/",
+                "/chat/**",
                 "chat/monthly-advice/{userId}"             
             ).permitAll()
                 .requestMatchers(

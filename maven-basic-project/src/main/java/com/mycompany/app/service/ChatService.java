@@ -56,4 +56,13 @@ public class ChatService {
         }
         return "Other / Uncategorized";
     }
+    public String chatLibre(String message) {
+    String systemInstructions = "You are a financial advisor for young adults. Respond in a concise, helpful, and friendly manner to the user's questions.";
+    
+    return chatClient.prompt()
+            .system(systemInstructions)
+            .user(message)
+            .call()
+            .content();
+}
 }

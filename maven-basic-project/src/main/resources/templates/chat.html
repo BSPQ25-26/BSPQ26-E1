@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chat with AI Assistant</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .chat-container { max-width: 800px; margin: 40px auto; font-family: Arial, sans-serif; }
+        .error-message { background-color: #ffdddd; color: #d8000c; padding: 15px; border-radius: 5px; }
+        .card { border: 1px solid #ddd; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        .card-header { background-color: #f8f9fa; padding: 15px; border-bottom: 1px solid #ddd; border-radius: 8px 8px 0 0;}
+        .card-body { padding: 20px; }
+        .tip-list { list-style-type: none; padding: 0; }
+        .tip-list li { background: #eef9f0; margin-bottom: 10px; padding: 15px; border-radius: 5px; border-left: 5px solid #28a745; }
+        .back-button { display: inline-block; padding: 10px 15px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;}
+        .back-button:hover { background-color: #0056b3; }
+    </style>
+</head>
+<body>
+
+    <div class="chat-container">
+        <h1>Expense Analysis - AI</h1>
+
+        <div th:if="${error}" class="error-message">
+            <strong>Error:</strong> <span th:text="${error}"></span>
+        </div>
+
+        <div th:if="${advice}">
+            <div class="card">
+                <div class="card-header">
+                    <h3 style="margin:0;">General Analysis</h3>
+                </div>
+                <div class="card-body">
+                    <p id="general-analysis">Analyzing data...</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 style="margin:0;">Savings Tips</h3>
+                </div>
+                <div class="card-body">
+                    <ul id="tips-list" class="tip-list">
+                        </ul>
+                </div>
+            </div>
+
+            <script th:inline="javascript">
+                /*<![CDATA[*/
+                var adviceString = /*[[${advice}]]*/ '{}';
+                
+                try {
+                    var adviceData = JSON.parse(adviceString);
+                    
+                    document.getElementById('general-analysis').innerText = adviceData.general_analysis;
+                    
+                    var tipsList = document.getElementById('tips-list');
+                    tipsList.innerHTML = ''; 
+                    
+                    adviceData.tips.forEach(function(tip) {
+                        var li = document.createElement('li');
+                        li.innerText = tip;
+                        tipsList.appendChild(li);
+                    });
+                } catch (e) {
+                    console.error("Error parsing JSON:", e);
+                    document.getElementById('general-analysis').innerText = "We encountered an error while processing the AI response. Original response: " + adviceString;
+                }
+                /*]]>*/
+            </script>
+        </div>
+        
+        <br>
+        <a href="/" class="back-button">Back to Home</a>
+    </div>
+
+</body>
+</html>

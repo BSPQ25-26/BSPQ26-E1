@@ -170,5 +170,159 @@
         <a th:href="@{/web/user/profile(lang=en)}">EN</a> |
         <a th:href="@{/web/user/profile(lang=es)}">ES</a>
     </footer>
+    <style>
+    .chatbot-btn {
+        position: fixed; bottom: 20px; right: 20px;
+        background-color: #007bff; color: white;
+        border: none; border-radius: 50%;
+        width: 60px; height: 60px; font-size: 24px;
+        cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        z-index: 1000; display: flex; align-items: center; justify-content: center;
+    }
+    .chatbot-btn:hover { background-color: #0056b3; }
+
+    .chat-window {
+        position: fixed; bottom: 90px; right: 20px;
+        width: 350px; height: 450px; background: white;
+        border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        display: none; flex-direction: column; overflow: hidden;
+        z-index: 1000; font-family: Arial, sans-serif;
+    }
+
+    .chat-header {
+        background: #007bff; color: white; padding: 15px;
+        font-weight: bold; display: flex; justify-content: space-between;
+    }
+    .chat-header span { cursor: pointer; font-size: 18px; }
+    .chat-body {
+        flex: 1; padding: 15px; overflow-y: auto;
+        display: flex; flex-direction: column; gap: 10px; background: #f8f9fa;
+    }
+    .chat-footer {
+        padding: 10px; display: flex; gap: 5px;
+        border-top: 1px solid #ddd; background: white;
+    }
+    .chat-footer input {
+        flex: 1; padding: 10px; border: 1px solid #ccc;
+        border-radius: 5px; outline: none;
+    }
+    .chat-footer button {
+        padding: 10px 15px; background: #007bff;
+        color: white; border: none; border-radius: 5px; cursor: pointer;
+    }
+
+    /* Burbujas de mensaje */
+    .msg { max-width: 80%; padding: 10px; border-radius: 15px; font-size: 14px; line-height: 1.4; }
+    .msg-user { background: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 2px;}
+    .msg-bot { background: #e9ecef; color: black; align-self: flex-start; border-bottom-left-radius: 2px;}
+</style>
+
+<button class="chatbot-btn" onclick="toggleChat()">💬</button>
+
+<div class="chat-window" id="chat-window">
+    <div class="chat-header">
+        <div>Your AI Assistant</div>
+        <span onclick="toggleChat()">✖</span>
+    </div>
+    <div class="chat-body" id="chat-body">
+        <div class="msg msg-bot">Hello! I am your financial advisor. What questions do you have about your finances today?</div>
+    </div>
+    <div class="chat-footer">
+        <input type="text" id="chat-input" placeholder="Write your message..." onkeypress="handleKeyPress(event)">
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script>
+    const CHAT_STATE_KEY = 'chat_window_open';
+    const CHAT_MSGS_KEY = 'chat_messages';
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const isOpen = localStorage.getItem(CHAT_STATE_KEY) === 'true';
+        if (isOpen) {
+            document.getElementById('chat-window').style.display = 'flex';
+        }
+
+        const savedMsgs = JSON.parse(localStorage.getItem(CHAT_MSGS_KEY) || '[]');
+        const chatBody = document.getElementById('chat-body');
+        
+        if (savedMsgs.length > 0) {
+            chatBody.innerHTML = ''; 
+            savedMsgs.forEach(msg => {
+                renderMessage(msg.text, msg.type, false); 
+            });
+        }
+    });
+
+    function toggleChat() {
+        const chatWindow = document.getElementById('chat-window');
+        if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
+            chatWindow.style.display = 'flex';
+            localStorage.setItem(CHAT_STATE_KEY, 'true');
+        } else {
+            chatWindow.style.display = 'none';
+            localStorage.setItem(CHAT_STATE_KEY, 'false');
+        }
+    }
+
+    function handleKeyPress(e) {
+        if (e.key === 'Enter') sendMessage();
+    }
+
+    async function sendMessage() {
+        const input = document.getElementById('chat-input');
+        const messageText = input.value.trim();
+        if (!messageText) return;
+
+        renderMessage(messageText, 'msg-user', true);
+        input.value = '';
+
+        const typingId = showTypingIndicator();
+
+        try {
+            const response = await fetch(`/chat/ask?message=${encodeURIComponent(messageText)}`);
+            const aiResponse = await response.text();
+
+            document.getElementById(typingId).remove();
+            
+            if (response.ok) {
+                renderMessage(aiResponse, 'msg-bot', true);
+            } else {
+                renderMessage("Ups, tuve un problema: " + aiResponse, 'msg-bot', false);
+            }
+        } catch (error) {
+            document.getElementById(typingId).remove();
+            renderMessage("Error de conexión.", 'msg-bot', false);
+        }
+    }
+
+    function renderMessage(text, className, saveToStorage) {
+        const chatBody = document.getElementById('chat-body');
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `msg ${className}`;
+        msgDiv.innerText = text;
+        chatBody.appendChild(msgDiv);
+        
+        chatBody.scrollTop = chatBody.scrollHeight; 
+
+        if (saveToStorage) {
+            const savedMsgs = JSON.parse(localStorage.getItem(CHAT_MSGS_KEY) || '[]');
+            savedMsgs.push({ text: text, type: className });
+            localStorage.setItem(CHAT_MSGS_KEY, JSON.stringify(savedMsgs));
+        }
+    }
+
+    function showTypingIndicator() {
+        const chatBody = document.getElementById('chat-body');
+        const msgDiv = document.createElement('div');
+        const uniqueId = 'msg-typing-' + Date.now();
+        msgDiv.id = uniqueId;
+        msgDiv.className = `msg msg-bot`;
+        msgDiv.innerHTML = '<em>Typing...</em>';
+        chatBody.appendChild(msgDiv);
+        chatBody.scrollTop = chatBody.scrollHeight;
+        return uniqueId;
+    }
+</script>
 </body>
 </html>

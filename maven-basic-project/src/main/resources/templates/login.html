@@ -36,5 +36,9 @@
         <a th:href="@{/web/auth/login(lang=en)}">EN</a> |
         <a th:href="@{/web/auth/login(lang=es)}">ES</a>
     </footer>
+    <script>
+        localStorage.removeItem('chat_messages');
+        localStorage.setItem('chat_window_open', 'false');
+    </script>
 </body>
 </html>
