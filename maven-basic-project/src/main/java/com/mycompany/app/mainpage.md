@@ -1,7 +1,7 @@
-@mainpage ExpenseSense Documentation
+@mainpage ExpenSense Documentation
 
 ## 1. Overview
-ExpenseSense is a financial management system designed to track personal and group expenses. 
+ExpenSense is a financial management system designed to track personal and group expenses. 
 Built as a RESTful web service using Spring Boot, it provides a secure and scalable backend 
 for managing financial data, resolving shared debts, and offering AI-driven financial insights.
 
