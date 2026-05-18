@@ -3,7 +3,6 @@ name: Keep Render Instance Alive
 on:
   schedule:
     - cron: '*/10 * * * *'
-  workflow_dispatch: 
 
 jobs:
   ping:
