@@ -71,6 +71,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: app-jar
-          path: maven-basic-project/target/*-SNAPSHOT.jar
+          path: maven-basic-project/target/maven-basic-project-Sprint3.jar
           if-no-files-found: error
           retention-days: 7
